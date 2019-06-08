@@ -1,0 +1,27 @@
+name: BedWars
+version: "1.0"
+api: ["1.0.0"]
+main: bedWars.BedWars
+author: "GameTeam"
+description: "bedWars minigame"
+depend: ["Actaeon"]
+softdepend: ["KotlinLib", "DbLib", "PlaceholderAPI"]
+
+commands:
+  bw:
+    description: "main bedwars command"
+  blue:
+    description: "join to blue team"
+  red:
+    description: "join to red team"
+  yellow:
+    description: "join to yellow team"
+  green:
+    description: "join to green team"
+  stats:
+    description: "show your game stats"
+  vote:
+    description: "vote command"
+  joinentity:
+    description: "Spawns join entity"
+    permission: "gameteam.admin"
