@@ -1,4 +1,4 @@
-package com.creeperface.nukkit.bedwars.mySQL
+package com.creeperface.nukkit.bedwars.mysql
 
 enum class Stat private constructor(val xp: Int, val tokens: Int) {
     KILLS(50, 1),

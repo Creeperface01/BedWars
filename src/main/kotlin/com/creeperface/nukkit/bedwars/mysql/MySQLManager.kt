@@ -1,4 +1,4 @@
-package com.creeperface.nukkit.bedwars.mySQL
+package com.creeperface.nukkit.bedwars.mysql
 
 import ru.nukkit.dblib.DbLib
 import java.sql.Connection

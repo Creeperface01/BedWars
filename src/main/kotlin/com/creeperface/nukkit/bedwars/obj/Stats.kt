@@ -1,7 +1,7 @@
 package com.creeperface.nukkit.bedwars.obj
 
 import cn.nukkit.Player
-import com.creeperface.nukkit.bedwars.mySQL.Stat
+import com.creeperface.nukkit.bedwars.mysql.Stat
 import java.util.*
 
 class Stats(val player: Player) {

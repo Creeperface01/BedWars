@@ -1,4 +1,4 @@
-package com.creeperface.nukkit.bedwars.blockEntity
+package com.creeperface.nukkit.bedwars.blockentity
 
 import cn.nukkit.blockentity.BlockEntitySign
 import cn.nukkit.level.format.FullChunk

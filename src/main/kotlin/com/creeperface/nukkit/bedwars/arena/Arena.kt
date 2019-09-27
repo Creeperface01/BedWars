@@ -39,11 +39,11 @@ import cn.nukkit.network.protocol.LevelEventPacket
 import cn.nukkit.utils.MainLogger
 import cn.nukkit.utils.TextFormat
 import com.creeperface.nukkit.bedwars.BedWars
-import com.creeperface.nukkit.bedwars.blockEntity.BlockEntityMine
+import com.creeperface.nukkit.bedwars.blockentity.BlockEntityMine
 import com.creeperface.nukkit.bedwars.entity.SpecialItem
 import com.creeperface.nukkit.bedwars.entity.TNTShip
 import com.creeperface.nukkit.bedwars.entity.Villager
-import com.creeperface.nukkit.bedwars.mySQL.Stat
+import com.creeperface.nukkit.bedwars.mysql.Stat
 import com.creeperface.nukkit.bedwars.obj.BedWarsData
 import com.creeperface.nukkit.bedwars.obj.Language
 import com.creeperface.nukkit.bedwars.obj.Team

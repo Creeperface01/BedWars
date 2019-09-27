@@ -1,4 +1,4 @@
-package com.creeperface.nukkit.bedwars.mySQL
+package com.creeperface.nukkit.bedwars.mysql
 
 import cn.nukkit.scheduler.AsyncTask
 import java.util.*

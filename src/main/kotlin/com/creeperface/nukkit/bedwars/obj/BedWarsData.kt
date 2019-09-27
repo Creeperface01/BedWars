@@ -2,7 +2,7 @@ package com.creeperface.nukkit.bedwars.obj
 
 import cn.nukkit.Player
 import com.creeperface.nukkit.bedwars.arena.Arena
-import com.creeperface.nukkit.bedwars.mySQL.Stat
+import com.creeperface.nukkit.bedwars.mysql.Stat
 
 class BedWarsData(private val arena: Arena,
                   val player: Player,
