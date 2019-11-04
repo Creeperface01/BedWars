@@ -11,11 +11,10 @@ class ArenaSchedule(var plugin: Arena) : Task() {
     var sign = 0
     var drop = 0
 
-
     override fun onRun(tick: Int) {
         if (this.plugin.starting) {
             this.starting()
-        } else if (this.plugin.game == 1 && !this.plugin.ending) {
+        } else if (this.plugin.game == Arena.ArenaState.GAME && !this.plugin.ending) {
             this.game()
         }
     }
@@ -37,13 +36,10 @@ class ArenaSchedule(var plugin: Arena) : Task() {
             return
         }
 
-        plugin.barUtil.updateBar(startTime)
-
         this.startTime--
     }
 
     fun game() {
-        plugin.barUtil.updateBar(gameTime)
         gameTime++
         this.plugin.dropBronze()
 
@@ -56,7 +52,7 @@ class ArenaSchedule(var plugin: Arena) : Task() {
         }
 
         if (gameTime > 3600) {
-            //TODO game time limit
+            plugin.stopGame()
         }
 
         this.drop++

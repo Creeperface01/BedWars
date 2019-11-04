@@ -7,7 +7,7 @@ import cn.nukkit.item.Item
 
 class VirtualInventory(p: Player) : CustomInventory(p, InventoryType.PLAYER) {
 
-    var armor: Array<Item>
+    private var armor: Array<Item>
 
     init {
         val inv = p.inventory

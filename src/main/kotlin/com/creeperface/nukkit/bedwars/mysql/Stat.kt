@@ -6,8 +6,8 @@ enum class Stat private constructor(val xp: Int, val tokens: Int) {
     WINS(500, 10),
     LOSSES(0, 0),
     BEDS(200, 5),
-    //PLACE(1, 0),
-    //BREAK(1, 0),
+    PLACE(1, 0),
+    BREAK(1, 0),
     PLAYED(200, 0);
     //RESOURCES(1, 0);
 

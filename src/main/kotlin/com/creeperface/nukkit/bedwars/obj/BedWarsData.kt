@@ -8,7 +8,7 @@ class BedWarsData(private val arena: Arena,
                   val player: Player,
                   val globalData: GlobalData) {
 
-    var team: Team? = null
+    lateinit var team: Team
 
     var lastHit: Long = 0
 
@@ -18,9 +18,10 @@ class BedWarsData(private val arena: Arena,
 
     var points = 0
 
+    fun hasTeam() = ::team.isInitialized
 
     fun canRespawn(): Boolean {
-        return this.team!!.hasBed()
+        return this.team.hasBed()
     }
 
     fun wasKilled(): Boolean {

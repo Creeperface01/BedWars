@@ -45,12 +45,11 @@ object Color {
         var s = s
         val digits = "0123456789ABCDEF"
         s = s.toUpperCase()
-        var `val` = 0
-        for (i in 0 until s.length) {
-            val c = s[i]
-            val d = digits.indexOf(c)
-            `val` = 16 * `val` + d
+        var value = 0
+        for (element in s) {
+            val d = digits.indexOf(element)
+            value = 16 * value + d
         }
-        return `val`
+        return value
     }
 }

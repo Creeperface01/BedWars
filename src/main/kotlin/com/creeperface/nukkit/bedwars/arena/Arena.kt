@@ -5,10 +5,9 @@ import cn.nukkit.Player
 import cn.nukkit.Server
 import cn.nukkit.block.Block
 import cn.nukkit.block.BlockAir
+import cn.nukkit.block.BlockID
 import cn.nukkit.blockentity.BlockEntity
 import cn.nukkit.blockentity.BlockEntityBed
-import cn.nukkit.blockentity.BlockEntityChest
-import cn.nukkit.blockentity.BlockEntitySign
 import cn.nukkit.entity.item.EntityItem
 import cn.nukkit.entity.projectile.EntityArrow
 import cn.nukkit.event.EventHandler
@@ -39,7 +38,15 @@ import cn.nukkit.network.protocol.LevelEventPacket
 import cn.nukkit.utils.MainLogger
 import cn.nukkit.utils.TextFormat
 import com.creeperface.nukkit.bedwars.BedWars
+import com.creeperface.nukkit.bedwars.arena.config.ArenaConfiguration
+import com.creeperface.nukkit.bedwars.arena.config.IArenaConfiguration
+import com.creeperface.nukkit.bedwars.arena.config.MapConfiguration
+import com.creeperface.nukkit.bedwars.arena.manager.DeathManager
+import com.creeperface.nukkit.bedwars.arena.manager.ScoreboardManager
+import com.creeperface.nukkit.bedwars.arena.manager.SignManager
+import com.creeperface.nukkit.bedwars.arena.manager.VotingManager
 import com.creeperface.nukkit.bedwars.blockentity.BlockEntityMine
+import com.creeperface.nukkit.bedwars.blockentity.BlockEntityTeamSign
 import com.creeperface.nukkit.bedwars.entity.SpecialItem
 import com.creeperface.nukkit.bedwars.entity.TNTShip
 import com.creeperface.nukkit.bedwars.entity.Villager
@@ -53,54 +60,40 @@ import com.creeperface.nukkit.bedwars.shop.Window
 import com.creeperface.nukkit.bedwars.task.WorldCopyTask
 import com.creeperface.nukkit.bedwars.utils.*
 import java.util.*
+import kotlin.collections.ArrayList
 
-class Arena(var id: String, var plugin: BedWars) : Listener {
+class Arena(var plugin: BedWars, val config: ArenaConfiguration) : Listener, IArenaConfiguration by config {
 
-    val data = mutableMapOf<String, Vector3>()
-    private val mainData: Map<String, Vector3> = this.plugin.arenas[this.id]!!.toMap()
-    lateinit var level: Level
+    val playerData = mutableMapOf<String, BedWarsData>()
+    val spectators = mutableMapOf<String, Player>()
 
-    var playerData = HashMap<String, BedWarsData>()
-    var spectators = HashMap<String, Player>()
+    val teams = ArrayList<Team>(config.teamData.size)
 
-    var teams = arrayOfNulls<Team>(5)
-    var game = 0
-    var starting = false
-    var ending = false
-    val task = ArenaSchedule(this)
-    val popupTask = PopupTask(this)
-    var votingManager: VotingManager
-    var deathManager: DeathManager
+    private val task = ArenaSchedule(this)
+    private val popupTask = PopupTask(this)
+
+    internal val votingManager: VotingManager
+    internal val scoreabordManager = ScoreboardManager(this)
+    private val deathManager: DeathManager
+    private val signManager = SignManager(this)
+
     var map = "Voting"
     var winnerTeam: Int = 0
-    private var canJoin = true
-
-    var bossBar: BossBar
-    var barUtil: BossBarUtil
-
-    val isMultiPlatform: Boolean
-
+    internal var canJoin = true
     var isLevelLoaded = false
 
-    val gameStatus: String
-        get() {
-            val t1 = teams[1]!!
-            val t2 = teams[2]!!
-            val t3 = teams[3]!!
-            val t4 = teams[4]!!
+    var game = ArenaState.LOBBY
+    var starting = false
+    var ending = false
 
-            return "                                          §8Mapa: §6" + this.map + "\n" + t1.status + t2.status + t3.status + t4.status + "\n" + "\n"
-        }
+    lateinit var level: Level
+    lateinit var mapConfig: MapConfiguration
 
-    val aliveTeams: ArrayList<Team>
+    private val aliveTeams: ArrayList<Team>
         get() {
             val teams = ArrayList<Team>()
 
             for (team in this.teams) {
-                if (team == null) {
-                    continue
-                }
-
                 if (team.hasBed() || team.players.isNotEmpty()) {
                     teams.add(team)
                 }
@@ -110,20 +103,20 @@ class Arena(var id: String, var plugin: BedWars) : Listener {
         }
 
     init {
-        this.isMultiPlatform = !mainData.containsKey("multiplatform")
-
-        this.bossBar = BossBar(this.plugin)
-        this.barUtil = BossBarUtil(this)
         this.enableScheduler()
         this.votingManager = VotingManager(this)
         this.deathManager = DeathManager(this)
         this.votingManager.createVoteTable()
-        this.writeTeams()
-        updateMainSign()
-        updateTeamSigns()
-        this.barUtil.updateBar(0)
+        scoreabordManager.initVotes()
+        initTeams()
+        signManager.init()
 
         plugin.server.pluginManager.registerEvents(this, plugin)
+    }
+
+    private fun initTeams() {
+        teams.clear()
+        teams.addAll(config.teamData.mapIndexed { index, conf -> Team(this, index, conf) })
     }
 
     private fun enableScheduler() {
@@ -131,11 +124,16 @@ class Arena(var id: String, var plugin: BedWars) : Listener {
         this.plugin.server.scheduler.scheduleRepeatingTask(this.popupTask, 20)
     }
 
-    private fun writeTeams() {
-        this.teams[1] = Team(this, 1, "blue", TextFormat.BLUE, Color.toDecimal(Color.BLUE))
-        this.teams[2] = Team(this, 2, "red", TextFormat.RED, Color.toDecimal(Color.RED))
-        this.teams[3] = Team(this, 3, "yellow", TextFormat.YELLOW, Color.toDecimal(Color.YELLOW))
-        this.teams[4] = Team(this, 4, "green", TextFormat.GREEN, Color.toDecimal(Color.GREEN))
+    @EventHandler
+    fun onBlockTouch2(e: PlayerInteractEvent) {
+        val p = e.player
+
+        if (isSpectator(p)) {
+            if (e.action == Action.RIGHT_CLICK_AIR && e.item.id == Item.CLOCK) {
+                this.leaveArena(p)
+                return
+            }
+        }
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
@@ -149,27 +147,24 @@ class Arena(var id: String, var plugin: BedWars) : Listener {
             return
         }
 
-        if (e.action == Action.RIGHT_CLICK_BLOCK && b == mainData["sign"]) {
-            e.setCancelled()
-
-            if (plugin.getPlayerArena(p) != null)
-                return
-
-            if (!this.isMultiPlatform && p.loginChainData.deviceOS == 7 && !p.hasPermission("gameteam.helper") && !p.hasPermission("gameteam.mcpe")) {
-                p.sendMessage(Lang.translate("pe_only", p))
-                return
-            }
-
-            this.joinToArena(p)
-            return
-        }
-
-        if (isSpectator(p)) {
-            if (e.action == Action.RIGHT_CLICK_AIR && e.item.id == Item.CLOCK) {
-                this.leaveArena(p)
-                return
-            }
-        }
+//        if (e.action == Action.RIGHT_CLICK_BLOCK ) { //TODO: main sign click
+//            val be = b.blockEntity
+//
+//            if(be is BlockEntityTeamSign) {
+//                e.setCancelled()
+//
+//                if (plugin.getPlayerArena(p) != null)
+//                    return
+//
+//                if (!this.multiPlatform && p.loginChainData.deviceOS == 7 && !p.hasPermission("gameteam.helper") && !p.hasPermission("gameteam.mcpe")) {
+//                    p.sendMessage(Lang.translate("pe_only", p))
+//                    return
+//                }
+//
+//                this.joinToArena(p)
+//                return
+//            }
+//        }
 
 //        if (data1.isInLobby) {
 //            e.setCancelled()
@@ -182,7 +177,7 @@ class Arena(var id: String, var plugin: BedWars) : Listener {
 
         val data = getPlayerData(p) ?: return
 
-        if (this.game == 0 && e.action == Action.RIGHT_CLICK_AIR && e.item.id == Item.CLOCK) {
+        if (this.game == ArenaState.LOBBY && e.action == Action.RIGHT_CLICK_AIR && e.item.id == Item.CLOCK) {
             this.leaveArena(p)
             return
         }
@@ -194,9 +189,9 @@ class Arena(var id: String, var plugin: BedWars) : Listener {
             return
         }
 
-        if (e.action == Action.RIGHT_CLICK_BLOCK && data.team != null && b.id == Block.ENDER_CHEST) {
+        if (e.action == Action.RIGHT_CLICK_BLOCK && b.id == Block.ENDER_CHEST) {
             e.setCancelled()
-            p.addWindow(data.team!!.enderChest)
+            p.addWindow(data.team.enderChest)
         }
 
         if (e.action == Action.RIGHT_CLICK_BLOCK && item.id == Item.SPAWN_EGG && item.damage == TNTShip.NETWORK_ID) {
@@ -214,7 +209,7 @@ class Arena(var id: String, var plugin: BedWars) : Listener {
                             .add(FloatTag("", Random().nextFloat() * 360))
                             .add(FloatTag("", 0.toFloat())))
 
-            val ship = TNTShip(b.getLevel().getChunk(b.floorX shr 4, b.floorZ shr 4), nbt, this, data.team!!)
+            val ship = TNTShip(b.getLevel().getChunk(b.floorX shr 4, b.floorZ shr 4), nbt, this, data.team)
             ship.spawnToAll()
 
             item.count--
@@ -233,10 +228,10 @@ class Arena(var id: String, var plugin: BedWars) : Listener {
     }
 
     fun joinToArena(p: Player) {
-        if (this.game >= 1) {
+        if (this.game == ArenaState.GAME) {
             p.sendMessage(BedWars.prefix + Language.translate("join_spectator"))
             this.setSpectator(p)
-            bossBar.addPlayer(p)
+            scoreabordManager.addPlayer(p)
             return
         }
 
@@ -256,20 +251,22 @@ class Arena(var id: String, var plugin: BedWars) : Listener {
         playerData[p.name.toLowerCase()] = pl
 
         p.nameTag = p.name
-        p.sendMessage(BedWars.prefix + Language.translate("join", this.id))
-        p.teleport(this.mainData["lobby"])
-        bossBar.addPlayer(p)
-        p.setSpawn(this.mainData["lobby"])
+        p.sendMessage(BedWars.prefix + Language.translate("join", this.name))
+        p.teleport(this.lobby)
+        scoreabordManager.addPlayer(p)
+        p.setSpawn(this.lobby)
 
         val inv = p.inventory
         inv.clearAll()
-        inv.setItem(0, Item.get(159, 11, 1).setCustomName("§r§7Pripojit do §9Blue"))
-        inv.setItem(1, Item.get(159, 14, 1).setCustomName("§r§7Pripojit do §4Red"))
-        inv.setItem(2, Item.get(159, 4, 1).setCustomName("§r§7Pripojit do §eYellow"))
-        inv.setItem(3, Item.get(159, 5, 1).setCustomName("§r§7Pripojit do §aGreen"))
 
+        var i = 0
+        while (i++ < teams.size) {
+            val team = teams[i]
 
-        inv.setItem(5, ItemClock().setCustomName("" + TextFormat.ITALIC + TextFormat.AQUA + "Lobby"))
+            inv.setItem(i, Item.get(Item.STAINED_TERRACOTTA, team.color.woolData, 1).setCustomName("§r§7Join " + team.chatColor + team.name)) //TODO: translate
+        }
+
+        inv.setItem(i, ItemClock().setCustomName("" + TextFormat.ITALIC + TextFormat.AQUA + "Lobby"))
 
         inv.sendContents(p)
 
@@ -278,7 +275,7 @@ class Arena(var id: String, var plugin: BedWars) : Listener {
         p.setGamemode(0)
 
         this.checkLobby()
-        this.updateMainSign()
+        this.signManager.updateMainSign()
     }
 
     fun leaveArena(p: Player) {
@@ -292,8 +289,8 @@ class Arena(var id: String, var plugin: BedWars) : Listener {
         data?.team?.let {
             val pTeam = data.team
 
-            if (this.game >= 1) {
-                pTeam!!.messagePlayers(Language.translate("player_leave", pTeam.color.toString() + p.name))
+            if (this.game == ArenaState.GAME) {
+                pTeam.messagePlayers(Language.translate("player_leave", pTeam.chatColor + p.name))
                 data.add(Stat.LOSSES)
             }
 
@@ -301,18 +298,18 @@ class Arena(var id: String, var plugin: BedWars) : Listener {
                 p.sendMessage(BedWars.prefix + Language.translate("leave"))
             }
 
-            updateTeamSigns()
+            signManager.updateTeamSigns()
         }
 
         this.unsetPlayer(p)
 
-        if (this.game >= 1) {
+        if (this.game == ArenaState.GAME) {
             this.checkAlive()
         }
 
         data?.globalData?.arena = null
 
-        updateMainSign()
+        signManager.updateMainSign()
     }
 
     fun startGame() {
@@ -324,21 +321,17 @@ class Arena(var id: String, var plugin: BedWars) : Listener {
         this.starting = false
         isLevelLoaded = false
 
-        this.plugin.server.loadLevel(this.map + "_" + id)
-        this.level = this.plugin.server.getLevelByName(this.map + "_" + id)
+        this.plugin.server.loadLevel(this.map + "_" + this.name)
+        this.level = this.plugin.server.getLevelByName(this.map + "_" + name)
         this.level.isRaining = false
         this.level.isThundering = false
 
         for (team in teams) {
-            if (team == null) {
-                continue
-            }
-
-            val positions = arrayOf(this.data[team.id.toString() + "bed"]!!, this.data[team.id.toString() + "bed2"]!!)
+            val positions = arrayOf(team.mapConfig.bed1, team.mapConfig.bed2)
 
             for (pos in positions) {
                 val nbt = BlockEntity.getDefaultCompound(pos, BlockEntity.BED)
-                nbt.putByte("color", team.dyeColor.woolData)
+                nbt.putByte("color", team.color.woolData)
 
                 BlockEntityBed(this.level.getChunk(pos.floorX shr 4, pos.floorZ shr 4), nbt)
             }
@@ -347,19 +340,19 @@ class Arena(var id: String, var plugin: BedWars) : Listener {
         this.level.time = 0
         this.level.stopTime()
 
-        for (data in ArrayList(this.playerData.values)) {
-            if (data.team == null) {
+        for (data in this.playerData.values) {
+            if (!data.hasTeam()) {
                 this.selectTeam(data)
             }
         }
 
-        this.game = 1
-        this.updateMainSign()
+        this.game = ArenaState.GAME
+        this.signManager.updateMainSign()
 
         for (data in playerData.values) {
             val p = data.player
 
-            val d = this.data[data.team!!.id.toString() + "spawn"]!!
+            val d = data.team.mapConfig.spawn
 
             p.teleport(Position(d.x, d.y, d.z, this.level), PlayerTeleportEvent.TeleportCause.PLUGIN)
             this.level.addSound(p.add(0.toDouble(), p.eyeHeight.toDouble()), Sound.RANDOM_ANVIL_USE, 1f, 1f, p)
@@ -382,11 +375,8 @@ class Arena(var id: String, var plugin: BedWars) : Listener {
         }
 
         this.messageAllPlayers("start_game", false)
-        barUtil.updateBar(0)
-        barUtil.updateTeamStats()
-        this.bossBar.maxHealth = 100
-        this.bossBar.health = 100
-        this.bossBar.update()
+
+        scoreabordManager.initGame()
     }
 
     fun selectTeam(data: BedWarsData) {
@@ -394,10 +384,6 @@ class Arena(var id: String, var plugin: BedWars) : Listener {
         val p = data.player
 
         for (team in teams) {
-            if (team == null) {
-                continue
-            }
-
             if (!isTeamFull(team) || isTeamFree(team) || p.hasPermission("gameteam.vip")) {
                 teamm = team
             }
@@ -413,7 +399,7 @@ class Arena(var id: String, var plugin: BedWars) : Listener {
         }
     }
 
-    fun checkAlive() {
+    private fun checkAlive() {
         if (!this.ending) {
             val aliveTeams = this.aliveTeams
 
@@ -428,22 +414,18 @@ class Arena(var id: String, var plugin: BedWars) : Listener {
 //                    pl.baseData.addShard(10)
                 }
 
-                messageAllPlayers("end_game", false, "" + team.color, team.name)
+                messageAllPlayers("end_game", false, "" + team.chatColor, team.name)
                 this.ending = true
             }
 
         }
 
-        if (this.playerData.size <= 0) {
+        if (this.playerData.isEmpty()) {
             Server.getInstance().scheduler.scheduleDelayedTask(plugin, { stopGame() }, 1)
         }
     }
 
     fun stopGame() {
-//        for (data in this.playerData.values) {
-//            data.baseData.addExp(200) //played
-//        }
-
         this.unsetAllPlayers()
         this.task.gameTime = 0
         this.task.startTime = 50
@@ -451,17 +433,16 @@ class Arena(var id: String, var plugin: BedWars) : Listener {
         this.task.sign = 0
         this.popupTask.ending = 20
         this.votingManager.players.clear()
-        this.votingManager.currentTable = arrayOfNulls(4)
-        this.votingManager.stats.clear()
         this.votingManager.createVoteTable()
+        scoreabordManager.initVotes()
         this.ending = false
-        this.winnerTeam = 0
-        this.game = 0
+        this.winnerTeam = -1
+        this.game = ArenaState.LOBBY
 
         this.level.unload()
 
-        updateMainSign()
-        barUtil.updateBar(0)
+        signManager.updateMainSign()
+        scoreabordManager.reset()
     }
 
     fun unsetAllPlayers() {
@@ -490,7 +471,7 @@ class Arena(var id: String, var plugin: BedWars) : Listener {
     fun onDropItem(e: PlayerDropItemEvent) {
         val p = e.player
 
-        if (!p.isOp && this.game == 0) {
+        if (!p.isOp && this.game == ArenaState.LOBBY) {
             e.setCancelled()
         }
     }
@@ -502,8 +483,8 @@ class Arena(var id: String, var plugin: BedWars) : Listener {
         if (!::level.isInitialized || victim.getLevel().id != this.level.id) {
             if (victim is Player) {
 
-                if (this.game == 0 && e.cause == DamageCause.VOID && inArena(victim)) {
-                    victim.teleport(mainData["lobby"])
+                if (this.game == ArenaState.LOBBY && e.cause == DamageCause.VOID && inArena(victim)) {
+                    victim.teleport(this.lobby)
                     e.setCancelled()
                 }
             }
@@ -526,7 +507,7 @@ class Arena(var id: String, var plugin: BedWars) : Listener {
                 return
             }
 
-            if (this.game == 0) {
+            if (this.game == ArenaState.LOBBY) {
                 e.setCancelled()
                 return
             }
@@ -561,7 +542,7 @@ class Arena(var id: String, var plugin: BedWars) : Listener {
                     }
                     kData = playerData[killer.name.toLowerCase()]!!
 
-                    if (this.game < 1 || data!!.team!!.id == kData.team!!.id) {
+                    if (this.game == ArenaState.LOBBY || data!!.team.id == kData.team.id) {
                         e.setCancelled()
                         return
                     }
@@ -569,13 +550,13 @@ class Arena(var id: String, var plugin: BedWars) : Listener {
                     if (!kill) {
                         data.lastHit = System.currentTimeMillis()
                         data.killer = killer.name
-                        data.killerColor = "" + kData.team!!.color
+                        data.killerColor = "" + kData.team.chatColor
                     }
                 }
 
                 if (e !is EntityDamageByChildEntityEvent && victim.networkId == Villager.NETWORK_ID && killer.getGamemode() == 0) {
                     kData = playerData[killer.name.toLowerCase()]!!
-                    val inv = kData.team!!.shop
+                    val inv = kData.team.shop
 
                     val id = killer.getWindowId(inv)
 
@@ -623,11 +604,13 @@ class Arena(var id: String, var plugin: BedWars) : Listener {
 
                 checkAlive()
             } else {
-                p.teleport(this.data[data.team!!.id.toString() + "spawn"])
+                p.teleport(data.team.mapConfig.spawn)
             }
-
-            bossBar.update(p, true)
         }
+    }
+
+    private fun isJoinSign(b: Block): Int {
+        return (b.blockEntity as? BlockEntityTeamSign)?.team ?: -1
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -651,7 +634,7 @@ class Arena(var id: String, var plugin: BedWars) : Listener {
             return
         }
 
-        if (this.game == 0) {
+        if (this.game == ArenaState.LOBBY) {
             e.setCancelled()
             return
         }
@@ -670,10 +653,8 @@ class Arena(var id: String, var plugin: BedWars) : Listener {
             val randomItem = Items.luckyBlock
 
             if (TextFormat.clean(randomItem.customName).startsWith("Legendary")) {
-                messageAllPlayers("legend_found", data.team!!.color.toString() + p.name, randomItem.customName)
+                messageAllPlayers("legend_found", data.team.chatColor.toString() + p.name, randomItem.customName)
             }
-
-            MainLogger.getLogger().info("LB item: ${randomItem.name}")
 
             e.drops = arrayOf(randomItem)
             return
@@ -701,19 +682,19 @@ class Arena(var id: String, var plugin: BedWars) : Listener {
             return
         }
 
-        if (this.game == 0) {
+        if (this.game == ArenaState.LOBBY) {
             e.setCancelled()
             return
         }
 
-        if (b.id == Block.STONE_PRESSURE_PLATE && data.team != null) {
+        if (b.id == Block.STONE_PRESSURE_PLATE) {
             val nbt = CompoundTag()
                     .putList(ListTag("Items"))
                     .putString("id", BlockEntity.FURNACE)
                     .putInt("x", b.floorX)
                     .putInt("y", b.floorY)
                     .putInt("z", b.floorZ)
-                    .putInt("team", data.team!!.id)
+                    .putInt("team", data.team.id)
 
             BlockEntityMine(b.level.getChunk(b.floorX shr 4, b.floorZ shr 4), nbt)
         }
@@ -722,10 +703,10 @@ class Arena(var id: String, var plugin: BedWars) : Listener {
     }
 
     private fun onBedBreak(p: Player, bedteam: Team, b: Block): Boolean {
-        val data = getPlayerData(p)
-        val pTeam = data!!.team
+        val data = getPlayerData(p) ?: return false
+        val pTeam = data.team
 
-        if (pTeam!!.id == bedteam.id) {
+        if (pTeam.id == bedteam.id) {
             p.sendMessage(BedWars.prefix + Language.translate("break_own_bed"))
             return false
         }
@@ -762,88 +743,43 @@ class Arena(var id: String, var plugin: BedWars) : Listener {
             player.dataPacket(pk)
         }
 
-        val team = this.getPlayerTeam(p)!!.id
-        val color = "" + this.teams[team]!!.color
-        val name = this.teams[team]!!.name
+        val team = data.team
+        val color = "" + team.chatColor
+        val name = team.name
 
-        messageAllPlayers("bed_break", false, "" + bedteam.color, color + p.name, color + name, bedteam.color.toString() + bedteam.name)
+        messageAllPlayers("bed_break", false, "" + bedteam.chatColor, color + p.name, color + name, bedteam.chatColor.toString() + bedteam.name)
         bedteam.onBedBreak()
 
         checkAlive()
         return true
     }
 
-    fun isJoinSign(b: Block): Int {
-        return if (b == mainData["1sign"]) {
-            1
-        } else if (b == mainData["2sign"]) {
-            2
-        } else if (b == mainData["3sign"]) {
-            3
-        } else if (b == mainData["4sign"]) {
-            4
-        } else {
-            0
-        }
-    }
-
-    fun isBed(b: Block): Team? {
+    private fun isBed(b: Block): Team? {
         if (b.id != Item.BED_BLOCK) {
             return null
         }
 
-        val b1 = this.data["1bed"]
-        val b12 = this.data["1bed2"]
-        val b2 = this.data["2bed"]
-        val b22 = this.data["2bed2"]
-        val b3 = this.data["3bed"]
-        val b32 = this.data["3bed2"]
-        val b4 = this.data["4bed"]
-        val b42 = this.data["4bed2"]
-
-        if (b == b1 || b == b12) {
-            return teams[1]
-        } else if (b == b2 || b == b22) {
-            return teams[2]
-        } else if (b == b3 || b == b32) {
-            return teams[3]
-        } else if (b == b4 || b == b42) {
-            return teams[4]
+        teams.forEach {
+            if (b == it.mapConfig.bed1 || b == it.mapConfig.bed2) {
+                return it
+            }
         }
 
         return null
     }
 
-    fun getPlayerTeam(p: Player): Team? {
-        return if (this.playerData.containsKey(p.name.toLowerCase())) {
-            this.playerData[p.name.toLowerCase()]!!.team
-        } else null
-    }
+    fun getPlayerTeam(p: Player) = this.playerData[p.name.toLowerCase()]?.team
 
-    fun getPlayerColor(p: Player): Int {
-        return if (this.playerData.containsKey(p.name)) {
-            this.playerData[p.name]!!.team!!.decimal
-        } else 0
-    }
+    fun getPlayerColor(p: Player) = this.playerData[p.name]?.team?.color?.rgb
 
     fun isTeamFree(team: Team): Boolean {
-        val teams = ArrayList<Int>()
-
-        for (i in 1..4) {
-            if (i == team.id) {
-                continue
-            }
-
-            teams.add(this.teams[i]!!.players.size)
-        }
-
-        val minPlayers = Math.min(teams[2], Math.min(teams[0], teams[1]))
+        val minPlayers = this.teams.filter { it !== team }.minBy { it.players.size }?.players?.size ?: team.players.size
 
         return team.players.size - minPlayers < 2
     }
 
     fun addToTeam(p: Player, team: Int) {
-        val pTeam = teams[team]!!
+        val pTeam = teams[team]
         val data = playerData[p.name.toLowerCase()]!!
 
         if ((isTeamFull(pTeam) || !isTeamFree(pTeam)) && !p.hasPermission("gameteam.vip")) {
@@ -853,22 +789,20 @@ class Arena(var id: String, var plugin: BedWars) : Listener {
 
         val currentTeam = data.team
 
-        if (currentTeam != null) {
-            if (currentTeam.id == pTeam.id) {
-                p.sendMessage(BedWars.prefix + Language.translate("already_in_team", pTeam.color.toString() + pTeam.name))
-                return
-            }
+        if (currentTeam.id == pTeam.id) {
+            p.sendMessage(BedWars.prefix + Language.translate("already_in_team", pTeam.chatColor.toString() + pTeam.name))
+            return
+        }
 
-            if (currentTeam.id != 0) {
-                currentTeam.removePlayer(data)
-            }
+        if (currentTeam.id != 0) {
+            currentTeam.removePlayer(data)
         }
 
         pTeam.addPlayer(data)
 
-        updateTeamSigns()
+        signManager.updateTeamSigns()
 
-        p.sendMessage(Language.translate("team_join", pTeam.color.toString() + pTeam.name))
+        p.sendMessage(Language.translate("team_join", pTeam.chatColor.toString() + pTeam.name))
     }
 
     fun isTeamFull(team: Team): Boolean {
@@ -876,37 +810,33 @@ class Arena(var id: String, var plugin: BedWars) : Listener {
     }
 
     fun unsetPlayer(p: Player) {
-        this.bossBar.removePlayer(p)
+        this.scoreabordManager.removePlayer(p)
 
         val data = playerData.remove(p.name.toLowerCase())
 
         if (data != null) {
             data.globalData.arena = null
 
-            if (data.team != null)
-                data.team!!.removePlayer(data)
+            data.team.removePlayer(data)
         }
     }
 
     fun dropBronze() {
-        this.dropItem(this.data["1bronze"]!!, Items.BRONZE)
-        this.dropItem(this.data["2bronze"]!!, Items.BRONZE)
-        this.dropItem(this.data["3bronze"]!!, Items.BRONZE)
-        this.dropItem(this.data["4bronze"]!!, Items.BRONZE)
+        this.mapConfig.bronze.forEach { vec ->
+            this.dropItem(vec, Items.BRONZE)
+        }
     }
 
     fun dropIron() {
-        this.dropItem(this.data["1iron"]!!, Items.IRON)
-        this.dropItem(this.data["2iron"]!!, Items.IRON)
-        this.dropItem(this.data["3iron"]!!, Items.IRON)
-        this.dropItem(this.data["4iron"]!!, Items.IRON)
+        this.mapConfig.iron.forEach { vec ->
+            this.dropItem(vec, Items.IRON)
+        }
     }
 
     fun dropGold() {
-        this.dropItem(this.data["1gold"]!!, Items.GOLD)
-        this.dropItem(this.data["2gold"]!!, Items.GOLD)
-        this.dropItem(this.data["3gold"]!!, Items.GOLD)
-        this.dropItem(this.data["4gold"]!!, Items.GOLD)
+        this.mapConfig.gold.forEach { vec ->
+            this.dropItem(vec, Items.GOLD)
+        }
     }
 
     private fun dropItem(v: Vector3, item: Item) {
@@ -951,14 +881,10 @@ class Arena(var id: String, var plugin: BedWars) : Listener {
 
     fun messageAllPlayers(message: String, player: Player?, data: BedWarsData?, addPrefix: Boolean, vararg args: String) {
         if (player != null) {
-            var msg: String
+            val pData = getPlayerData(player) ?: return
 
-            if (data!!.team == null) {
-                msg = TextFormat.GRAY.toString() + "[" + TextFormat.DARK_PURPLE + "Lobby" + TextFormat.GRAY + "] " + player.displayName + TextFormat.DARK_AQUA + " > " + /*data.baseData.chatColor +*/ message //TODO: chatcolor
-            } else {
-                val color = "" + getPlayerTeam(player)!!.color
-                msg = TextFormat.GRAY.toString() + "[" + color + "All" + TextFormat.GRAY + "]   " + player.displayName + /*data.baseData.chatColor + ": " +*/ message.substring(1) //TODO: chatcolor
-            }
+            val color = "" + pData.team.chatColor
+            val msg = TextFormat.GRAY.toString() + "[" + color + "All" + TextFormat.GRAY + "]   " + player.displayName + /*data.baseData.chatColor + ": " +*/ message.substring(1) //TODO: chatcolor
 
             for (p in ArrayList(playerData.values)) {
                 p.player.sendMessage(msg)
@@ -991,10 +917,10 @@ class Arena(var id: String, var plugin: BedWars) : Listener {
         var map = ""
         var points = -1
 
-        for ((key, value) in this.votingManager.stats) {
-            if (points < value) {
-                map = key
-                points = value
+        this.votingManager.stats.forEachIndexed { index, score ->
+            if (points < score) {
+                map = this.votingManager.currentTable[index]
+                points = score
             }
         }
 
@@ -1002,26 +928,23 @@ class Arena(var id: String, var plugin: BedWars) : Listener {
             this.plugin.server.unloadLevel(this.plugin.server.getLevelByName(map))
         }
 
-        WorldCopyTask(this.plugin, map, this.id, force)
+        WorldCopyTask(this.plugin, map, this.name, force)
 
         this.map = map
 
-        this.data.clear()
-        this.data.putAll(this.plugin.maps[map]!!)
+        this.mapConfig = plugin.maps[map]!!
 
         teams.forEach {
-            it ?: return@forEach
-
-            it.spawn = this.data["${it.id}spawn"]!!
+            it.mapConfig = this.mapConfig.teams[it.id]
         }
 
         messageAllPlayers("select_map", map)
     }
 
-    fun checkLobby() {
-        if (this.playerData.size >= 12 && this.game == 0) {
+    private fun checkLobby() {
+        if (this.playerData.size >= 12 && this.game == ArenaState.LOBBY) {
             this.starting = true
-        } else if (this.playerData.size >= 16 && this.game == 0 && this.task.startTime > 10) {
+        } else if (this.playerData.size >= 16 && this.game == ArenaState.LOBBY && this.task.startTime > 10) {
             this.task.startTime = 10
         }
     }
@@ -1033,26 +956,9 @@ class Arena(var id: String, var plugin: BedWars) : Listener {
             return
         }
 
-        if (this.game <= 0) {
-            if (e.item.id == 159) {
-                when (e.item.damage) {
-                    11 -> {
-                        this.addToTeam(p, 1)
-                        e.setCancelled()
-                    }
-                    14 -> {
-                        this.addToTeam(p, 2)
-                        e.setCancelled()
-                    }
-                    4 -> {
-                        this.addToTeam(p, 3)
-                        e.setCancelled()
-                    }
-                    5 -> {
-                        this.addToTeam(p, 4)
-                        e.setCancelled()
-                    }
-                }
+        if (this.game == ArenaState.LOBBY) {
+            if (e.item.id == BlockID.STAINED_TERRACOTTA) {
+                addToTeam(p, e.slot)
             }
         }
     }
@@ -1093,7 +999,7 @@ class Arena(var id: String, var plugin: BedWars) : Listener {
     }
 
     fun resetTeams() {
-        this.writeTeams()
+        this.initTeams()
     }
 
     fun isSpectator(p: Player): Boolean {
@@ -1102,7 +1008,7 @@ class Arena(var id: String, var plugin: BedWars) : Listener {
 
     @JvmOverloads
     fun setSpectator(p: Player, respawn: Boolean = false) {
-        if (this.game == 0 || playerData.isEmpty() || isSpectator(p)) {
+        if (this.game == ArenaState.LOBBY || playerData.isEmpty() || isSpectator(p)) {
             return
         }
 
@@ -1147,7 +1053,7 @@ class Arena(var id: String, var plugin: BedWars) : Listener {
         p.inventory.sendContents(p)
         p.nameTag = p.name
 
-        this.bossBar.addPlayer(p)
+        this.scoreabordManager.addPlayer(p)
         p.teleport(tpPos)
     }
 
@@ -1179,19 +1085,11 @@ class Arena(var id: String, var plugin: BedWars) : Listener {
 
     fun unsetSpectator(p: Player) {
         this.spectators.remove(p.name.toLowerCase())
-        this.bossBar.removePlayer(p)
+        this.scoreabordManager.removePlayer(p)
 
         p.adventureSettings.set(Type.ALLOW_FLIGHT, false)
         p.adventureSettings.set(Type.FLYING, false)
         p.adventureSettings.update()
-    }
-
-    fun isChest(b: Block): Boolean {
-        return (b == this.data["1bronze"] || b == this.data["2bronze"] || b == this.data["3bronze"] || b == this.data["4bronze"])
-    }
-
-    fun isEnderChest(b: Block): Boolean {
-        return (b == this.data["1chest"] || b == this.data["2chest"] || b == this.data["3chest"] || b == this.data["4chest"])
     }
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
@@ -1210,32 +1108,27 @@ class Arena(var id: String, var plugin: BedWars) : Listener {
         }
     }
 
-    fun getTeamEnderChest(team: Int): BlockEntityChest {
-        return this.level.getBlockEntity(this.data["${team}chest"]) as BlockEntityChest
-    }
-
     @EventHandler(ignoreCancelled = true)
     fun onChat(e: PlayerChatEvent) {
         val p = e.player
-        val data = getPlayerData(p)
-        val spectator = spectators[p.name.toLowerCase()]
 
-        if ((data == null && spectator == null)) {
-            return
-        }
-
-        e.setCancelled()
-
-        if (spectator != null) {
+        if (spectators.containsKey(p.name.toLowerCase())) {
             val msg = TextFormat.GRAY.toString() + "[" + TextFormat.BLUE + "SPECTATE" + TextFormat.GRAY + "] " + TextFormat.RESET + TextFormat.WHITE + p.displayName + TextFormat.GRAY + " > " /*+ data2.chatColor*/ + e.message //TODO: chat color
 
             for (s in spectators.values) {
                 s.sendMessage(msg)
             }
-        } else if (e.message.startsWith("!") && e.message.length > 1) {
-            this.messageAllPlayers(e.message, p, data!!)
-        } else if (data!!.team != null) {
-            data.team!!.messagePlayers(e.message, data)
+
+            e.setCancelled()
+            return
+        }
+
+        val data = getPlayerData(p) ?: return
+
+        if (e.message.startsWith("!") && e.message.length > 1) {
+            this.messageAllPlayers(e.message, p, data)
+        } else {
+            data.team.messagePlayers(e.message, data)
         }
     }
 
@@ -1314,57 +1207,7 @@ class Arena(var id: String, var plugin: BedWars) : Listener {
         }
     }
 
-    private fun updateMainSign() {
-        val pos = this.mainData["sign"]
-
-        var tile = this.plugin.level.getBlockEntity(pos)
-        if ((tile !is BlockEntitySign)) {
-            val nbt = CompoundTag()
-                    .putString("id", BlockEntity.SIGN)
-                    .putInt("x", pos!!.x.toInt())
-                    .putInt("y", pos.y.toInt())
-                    .putInt("z", pos.z.toInt())
-                    .putString("Text1", "")
-                    .putString("Text2", "")
-                    .putString("Text3", "")
-                    .putString("Text4", "")
-
-            tile = BlockEntitySign(this.plugin.level.getChunk(pos.x.toInt() shr 4, pos.z.toInt() shr 4), nbt)
-        }
-
-
-        val mapname = this.map
-        val map: String
-
-        map = when {
-            this.game <= 0 -> if (isMultiPlatform) "---" else "" + TextFormat.BOLD + TextFormat.LIGHT_PURPLE + "PE ONLY"
-            else -> mapname
-        }
-        var game = "§aLobby"
-        if (this.game == 1) {
-            game = "§cIngame"
-        }
-        if (this.game != 1 && !this.canJoin) {
-            game = "§c§lRESTART"
-        }
-        tile.setText("§4■" + this.id + "■", "§0" + this.playerData.size + "/16", game, "§l§0$map")
-    }
-
-    fun updateTeamSigns() {
-        val blue = this.plugin.level.getBlockEntity(this.mainData["1sign"]) as? BlockEntitySign ?: return
-        val red = this.plugin.level.getBlockEntity(this.mainData["2sign"]) as? BlockEntitySign ?: return
-        val yellow = this.plugin.level.getBlockEntity(this.mainData["3sign"]) as? BlockEntitySign ?: return
-        val green = this.plugin.level.getBlockEntity(this.mainData["4sign"]) as? BlockEntitySign ?: return
-
-        blue.setText("", "§l§9[BLUE]", "§7" + this.teams[1]!!.players.size + " players", "")
-        red.setText("", "§l§c[RED]", "§7" + this.teams[2]!!.players.size + " players", "")
-        yellow.setText("", "§l§e[YELLOW]", "§7" + this.teams[3]!!.players.size + " players", "")
-        green.setText("", "§l§a[GREEN]", "§7" + this.teams[4]!!.players.size + " players", "")
-    }
-
-    fun getPlayerData(p: Player): BedWarsData? {
-        return playerData[p.name.toLowerCase()]
-    }
+    fun getPlayerData(p: Player) = playerData[p.name.toLowerCase()]
 
     @EventHandler
     fun onHungerChange(e: PlayerFoodLevelChangeEvent) {
@@ -1374,7 +1217,7 @@ class Arena(var id: String, var plugin: BedWars) : Listener {
 
         val p = e.player
 
-        if (inArena(p) && this.game <= 0) {
+        if (inArena(p) && this.game == ArenaState.LOBBY) {
             e.setCancelled()
         }
     }
@@ -1399,23 +1242,22 @@ class Arena(var id: String, var plugin: BedWars) : Listener {
 
     @EventHandler(ignoreCancelled = true)
     fun onBowShot(e: EntityShootBowEvent) {
-        val entity = e.getEntity()
-        val bow = e.getBow()
+        val entity = e.entity
+        val bow = e.bow
 
         if (entity is Player) {
-            val p = entity
 
-            if (p.gamemode > 1) {
+            if (entity.gamemode > 1) {
                 e.setCancelled()
             }
 
-            val data = getPlayerData(p) ?: return
+            val data = getPlayerData(entity) ?: return
 
             if (bow.customName == "Explosive Bow") {
                 val entityBow = e.projectile
 
                 entityBow.namedTag.putBoolean("explode", true)
-                entityBow.namedTag.putInt("team", data.team!!.id)
+                entityBow.namedTag.putInt("team", data.team.id)
             }
         }
     }
@@ -1429,9 +1271,7 @@ class Arena(var id: String, var plugin: BedWars) : Listener {
         }
     }
 
-    fun getTeam(id: Int): Team {
-        return teams[id]!!
-    }
+    fun getTeam(id: Int) = teams[id]
 
     private fun onEntityInteract(e: PlayerInteractEvent) {
         val p = e.player
@@ -1454,7 +1294,7 @@ class Arena(var id: String, var plugin: BedWars) : Listener {
             return
         }
 
-        if (blockEntity.getTeam() == data.team!!.id) {
+        if (blockEntity.getTeam() == data.team.id) {
             e.setCancelled()
             return
         }
@@ -1464,10 +1304,15 @@ class Arena(var id: String, var plugin: BedWars) : Listener {
         b.level.setBlock(b, BlockAir(), true, false)
     }
 
+    enum class ArenaState {
+        LOBBY,
+        GAME
+    }
+
     companion object {
 
-        val MAX_PLAYERS = 16
+        const val MAX_PLAYERS = 16
 
-        private val allowedBlocks = HashSet<Int>(Arrays.asList<Int>(Item.SANDSTONE, Block.STONE_PRESSURE_PLATE, 92, 30, 42, 54, 89, 121, 19, 92, Item.OBSIDIAN, Item.BRICKS, Item.ENDER_CHEST))
+        private val allowedBlocks = HashSet<Int>(listOf(Item.SANDSTONE, Block.STONE_PRESSURE_PLATE, 92, 30, 42, 54, 89, 121, 19, 92, Item.OBSIDIAN, Item.BRICKS, Item.ENDER_CHEST))
     }
 }

@@ -5,28 +5,26 @@ import cn.nukkit.block.BlockSandstone
 import cn.nukkit.block.BlockTNT
 import cn.nukkit.item.*
 import cn.nukkit.item.enchantment.Enchantment
-import cn.nukkit.math.Vector3
 import cn.nukkit.nbt.tag.CompoundTag
-import cn.nukkit.utils.DyeColor
 import cn.nukkit.utils.TextFormat
 import com.creeperface.nukkit.bedwars.arena.Arena
+import com.creeperface.nukkit.bedwars.arena.config.IArenaConfiguration
+import com.creeperface.nukkit.bedwars.arena.config.MapConfiguration
 import com.creeperface.nukkit.bedwars.entity.TNTShip
 import com.creeperface.nukkit.bedwars.shop.ItemWindow
 import com.creeperface.nukkit.bedwars.shop.ShopWindow
 import com.creeperface.nukkit.bedwars.shop.Window
 import com.creeperface.nukkit.bedwars.utils.EnderChestInventory
 import com.creeperface.nukkit.bedwars.utils.Items
+import com.creeperface.nukkit.bedwars.utils.rgb
 import java.util.*
 
 class Team(var arena: Arena,
-           var id: Int,
-           var name: String,
-           var color: TextFormat,
-           var decimal: Int) {
+           val id: Int,
+           config: IArenaConfiguration.TeamConfiguration
+) : IArenaConfiguration.ITeamConfiguration by config {
 
-    var bed = true
-
-    val dyeColor: DyeColor = DyeColor.valueOf(this.color.name.toUpperCase())
+    private var bed = true
 
     var status = ""
         private set
@@ -38,7 +36,7 @@ class Team(var arena: Arena,
 
     val players = mutableMapOf<String, BedWarsData>()
 
-    lateinit var spawn: Vector3
+    lateinit var mapConfig: MapConfiguration.TeamData
 
     init {
         recalculateStatus()
@@ -60,7 +58,7 @@ class Team(var arena: Arena,
     fun messagePlayers(message: String, data: BedWarsData) {
         val player = data.player
 
-        val msg = TextFormat.GRAY.toString() + "[" + color + "Team" + TextFormat.GRAY + "]   " + player.displayName /*+ data.baseData.chatColor*/ + ": " + message //TODO: chat color
+        val msg = TextFormat.GRAY.toString() + "[" + chatColor + "Team" + TextFormat.GRAY + "]   " + player.displayName /*+ data.baseData.chatColor*/ + ": " + message //TODO: chat color
 
         for (p in ArrayList(this.players.values)) {
             p.player.sendMessage(msg)
@@ -71,34 +69,33 @@ class Team(var arena: Arena,
     fun addPlayer(p: BedWarsData) {
         this.players[p.player.name.toLowerCase()] = p
         p.team = this
-        p.player.nameTag = color.toString() + p.player.name
-        p.player.displayName = TextFormat.GRAY.toString() /*+ "[" + TextFormat.GREEN + p.baseData.level + TextFormat.GRAY + "]" + p.baseData.prefix*/ + " " + p.team!!.color + p.player.name + TextFormat.RESET //TODO: chat color
+        p.player.nameTag = chatColor.toString() + p.player.name
+        p.player.displayName = TextFormat.GRAY.toString() /*+ "[" + TextFormat.GREEN + p.baseData.level + TextFormat.GRAY + "]" + p.baseData.prefix*/ + " " + p.team.chatColor + p.player.name + TextFormat.RESET //TODO: chat color
         recalculateStatus()
     }
 
-    fun removePlayer(p: BedWarsData) {
-        this.players.remove(p.player.name.toLowerCase())
-        p.team = null
-        p.player.nameTag = p.player.name
+    fun removePlayer(data: BedWarsData) {
+        this.players.remove(data.player.name.toLowerCase())
+        data.player.nameTag = data.player.name
         recalculateStatus()
 
-        if (arena.game > 0) {
-            arena.barUtil.updateTeamStats()
+        if (arena.game == Arena.ArenaState.GAME) {
+            arena.scoreabordManager.updateTeam(this.id)
         }
     }
 
     fun onBedBreak() {
         this.bed = false
         recalculateStatus()
-        arena.barUtil.updateTeamStats()
+        arena.scoreabordManager.updateTeam(this.id)
     }
 
-    fun recalculateStatus() {
+    private fun recalculateStatus() {
         val count = this.players.size
         val bed = hasBed()
 
         if (count >= 1 || bed) {
-            this.status = "                                          " + color + name + ": " + (if (bed) TextFormat.GREEN.toString() + "✔" else TextFormat.RED.toString() + "✖") + TextFormat.GRAY + " " + this.players.size + "\n"
+            this.status = "                                          " + chatColor + name + ": " + (if (bed) TextFormat.GREEN.toString() + "✔" else TextFormat.RED.toString() + "✖") + TextFormat.GRAY + " " + this.players.size + "\n"
         } else {
             this.status = ""
         }
@@ -130,9 +127,9 @@ class Team(var arena: Arena,
         blocks[Item.get(Item.GLASS)] = ShopWindow(Item.get(Item.GLASS), setCount(Items.BRONZE, 4), blocksW)
 
         val armor = LinkedHashMap<Item, Window>()
-        armor[addEnchantment(ItemHelmetLeather().setCompoundTag(CompoundTag().putInt("customColor", decimal)), Enchantment.ID_DURABILITY, 1)] = ShopWindow(addEnchantment(ItemHelmetLeather().setCompoundTag(CompoundTag().putInt("customColor", decimal)), Enchantment.ID_DURABILITY, 1), Items.BRONZE.clone(), armorW)
-        armor[addEnchantment(ItemLeggingsLeather().setCompoundTag(CompoundTag().putInt("customColor", decimal)), Enchantment.ID_DURABILITY, 1)] = ShopWindow(addEnchantment(ItemLeggingsLeather().setCompoundTag(CompoundTag().putInt("customColor", decimal)), Enchantment.ID_DURABILITY, 1), Items.BRONZE.clone(), armorW)
-        armor[addEnchantment(ItemBootsLeather().setCompoundTag(CompoundTag().putInt("customColor", decimal)), Enchantment.ID_DURABILITY, 1)] = ShopWindow(addEnchantment(ItemBootsLeather().setCompoundTag(CompoundTag().putInt("customColor", decimal)), Enchantment.ID_DURABILITY, 1), Items.BRONZE.clone(), armorW)
+        armor[addEnchantment(ItemHelmetLeather().setCompoundTag(CompoundTag().putInt("customColor", color.rgb)), Enchantment.ID_DURABILITY, 1)] = ShopWindow(addEnchantment(ItemHelmetLeather().setCompoundTag(CompoundTag().putInt("customColor", color.rgb)), Enchantment.ID_DURABILITY, 1), Items.BRONZE.clone(), armorW)
+        armor[addEnchantment(ItemLeggingsLeather().setCompoundTag(CompoundTag().putInt("customColor", color.rgb)), Enchantment.ID_DURABILITY, 1)] = ShopWindow(addEnchantment(ItemLeggingsLeather().setCompoundTag(CompoundTag().putInt("customColor", color.rgb)), Enchantment.ID_DURABILITY, 1), Items.BRONZE.clone(), armorW)
+        armor[addEnchantment(ItemBootsLeather().setCompoundTag(CompoundTag().putInt("customColor", color.rgb)), Enchantment.ID_DURABILITY, 1)] = ShopWindow(addEnchantment(ItemBootsLeather().setCompoundTag(CompoundTag().putInt("customColor", color.rgb)), Enchantment.ID_DURABILITY, 1), Items.BRONZE.clone(), armorW)
         armor[addEnchantment(addEnchantment(ItemChestplateChain(), Enchantment.ID_DURABILITY, 1), Enchantment.ID_PROTECTION_ALL, 1).setCustomName("Chestplate lvl I")] = ShopWindow(addEnchantment(addEnchantment(ItemChestplateChain(), Enchantment.ID_DURABILITY, 1), Enchantment.ID_PROTECTION_ALL, 1).setCustomName("Chestplate lvl I"), setCount(Items.IRON, 1), armorW)
         armor[addEnchantment(addEnchantment(ItemChestplateChain(), Enchantment.ID_DURABILITY, 1), Enchantment.ID_PROTECTION_ALL, 2).setCustomName("Chestplate lvl II")] = ShopWindow(addEnchantment(addEnchantment(ItemChestplateChain(), Enchantment.ID_DURABILITY, 1), Enchantment.ID_PROTECTION_ALL, 2).setCustomName("Chestplate lvl II"), setCount(Items.IRON, 3), armorW)
         armor[addEnchantment(addEnchantment(ItemChestplateChain(), Enchantment.ID_DURABILITY, 1), Enchantment.ID_PROTECTION_ALL, 3).setCustomName("Chestplate lvl III")] = ShopWindow(addEnchantment(addEnchantment(ItemChestplateChain(), Enchantment.ID_DURABILITY, 1), Enchantment.ID_PROTECTION_ALL, 3).setCustomName("Chestplate lvl III"), setCount(Items.IRON, 7), armorW)
@@ -176,7 +173,7 @@ class Team(var arena: Arena,
         specials[Item.get(Item.ENDER_PEARL)] = ShopWindow(Item.get(Item.ENDER_PEARL), setCount(Items.GOLD, 13), specialW)
         specials[Item.get(Item.SPAWN_EGG, TNTShip.NETWORK_ID).setCustomName("${TextFormat.RED}Sheepy ${TextFormat.GOLD}Sheep ${TextFormat.YELLOW}Sheep")] = ShopWindow(Item.get(Item.SPAWN_EGG, TNTShip.NETWORK_ID).setCustomName("${TextFormat.RED}Sheepy ${TextFormat.GOLD}Sheep ${TextFormat.YELLOW}Sheep"), setCount(Items.BRONZE, 64), specialW)
         specials[Item.get(Item.STONE_PRESSURE_PLATE).setCustomName(TextFormat.GOLD.toString() + "Mine")] = ShopWindow(Item.get(Item.STONE_PRESSURE_PLATE).setCustomName(TextFormat.GOLD.toString() + "Mine"), setCount(Items.IRON, 5), specialW)
-        //TODO: PRUT
+        //TODO: FISHING ROT
         //TODO: WARP DUST
 
         ////////////////////////////////////////////////////////////////////

@@ -1,4 +1,4 @@
-package com.creeperface.nukkit.bedwars.arena
+package com.creeperface.nukkit.bedwars.arena.manager
 
 import cn.nukkit.Player
 import cn.nukkit.entity.projectile.EntityProjectile
@@ -6,16 +6,17 @@ import cn.nukkit.event.entity.EntityDamageByChildEntityEvent
 import cn.nukkit.event.entity.EntityDamageByEntityEvent
 import cn.nukkit.event.entity.EntityDamageEvent
 import cn.nukkit.event.player.PlayerDeathEvent
+import com.creeperface.nukkit.bedwars.arena.Arena
 import com.creeperface.nukkit.bedwars.mysql.Stat
 
 class DeathManager(var plugin: Arena) {
 
     fun onDeath(e: PlayerDeathEvent) {
         val p = e.entity
-        val data = plugin.getPlayerData(p)
+        val data = plugin.getPlayerData(p) ?: return
 
         val lastDmg = p.lastDamageCause
-        val pColor = "" + data!!.team!!.color
+        val pColor = data.team.chatColor.toString()
         val dColor: String?
         var escape = false
 
@@ -24,7 +25,7 @@ class DeathManager(var plugin: Arena) {
                 val arrow = lastDmg.child
                 val killer = lastDmg.damager
                 if (arrow is EntityProjectile && killer is Player) {
-                    dColor = "" + this.plugin.getPlayerTeam(killer)!!.color
+                    dColor = "" + this.plugin.getPlayerTeam(killer)!!.chatColor
                     this.plugin.messageAllPlayers("shot", pColor + p.name, dColor + killer.getName())
                     plugin.getPlayerData(killer)!!.add(Stat.KILLS)
                     return
@@ -32,7 +33,7 @@ class DeathManager(var plugin: Arena) {
             } else if (lastDmg is EntityDamageByEntityEvent) {
                 val killer = lastDmg.damager
                 if (killer is Player) {
-                    dColor = "" + this.plugin.getPlayerTeam(killer)!!.color
+                    dColor = "" + this.plugin.getPlayerTeam(killer)!!.chatColor
                     this.plugin.messageAllPlayers("contact_player", pColor + p.name, dColor + killer.getName())
                     plugin.getPlayerData(killer)!!.add(Stat.KILLS)
                     return

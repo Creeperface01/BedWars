@@ -1,4 +1,4 @@
-package com.creeperface.nukkit.bedwars.arena
+package com.creeperface.nukkit.bedwars.arena.manager
 
 import cn.nukkit.Server
 import org.apache.commons.io.FileUtils
@@ -8,7 +8,7 @@ import java.io.IOException
 
 object WorldManager {
 
-    fun addWorld(name: String, id: String) {
+    private fun addWorld(name: String, id: String) {
         val from = File(Server.getInstance().dataPath + "/worlds/bedwars/" + name)
         val to = File(Server.getInstance().dataPath + "/worlds/" + name + "_" + id)
 
@@ -20,7 +20,7 @@ object WorldManager {
 
     }
 
-    fun deleteWorld(name: String, id: String) {
+    private fun deleteWorld(name: String, id: String) {
         try {
             val directory = File(Server.getInstance().dataPath + "/worlds/" + name + "_" + id)
             FileUtils.deleteDirectory(directory)

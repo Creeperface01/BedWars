@@ -17,7 +17,7 @@ import me.onebone.actaeon.target.EntityTarget
 class TNTShip(chunk: FullChunk, nbt: CompoundTag, private val arena: Arena, private val team: Team) : MovingEntity(chunk, nbt) {
 
     init {
-        this.setDataProperty(ByteEntityData(Entity.DATA_COLOUR, team.dyeColor.woolData))
+        this.setDataProperty(ByteEntityData(Entity.DATA_COLOUR, team.color.woolData))
         setMovementSpeed(0.29f)
     }
 

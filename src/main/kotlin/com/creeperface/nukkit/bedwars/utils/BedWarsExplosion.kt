@@ -12,7 +12,6 @@ import cn.nukkit.level.particle.HugeExplodeParticle
 import cn.nukkit.math.NukkitMath
 import cn.nukkit.math.SimpleAxisAlignedBB
 import cn.nukkit.math.Vector3
-import cn.nukkit.network.protocol.ExplodePacket
 import com.creeperface.nukkit.bedwars.arena.Arena
 
 /**
@@ -66,13 +65,13 @@ class BedWarsExplosion(private val source: Position, size: Double, private val w
             }
         }
 
-        val pk = ExplodePacket()
-        pk.x = this.source.x.toFloat()
-        pk.y = this.source.y.toFloat()
-        pk.z = this.source.z.toFloat()
-        pk.radius = this.size.toFloat()
+//        val pk = ExplodePacket() //TODO: explode packet
+//        pk.x = this.source.x.toFloat()
+//        pk.y = this.source.y.toFloat()
+//        pk.z = this.source.z.toFloat()
+//        pk.radius = this.size.toFloat()
 
-        this.level.addChunkPacket(source.x.toInt() shr 4, source.z.toInt() shr 4, pk)
+//        this.level.addChunkPacket(source.x.toInt() shr 4, source.z.toInt() shr 4, pk)
 
         this.level.addParticle(HugeExplodeParticle(source))
         this.level.addSound(source, Sound.RANDOM_EXPLODE)
