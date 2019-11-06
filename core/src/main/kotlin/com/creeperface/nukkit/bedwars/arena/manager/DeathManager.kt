@@ -6,9 +6,9 @@ import cn.nukkit.event.entity.EntityDamageByChildEntityEvent
 import cn.nukkit.event.entity.EntityDamageByEntityEvent
 import cn.nukkit.event.entity.EntityDamageEvent
 import cn.nukkit.event.player.PlayerDeathEvent
+import com.creeperface.nukkit.bedwars.api.utils.Lang
 import com.creeperface.nukkit.bedwars.arena.Arena
 import com.creeperface.nukkit.bedwars.mysql.Stat
-import com.creeperface.nukkit.bedwars.utils.Lang
 
 class DeathManager(var plugin: Arena) {
 

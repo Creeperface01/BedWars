@@ -1,4 +1,4 @@
-package com.creeperface.nukkit.bedwars.utils
+package com.creeperface.nukkit.bedwars.api.utils
 
 enum class Lang {
     USE_VOTE,

@@ -3,8 +3,8 @@ package com.creeperface.nukkit.bedwars.arena.manager
 import cn.nukkit.Player
 import com.creeperface.nukkit.bedwars.BedWars
 import com.creeperface.nukkit.bedwars.api.arena.Arena.ArenaState
+import com.creeperface.nukkit.bedwars.api.utils.Lang
 import com.creeperface.nukkit.bedwars.arena.Arena
-import com.creeperface.nukkit.bedwars.utils.Lang
 
 class VotingManager(val plugin: Arena) {
 
@@ -29,7 +29,7 @@ class VotingManager(val plugin: Arena) {
     }
 
     fun onVote(p: Player, vote: String) {
-        if (this.plugin.game == ArenaState.GAME || !this.plugin.inArena(p)) {
+        if (this.plugin.gameState == ArenaState.GAME || !this.plugin.inArena(p)) {
             p.sendMessage(BedWars.prefix + (Lang.CAN_NOT_VOTE.translate()))
             return
         }

@@ -13,10 +13,9 @@ import cn.nukkit.plugin.PluginBase
 import cn.nukkit.utils.Config
 import cn.nukkit.utils.MainLogger
 import cn.nukkit.utils.TextFormat
-import com.creeperface.nukkit.bedwars.BedWars.Companion.instance
 import com.creeperface.nukkit.bedwars.api.BedWarsAPI
-import com.creeperface.nukkit.bedwars.api.BedWarsAPI.Companion.instance
 import com.creeperface.nukkit.bedwars.api.arena.Arena.ArenaState
+import com.creeperface.nukkit.bedwars.api.utils.Lang
 import com.creeperface.nukkit.bedwars.arena.Arena
 import com.creeperface.nukkit.bedwars.arena.config.ArenaConfiguration
 import com.creeperface.nukkit.bedwars.arena.config.ConfigurationSerializer
@@ -32,7 +31,6 @@ import com.creeperface.nukkit.bedwars.mysql.StatQuery
 import com.creeperface.nukkit.bedwars.obj.GlobalData
 import com.creeperface.nukkit.bedwars.placeholder.Placeholders
 import com.creeperface.nukkit.bedwars.utils.FireworkUtils
-import com.creeperface.nukkit.bedwars.utils.Lang
 import org.apache.commons.io.FileUtils
 import java.io.File
 import java.io.FileFilter
@@ -109,7 +107,7 @@ class BedWars : PluginBase(), Listener, BedWarsAPI {
         shuttingDown = true
 
         for (arena in this.ins.values) {
-            if (arena.game == ArenaState.GAME) {
+            if (arena.gameState == ArenaState.GAME) {
                 arena.stopGame()
             }
         }
@@ -318,7 +316,7 @@ class BedWars : PluginBase(), Listener, BedWarsAPI {
         var players = -1
 
         for (a in ins.values) {
-            if (a.game == ArenaState.GAME)
+            if (a.gameState == ArenaState.GAME)
                 continue
 
             val count = a.playerData.size

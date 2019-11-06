@@ -10,8 +10,8 @@ import cn.nukkit.nbt.tag.FloatTag
 import cn.nukkit.nbt.tag.ListTag
 import cn.nukkit.scheduler.Task
 import com.creeperface.nukkit.bedwars.api.arena.Arena.ArenaState
+import com.creeperface.nukkit.bedwars.api.utils.Lang
 import com.creeperface.nukkit.bedwars.utils.FireworkUtils
-import com.creeperface.nukkit.bedwars.utils.Lang
 import java.util.*
 
 class PopupTask(var plugin: Arena) : Task() {
@@ -23,7 +23,7 @@ class PopupTask(var plugin: Arena) : Task() {
         /*if (this.plugin.game == 1 && !this.plugin.ending) {
             this.sendStatus();
         }*/
-        if (this.plugin.ending && this.plugin.game == ArenaState.GAME) {
+        if (this.plugin.ending && this.plugin.gameState == ArenaState.GAME) {
             if (this.ending <= 0) {
                 this.plugin.ending = false
                 this.plugin.stopGame()
@@ -34,7 +34,7 @@ class PopupTask(var plugin: Arena) : Task() {
             spawnFireworks()
             this.ending--
         }
-        if (this.plugin.game == ArenaState.LOBBY) {
+        if (this.plugin.gameState == ArenaState.LOBBY) {
             sendPlayerCount()
         }
     }

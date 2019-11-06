@@ -81,7 +81,7 @@ class Team(var arena: Arena,
         data.player.nameTag = data.player.name
         recalculateStatus()
 
-        if (arena.game == ArenaState.GAME) {
+        if (arena.gameState == ArenaState.GAME) {
             arena.scoreboardManager.updateTeam(this.id)
         }
     }

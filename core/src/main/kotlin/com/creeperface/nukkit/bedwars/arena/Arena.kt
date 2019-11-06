@@ -29,6 +29,7 @@ import com.creeperface.nukkit.bedwars.BedWars
 import com.creeperface.nukkit.bedwars.api.arena.Arena
 import com.creeperface.nukkit.bedwars.api.arena.Arena.ArenaState
 import com.creeperface.nukkit.bedwars.api.arena.PlayerData
+import com.creeperface.nukkit.bedwars.api.utils.Lang
 import com.creeperface.nukkit.bedwars.arena.config.ArenaConfiguration
 import com.creeperface.nukkit.bedwars.arena.config.IArenaConfiguration
 import com.creeperface.nukkit.bedwars.arena.config.MapConfiguration
@@ -43,17 +44,23 @@ import com.creeperface.nukkit.bedwars.mysql.Stat
 import com.creeperface.nukkit.bedwars.obj.BedWarsData
 import com.creeperface.nukkit.bedwars.obj.Team
 import com.creeperface.nukkit.bedwars.task.WorldCopyTask
-import com.creeperface.nukkit.bedwars.utils.*
+import com.creeperface.nukkit.bedwars.utils.BedWarsExplosion
+import com.creeperface.nukkit.bedwars.utils.Items
+import com.creeperface.nukkit.bedwars.utils.blockEntity
+import com.creeperface.nukkit.bedwars.utils.plus
 import java.util.*
 import kotlin.collections.ArrayList
 
 class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaConfiguration by config, Arena {
 
     val playerData = mutableMapOf<String, BedWarsData>()
-    val spectators = mutableMapOf<String, Player>()
+    val gameSpectators = mutableMapOf<String, Player>()
 
     override val players: Map<String, PlayerData>
         get() = playerData.toMap()
+
+    override val spectators: Map<String, Player>
+        get() = gameSpectators.toMap()
 
     val teams = ArrayList<Team>(teamData.size)
 
@@ -70,14 +77,14 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaC
     internal var canJoin = true
     var isLevelLoaded = false
 
-    var game = ArenaState.LOBBY
+    override var gameState = ArenaState.LOBBY
     var starting = false
     var ending = false
 
     lateinit var level: Level
     lateinit var mapConfig: MapConfiguration
 
-    private val aliveTeams: ArrayList<Team>
+    override val aliveTeams: List<Team>
         get() {
             val teams = ArrayList<Team>()
 
@@ -112,8 +119,8 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaC
         this.plugin.server.scheduler.scheduleRepeatingTask(this.popupTask, 20)
     }
 
-    fun joinToArena(p: Player) {
-        if (this.game == ArenaState.GAME) {
+    override fun joinToArena(p: Player) {
+        if (this.gameState == ArenaState.GAME) {
             p.sendMessage(BedWars.prefix + (Lang.JOIN_SPECTATOR.translate()))
             this.setSpectator(p)
             scoreboardManager.addPlayer(p)
@@ -163,7 +170,7 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaC
         this.signManager.updateMainSign()
     }
 
-    fun leaveArena(p: Player) {
+    override fun leaveArena(p: Player) {
         if (isSpectator(p)) {
             unsetSpectator(p)
             return
@@ -174,7 +181,7 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaC
         data?.team?.let {
             val pTeam = data.team
 
-            if (this.game == ArenaState.GAME) {
+            if (this.gameState == ArenaState.GAME) {
                 pTeam.messagePlayers(Lang.PLAYER_LEAVE.translate(pTeam.chatColor + p.name))
                 data.add(Stat.LOSSES)
             }
@@ -188,7 +195,7 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaC
 
         this.unsetPlayer(p)
 
-        if (this.game == ArenaState.GAME) {
+        if (this.gameState == ArenaState.GAME) {
             this.checkAlive()
         }
 
@@ -197,7 +204,7 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaC
         signManager.updateMainSign()
     }
 
-    fun startGame() {
+    override fun startGame() {
         if (!isLevelLoaded) {
             return
         }
@@ -231,7 +238,7 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaC
             }
         }
 
-        this.game = ArenaState.GAME
+        this.gameState = ArenaState.GAME
         this.signManager.updateMainSign()
 
         for (data in playerData.values) {
@@ -302,8 +309,8 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaC
         }
     }
 
-    fun stopGame() {
-        if (this.game == ArenaState.LOBBY) return
+    override fun stopGame() {
+        if (this.gameState == ArenaState.LOBBY) return
 
         this.unsetAllPlayers()
         this.task.gameTime = 0
@@ -315,7 +322,7 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaC
         scoreboardManager.initVotes()
         this.ending = false
         this.winnerTeam = -1
-        this.game = ArenaState.LOBBY
+        this.gameState = ArenaState.LOBBY
 
         this.level.unload()
 
@@ -325,14 +332,14 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaC
 
     private fun unsetAllPlayers() {
         ArrayList(this.playerData.values).forEach { unsetPlayer(it.player) }
-        ArrayList(this.spectators.values).forEach { this.unsetSpectator(it) }
+        ArrayList(this.gameSpectators.values).forEach { this.unsetSpectator(it) }
 
-        this.spectators.clear()
+        this.gameSpectators.clear()
         this.playerData.clear()
         this.initTeams()
     }
 
-    fun inArena(p: Player): Boolean {
+    override fun inArena(p: Player): Boolean {
         return this.playerData.containsKey(p.name.toLowerCase())
     }
 
@@ -374,7 +381,7 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaC
             data2.player.dataPacket(pk)
         }
 
-        for (player in ArrayList(spectators.values)) {
+        for (player in ArrayList(gameSpectators.values)) {
             pk.x = player.x.toInt().toFloat()
             pk.y = player.y.toInt() + player.eyeHeight
             pk.z = player.z.toInt().toFloat()
@@ -406,13 +413,15 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaC
         return null
     }
 
-    fun getPlayerTeam(p: Player) = this.playerData[p.name.toLowerCase()]?.team
+    override fun getPlayerTeam(p: Player) = this.playerData[p.name.toLowerCase()]?.team
 
     fun isTeamFree(team: Team): Boolean {
         val minPlayers = this.teams.filter { it !== team }.minBy { it.players.size }?.players?.size ?: team.players.size
 
         return team.players.size - minPlayers < 2
     }
+
+    override fun isTeamFree(team: com.creeperface.nukkit.bedwars.api.arena.Team) = isTeamFree(team as Team)
 
     fun addToTeam(p: Player, team: Int) {
         val pTeam = teams[team]
@@ -499,18 +508,18 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaC
         }
     }
 
-    fun messageAllPlayers(lang: Lang, vararg args: String) {
+    override fun messageAllPlayers(lang: Lang, vararg args: String) {
         messageAllPlayers(lang, false, *args)
     }
 
-    fun messageAllPlayers(lang: Lang, addPrefix: Boolean = false, vararg args: String) {
+    override fun messageAllPlayers(lang: Lang, addPrefix: Boolean, vararg args: String) {
         val translation = lang.translate(*args)
 
         playerData.values.forEach { it.player.sendMessage(if (addPrefix) BedWars.prefix else "" + translation) }
-        spectators.values.forEach { it.sendMessage(if (addPrefix) BedWars.prefix else "" + translation) }
+        gameSpectators.values.forEach { it.sendMessage(if (addPrefix) BedWars.prefix else "" + translation) }
     }
 
-    fun messageAllPlayers(lang: String, player: Player, data: BedWarsData? = null) {
+    internal fun messageAllPlayers(lang: String, player: Player, data: BedWarsData? = null) {
         val pData = data ?: getPlayerData(player) ?: return
 
         val color = "" + pData.team.chatColor
@@ -520,7 +529,7 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaC
             p.player.sendMessage(msg)
         }
 
-        for (p in spectators.values) {
+        for (p in gameSpectators.values) {
             p.sendMessage(msg)
         }
         return
@@ -556,20 +565,19 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaC
     }
 
     private fun checkLobby() {
-        if (this.playerData.size >= this.startPlayers && this.game == ArenaState.LOBBY) {
+        if (this.playerData.size >= this.startPlayers && this.gameState == ArenaState.LOBBY) {
             this.starting = true
-        } else if (this.playerData.size >= this.fastStartPlayers && this.game == ArenaState.LOBBY && this.task.startTime > this.fastStartTime) {
+        } else if (this.playerData.size >= this.fastStartPlayers && this.gameState == ArenaState.LOBBY && this.task.startTime > this.fastStartTime) {
             this.task.startTime = this.fastStartTime
         }
     }
 
-    fun isSpectator(p: Player): Boolean {
-        return this.spectators.containsKey(p.name.toLowerCase())
+    override fun isSpectator(p: Player): Boolean {
+        return this.gameSpectators.containsKey(p.name.toLowerCase())
     }
 
-    @JvmOverloads
-    fun setSpectator(p: Player, respawn: Boolean = false) {
-        if (this.game == ArenaState.LOBBY || playerData.isEmpty() || isSpectator(p)) {
+    override fun setSpectator(p: Player, respawn: Boolean) {
+        if (this.gameState == ArenaState.LOBBY || playerData.isEmpty() || isSpectator(p)) {
             return
         }
 
@@ -586,7 +594,7 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaC
             tpPos.y = 10.0
         }
 
-        this.spectators[p.name.toLowerCase()] = p
+        this.gameSpectators[p.name.toLowerCase()] = p
 
         p.isSneaking = false
         p.inventory.clearAll()
@@ -619,7 +627,7 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaC
     }
 
     fun unsetSpectator(p: Player) {
-        this.spectators.remove(p.name.toLowerCase())
+        this.gameSpectators.remove(p.name.toLowerCase())
         this.scoreboardManager.removePlayer(p)
 
         p.adventureSettings.set(Type.ALLOW_FLIGHT, false)
@@ -627,9 +635,9 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaC
         p.adventureSettings.update()
     }
 
-    fun getPlayerData(p: Player) = playerData[p.name.toLowerCase()]
+    override fun getPlayerData(p: Player) = playerData[p.name.toLowerCase()]
 
-    fun getTeam(id: Int) = teams[id]
+    override fun getTeam(id: Int) = teams[id]
 
     internal fun onEntityInteract(e: PlayerInteractEvent) {
         val p = e.player

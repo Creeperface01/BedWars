@@ -13,7 +13,7 @@ class ArenaSchedule(var plugin: Arena) : Task() {
     override fun onRun(tick: Int) {
         if (this.plugin.starting) {
             this.starting()
-        } else if (this.plugin.game == ArenaState.GAME && !this.plugin.ending) {
+        } else if (this.plugin.gameState == ArenaState.GAME && !this.plugin.ending) {
             this.game()
         }
     }

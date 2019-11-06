@@ -7,11 +7,11 @@ import cn.nukkit.event.player.PlayerInteractEvent
 import cn.nukkit.event.player.PlayerPreLoginEvent
 import cn.nukkit.event.player.PlayerQuitEvent
 import com.creeperface.nukkit.bedwars.BedWars
+import com.creeperface.nukkit.bedwars.api.utils.Lang
 import com.creeperface.nukkit.bedwars.blockentity.BlockEntityArenaSign
 import com.creeperface.nukkit.bedwars.mysql.JoinQuery
 import com.creeperface.nukkit.bedwars.mysql.StatQuery
 import com.creeperface.nukkit.bedwars.obj.GlobalData
-import com.creeperface.nukkit.bedwars.utils.Lang
 import com.creeperface.nukkit.bedwars.utils.blockEntity
 import java.util.function.Consumer
 

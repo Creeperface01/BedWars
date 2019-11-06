@@ -29,15 +29,15 @@ class SignManager(private val arena: Arena) {
         val map: String
 
         map = when {
-            arena.game == ArenaState.LOBBY -> if (arena.multiPlatform) "---" else "" + TextFormat.BOLD + TextFormat.LIGHT_PURPLE + "PE ONLY"
+            arena.gameState == ArenaState.LOBBY -> if (arena.multiPlatform) "---" else "" + TextFormat.BOLD + TextFormat.LIGHT_PURPLE + "PE ONLY"
             else -> mapname
         }
 
         var game = TextFormat.GREEN + "Lobby"
-        if (arena.game == ArenaState.GAME) {
+        if (arena.gameState == ArenaState.GAME) {
             game = TextFormat.RED + "Ingame"
         }
-        if (arena.game != ArenaState.LOBBY && !arena.canJoin) {
+        if (arena.gameState != ArenaState.LOBBY && !arena.canJoin) {
             game = "§c§lRESTART"
         }
 
