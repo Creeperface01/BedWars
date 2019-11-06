@@ -36,44 +36,66 @@ class BedWarsCommand(plugin: BedWars) : BaseCommand("bedwars", plugin) {
         if (args.isEmpty()) return false
 
         when (args[0]) {
-            "randomjoin" -> {
+            "quickjoin" -> {
                 val p = when {
                     args.size == 2 -> plugin.server.getPlayerExact(args[1])
                     sender is Player -> sender
                     else -> return false
                 }
 
-                if (!p.hasPermission("bedwars.command.randomjoin")) {
+                if (!testPermission(p, "bedwars.command.quickjoin")) {
                     return false
                 }
 
                 plugin.joinRandomArena(p)
             }
-            "sign" -> {
-                if (sender !is Player) {
-                    sender.sendMessage(BedWars.prefix + TextFormat.RED + "You can run this command only in-game")
+            "stats" -> {
+                if (!testPermission(sender, "bedwars.command.stats")) {
                     return false
                 }
-
-                if (!sender.hasPermission("bedwars.command.sign")) {
-                    return false
-                }
-
-                plugin.commandListener.actionPlayers[sender.uniqueId] = CommandEventListener.Action.SET_SIGN
-                sender.sendMessage(BedWars.prefix + TextFormat.YELLOW + "Click on the sign to set")
             }
-            "teamsign" -> {
+            "help" -> {
+
+            }
+            else -> {
                 if (sender !is Player) {
                     sender.sendMessage(BedWars.prefix + TextFormat.RED + "You can run this command only in-game")
                     return false
                 }
 
-                if (!sender.hasPermission("bedwars.command.sign")) {
-                    return false
-                }
+                when (args[0]) {
+                    "sign" -> {
+                        if (!testPermission(sender, "bedwars.command.sign")) {
+                            return false
+                        }
 
-                plugin.commandListener.actionPlayers[sender.uniqueId] = CommandEventListener.Action.SET_TEAM_SIGN
-                sender.sendMessage(BedWars.prefix + TextFormat.YELLOW + "Click on the sign to set")
+                        plugin.commandListener.actionPlayers[sender.uniqueId] = CommandEventListener.Action.SET_SIGN
+                        sender.sendMessage(BedWars.prefix + TextFormat.YELLOW + "Click on the sign to set")
+                    }
+                    "teamsign" -> {
+                        if (!testPermission(sender, "bedwars.command.sign")) {
+                            return false
+                        }
+
+                        plugin.commandListener.actionPlayers[sender.uniqueId] = CommandEventListener.Action.SET_TEAM_SIGN
+                        sender.sendMessage(BedWars.prefix + TextFormat.YELLOW + "Click on the sign to set")
+                    }
+                    "start" -> {
+                        if (!testPermission(sender, "bedwars.command.start")) {
+                            return false
+                        }
+                    }
+                    "stop" -> {
+                        if (!testPermission(sender, "bedwars.command.stop")) {
+                            return false
+                        }
+                    }
+                    "vote" -> {
+                        if (!testPermission(sender, "bedwars.command.vote")) {
+                            return false
+                        }
+                    }
+                }
             }
         }
 

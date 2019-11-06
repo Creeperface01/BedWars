@@ -8,6 +8,7 @@ import cn.nukkit.event.entity.EntityDamageEvent
 import cn.nukkit.event.player.PlayerDeathEvent
 import com.creeperface.nukkit.bedwars.arena.Arena
 import com.creeperface.nukkit.bedwars.mysql.Stat
+import com.creeperface.nukkit.bedwars.obj.Language
 
 class DeathManager(var plugin: Arena) {
 
@@ -26,7 +27,7 @@ class DeathManager(var plugin: Arena) {
                 val killer = lastDmg.damager
                 if (arrow is EntityProjectile && killer is Player) {
                     dColor = "" + this.plugin.getPlayerTeam(killer)!!.chatColor
-                    this.plugin.messageAllPlayers("shot", pColor + p.name, dColor + killer.getName())
+                    this.plugin.messageAllPlayers(Language.SHOT, pColor + p.name, dColor + killer.getName())
                     plugin.getPlayerData(killer)!!.add(Stat.KILLS)
                     return
                 }
@@ -34,7 +35,7 @@ class DeathManager(var plugin: Arena) {
                 val killer = lastDmg.damager
                 if (killer is Player) {
                     dColor = "" + this.plugin.getPlayerTeam(killer)!!.chatColor
-                    this.plugin.messageAllPlayers("contact_player", pColor + p.name, dColor + killer.getName())
+                    this.plugin.messageAllPlayers(Language.CONTACT_PLAYER, pColor + p.name, dColor + killer.getName())
                     plugin.getPlayerData(killer)!!.add(Stat.KILLS)
                     return
                 }
@@ -72,56 +73,56 @@ class DeathManager(var plugin: Arena) {
                 when (lastDmg.cause) {
                     EntityDamageEvent.DamageCause.CONTACT -> {
                         if (escape) {
-                            plugin.messageAllPlayers("cactus_escape", playerName, killerName)
+                            plugin.messageAllPlayers(Language.CACTUS_ESCAPE, playerName, killerName)
                             return
                         }
-                        plugin.messageAllPlayers("cactus", playerName)
+                        plugin.messageAllPlayers(Language.CACTUS, playerName)
                     }
-                    EntityDamageEvent.DamageCause.SUFFOCATION -> plugin.messageAllPlayers("suffocate", playerName)
+                    EntityDamageEvent.DamageCause.SUFFOCATION -> plugin.messageAllPlayers(Language.SUFFOCATE, playerName)
                     EntityDamageEvent.DamageCause.FALL -> {
                         if (escape) {
-                            plugin.messageAllPlayers("fall_escape", playerName, killerName)
+                            plugin.messageAllPlayers(Language.FALL_ESCAPE, playerName, killerName)
                             return@apply
                         }
-                        plugin.messageAllPlayers("fall", playerName)
+                        plugin.messageAllPlayers(Language.FALL, playerName)
                     }
                     EntityDamageEvent.DamageCause.FIRE -> {
                         if (escape) {
-                            plugin.messageAllPlayers("fire_escape", playerName, killerName)
+                            plugin.messageAllPlayers(Language.FIRE_ESCAPE, playerName, killerName)
                             return@apply
                         }
-                        plugin.messageAllPlayers("fire", playerName)
+                        plugin.messageAllPlayers(Language.FIRE, playerName)
                     }
                     EntityDamageEvent.DamageCause.FIRE_TICK -> {
                         if (escape) {
-                            plugin.messageAllPlayers("fire_tick_escape", playerName, killerName)
+                            plugin.messageAllPlayers(Language.FIRE_TICK_ESCAPE, playerName, killerName)
                             return@apply
                         }
-                        plugin.messageAllPlayers("fire_tick", playerName)
+                        plugin.messageAllPlayers(Language.FIRE_TICK, playerName)
                     }
                     EntityDamageEvent.DamageCause.LAVA -> {
                         if (escape) {
-                            plugin.messageAllPlayers("lava_escape", playerName, killerName)
+                            plugin.messageAllPlayers(Language.LAVA_ESCAPE, playerName, killerName)
                             return@apply
                         }
-                        plugin.messageAllPlayers("lava", playerName)
+                        plugin.messageAllPlayers(Language.LAVA, playerName)
                     }
                     EntityDamageEvent.DamageCause.DROWNING -> {
                         if (escape) {
-                            plugin.messageAllPlayers("drowning_escape", playerName, killerName)
+                            plugin.messageAllPlayers(Language.DROWNING_ESCAPE, playerName, killerName)
                             return@apply
                         }
-                        plugin.messageAllPlayers("drowning", playerName)
+                        plugin.messageAllPlayers(Language.DROWNING, playerName)
                     }
-                    EntityDamageEvent.DamageCause.BLOCK_EXPLOSION, EntityDamageEvent.DamageCause.ENTITY_EXPLOSION -> plugin.messageAllPlayers("explosion", playerName)
+                    EntityDamageEvent.DamageCause.BLOCK_EXPLOSION, EntityDamageEvent.DamageCause.ENTITY_EXPLOSION -> plugin.messageAllPlayers(Language.EXPLOSION, playerName)
                     EntityDamageEvent.DamageCause.VOID -> {
                         if (escape) {
-                            plugin.messageAllPlayers("fall_escape", playerName, killerName)
+                            plugin.messageAllPlayers(Language.FALL_ESCAPE, playerName, killerName)
                             return@apply
                         }
-                        plugin.messageAllPlayers("void", playerName)
+                        plugin.messageAllPlayers(Language.VOID, playerName)
                     }
-                    else -> plugin.messageAllPlayers("unknown", playerName)
+                    else -> plugin.messageAllPlayers(Language.UNKNOWN, playerName)
                 }
             }
         }

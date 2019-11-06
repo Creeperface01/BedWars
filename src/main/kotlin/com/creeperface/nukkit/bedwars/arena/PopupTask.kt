@@ -40,7 +40,7 @@ class PopupTask(var plugin: Arena) : Task() {
 
     private fun sendPlayerCount() {
         this.plugin.playerData.values.forEach {
-            it.player.sendPopup(Language.translate("player_count", plugin.playerData.size.toString(), "16"))
+            it.player.sendPopup(Language.PLAYER_COUNT.translate2(plugin.playerData.size.toString(), plugin.maxPlayers))
         }
     }
 

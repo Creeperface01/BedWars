@@ -29,7 +29,7 @@ class VotingManager(val plugin: Arena) {
 
     fun onVote(p: Player, vote: String) {
         if (this.plugin.game == Arena.ArenaState.GAME || !this.plugin.inArena(p)) {
-            p.sendMessage(BedWars.prefix + Language.translate("can_not_vote"))
+            p.sendMessage(BedWars.prefix + (Language.CAN_NOT_VOTE.translate2()))
             return
         }
 
@@ -40,7 +40,7 @@ class VotingManager(val plugin: Arena) {
         }
 
         if (index < 0 || index >= currentTable.size) {
-            p.sendMessage(BedWars.prefix + Language.translate("use_vote"))
+            p.sendMessage(BedWars.prefix + (Language.USE_VOTE.translate2()))
             return
         }
 
@@ -54,7 +54,7 @@ class VotingManager(val plugin: Arena) {
         this.stats[index]++
 
         this.players[p.name.toLowerCase()] = index
-        p.sendMessage(BedWars.prefix + Language.translate("vote", this.currentTable[index]))
+        p.sendMessage(BedWars.prefix + (Language.VOTE.translate2(this.currentTable[index])))
 
         plugin.scoreboardManager.updateVote(index)
         if (oldIndex >= 0) {

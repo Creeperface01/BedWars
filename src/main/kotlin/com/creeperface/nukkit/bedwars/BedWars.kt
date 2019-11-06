@@ -151,7 +151,7 @@ class BedWars : PluginBase(), Listener {
 
                         val stats = data.stats
 
-                        sender.sendMessage(Language.translate("stats", stats[Stat.KILLS].toString(), stats[Stat.DEATHS].toString(), stats[Stat.WINS].toString(), stats[Stat.LOSSES].toString(), stats[Stat.BEDS].toString()))
+                        sender.sendMessage(Language.STATS.translate2(stats[Stat.KILLS].toString(), stats[Stat.DEATHS].toString(), stats[Stat.WINS].toString(), stats[Stat.LOSSES].toString(), stats[Stat.BEDS].toString()))
                     }
                     "vote" -> {
                         if (args.size != 1) {
@@ -188,6 +188,7 @@ class BedWars : PluginBase(), Listener {
         } else null
     }
 
+    @Suppress("UNCHECKED_CAST")
     private fun initLanguage() {
         val languages = arrayOf("english", "czech")
 
@@ -198,14 +199,11 @@ class BedWars : PluginBase(), Listener {
             lang = "english"
         }
 
-        val langs = HashMap<String, Config>()
-
         languages.forEach {
             saveResource("$it.yml", false)
-            langs[it] = Config("$dataFolder/$it.yml")
         }
 
-        Language.init(langs, lang)
+        Language.init(Config("$lang.yml", Config.YAML).all as Map<String, String>)
     }
 
 //    fun refreshQuery(async: Boolean): HashMap<String, String> {
@@ -287,7 +285,7 @@ class BedWars : PluginBase(), Listener {
         val a = getFreeArena(p)
 
         if (a == null) {
-            p.sendMessage(Language.translate("no_arena_found"))
+            p.sendMessage(Language.NO_ARENA_FOUND.translate2())
             return
         }
 

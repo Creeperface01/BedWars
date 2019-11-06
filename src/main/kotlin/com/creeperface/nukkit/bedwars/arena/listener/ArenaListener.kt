@@ -255,7 +255,7 @@ class ArenaListener(private val arena: Arena) : Listener {
 
             if (!data.canRespawn()) {
                 this.arena.unsetPlayer(p)
-                p.sendMessage(BedWars.prefix + Language.translate("join_spectator"))
+                p.sendMessage(BedWars.prefix + (Language.JOIN_SPECTATOR.translate2()))
                 this.arena.setSpectator(p, true)
 
 //                data.baseData.addExp(200) //played
@@ -307,7 +307,7 @@ class ArenaListener(private val arena: Arena) : Listener {
             val randomItem = Items.luckyBlock
 
             if (TextFormat.clean(randomItem.customName).startsWith("Legendary")) {
-                arena.messageAllPlayers("legend_found", data.team.chatColor.toString() + p.name, randomItem.customName)
+                arena.messageAllPlayers(Language.LEGEND_FOUND, data.team.chatColor.toString() + p.name, randomItem.customName)
             }
 
             e.drops = arrayOf(randomItem)
@@ -468,19 +468,19 @@ class ArenaListener(private val arena: Arena) : Listener {
                 val item = inv2.item
 
                 if (!Items.containsItem(inv, cost)) {
-                    p.sendMessage(Language.translate("low_shop", cost.customName))
+                    p.sendMessage(Language.LOW_SHOP.translate2(cost.customName))
                     return
                 }
 
                 if (!inv.canAddItem(item)) {
-                    p.sendMessage(Language.translate("full_inventory"))
+                    p.sendMessage(Language.FULL_INVENTORY.translate2())
                     return
                 }
 
                 Items.removeItem(inv, cost)
                 inv.addItem(item)
 
-                p.sendMessage(BedWars.prefix + Language.translate("buy", if (item.hasCustomName()) item.customName else item.name))
+                p.sendMessage(BedWars.prefix + (Language.BUY.translate2(if (item.hasCustomName()) item.customName else item.name)))
             } else {
                 val window = inv2.getWindow(slot)
 

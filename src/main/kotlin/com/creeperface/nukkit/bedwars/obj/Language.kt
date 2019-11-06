@@ -1,47 +1,104 @@
 package com.creeperface.nukkit.bedwars.obj
 
-import cn.nukkit.utils.Config
-import java.util.*
+enum class Language {
+    USE_VOTE,
+    PLAYER_LEAVE,
+    BED_BREAK,
+    SHOP_BLOCKS,
+    PERMS,
+    SHOP_ARMOR,
+    FALL,
+    UPDATE_MSG,
+    FIRE_TICK,
+    TEAM_JOIN,
+    END_GAME,
+    VOTE,
+    SHOT,
+    CACTUS,
+    FIRE_ESCAPE,
+    LEGEND_FOUND,
+    JOIN_SPECTATOR,
+    STATS,
+    PE_ONLY,
+    UNKNOWN,
+    LAVA,
+    FULL_INVENTORY,
+    SHOP_POTION,
+    SUFFOCATE,
+    FULL_TEAM,
+    ALREADY_IN_TEAM,
+    CAN_NOT_VOTE,
+    SHOP_SPECIAL,
+    GAME_FULL,
+    BREAK_OWN_BED,
+    FIRE_TICK_ESCAPE,
+    BUY,
+    SHOP_PICKAXE,
+    SHOP_BOW,
+    SHOP_FOOD,
+    FIRE,
+    VOID,
+    MIN_PLAYERS,
+    SELECT_MAP,
+    TOKENS,
+    LOW_SHOP,
+    NO_ARENA_FOUND,
+    LAVA_ESCAPE,
+    SHOP_CHEST,
+    DROWNING,
+    PLAYER_COUNT,
+    JOIN,
+    SHOP_SWORD,
+    START_GAME,
+    FALL_ESCAPE,
+    CONTACT_PLAYER,
+    LEAVE,
+    CONTACT,
+    CACTUS_ESCAPE,
+    DROWNING_ESCAPE,
+    EXPLOSION;
 
-object Language {
+    private lateinit var translation: String
 
-    private val data = HashMap<String, Map<String, String>>()
-    private lateinit var current: Map<String, String>
+    fun translate2(vararg args: Any): String {
+        if (args.isEmpty()) return this.translation
 
-    @Suppress("UNCHECKED_CAST")
-    fun init(data: Map<String, Config>, language: String) {
-        for ((key, value) in data) {
-            Language.data[key] = value.all as Map<String, String>
-        }
-
-        current = (data[language] ?: error("")).all as Map<String, String>
-    }
-
-//    fun translate(message: String, p: Player, vararg args: String): String {
-//        return translate(message, MTCore.getInstance().getPlayerData(p), *args)
-//    }
-
-//    fun translate(message: String, data: PlayerData, vararg args: String): String {
-//        return translate(message, data.language, *args)
-//    }
-
-    fun translate(message: String, vararg args: String): String {
-        var base: String = current[message]?.replace('&', '§') ?: return message
+        val base = StringBuilder(this.translation)
 
         for (i in args.indices) {
-            base = base.replace("%$i", args[i])
+            base.replaceAll("%$i", args[i].toString())
         }
 
-        return base
+        return base.toString()
     }
 
-//    fun getTranslations(msg: String, vararg args: String): HashMap<Int, String> {
-//        val translations = HashMap<Int, String>()
-//
-//        for (i in Lang.getLanguages()) {
-//            translations[i] = translate(msg, i, *args)
-//        }
-//
-//        return translations
-//    }
+    private fun StringBuilder.replaceAll(from: String, to: String) {
+        var index = this.indexOf(from)
+
+        while (index != -1) {
+            this.replace(index, index + from.length, to)
+            index += to.length
+            index = this.indexOf(from, index)
+        }
+    }
+
+    companion object {
+
+        fun init(data: Map<String, String>) {
+            for ((key, value) in data) {
+                valueOf(key.toUpperCase()).translation = value
+            }
+        }
+
+        @Deprecated("deprecated", ReplaceWith("Language..translate2(*args)"))
+        fun translate(message: String, vararg args: String): String {
+            var base: String = valueOf(message).translation.replace('&', '§')
+
+            for (i in args.indices) {
+                base = base.replace("%$i", args[i])
+            }
+
+            return base
+        }
+    }
 }

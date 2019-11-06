@@ -10,7 +10,7 @@ import com.creeperface.nukkit.bedwars.blockentity.BlockEntityArenaSign
 import com.creeperface.nukkit.bedwars.mysql.JoinQuery
 import com.creeperface.nukkit.bedwars.mysql.StatQuery
 import com.creeperface.nukkit.bedwars.obj.GlobalData
-import com.creeperface.nukkit.bedwars.utils.Lang
+import com.creeperface.nukkit.bedwars.obj.Language
 import com.creeperface.nukkit.bedwars.utils.blockEntity
 
 class EventListener(private val plugin: BedWars) : Listener {
@@ -30,7 +30,7 @@ class EventListener(private val plugin: BedWars) : Listener {
         if (be is BlockEntityArenaSign) {
 
             if (!be.arena.multiPlatform && p.loginChainData.deviceOS == 7 && !p.hasPermission("gameteam.helper")) { //TODO: permissions
-                p.sendMessage(Lang.translate("pe_only", p))
+                p.sendMessage(Language.PE_ONLY.translate2())
                 return
             }
 

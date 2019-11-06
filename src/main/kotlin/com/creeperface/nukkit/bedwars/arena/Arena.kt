@@ -112,14 +112,14 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaC
 
     fun joinToArena(p: Player) {
         if (this.game == ArenaState.GAME) {
-            p.sendMessage(BedWars.prefix + Language.translate("join_spectator"))
+            p.sendMessage(BedWars.prefix + (Language.JOIN_SPECTATOR.translate2()))
             this.setSpectator(p)
             scoreboardManager.addPlayer(p)
             return
         }
 
-        if (this.playerData.size >= 16 && !p.hasPermission("gameteam.vip")) {
-            p.sendMessage(BedWars.prefix + Language.translate("game_full"))
+        if (this.playerData.size >= this.maxPlayers && !p.hasPermission("bedwars.joinfullarena")) {
+            p.sendMessage(BedWars.prefix + (Language.GAME_FULL.translate2()))
             return
         }
 
@@ -134,7 +134,7 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaC
         playerData[p.name.toLowerCase()] = pl
 
         p.nameTag = p.name
-        p.sendMessage(BedWars.prefix + Language.translate("join", this.name))
+        p.sendMessage(BedWars.prefix + (Language.JOIN.translate2(this.name)))
         p.teleport(this.lobby)
         scoreboardManager.addPlayer(p)
         p.setSpawn(this.lobby)
@@ -173,12 +173,12 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaC
             val pTeam = data.team
 
             if (this.game == ArenaState.GAME) {
-                pTeam.messagePlayers(Language.translate("player_leave", pTeam.chatColor + p.name))
+                pTeam.messagePlayers(Language.PLAYER_LEAVE.translate2(pTeam.chatColor + p.name))
                 data.add(Stat.LOSSES)
             }
 
             if (p.isOnline) {
-                p.sendMessage(BedWars.prefix + Language.translate("leave"))
+                p.sendMessage(BedWars.prefix + (Language.LEAVE.translate2()))
             }
 
             signManager.updateTeamSigns()
@@ -257,7 +257,7 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaC
             }
         }
 
-        this.messageAllPlayers("start_game", false)
+        this.messageAllPlayers(Language.START_GAME, false)
 
         scoreboardManager.initGame()
     }
@@ -289,7 +289,7 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaC
                     pl.add(Stat.WINS)
                 }
 
-                messageAllPlayers("end_game", false, "" + team.chatColor, team.name)
+                messageAllPlayers(Language.END_GAME, false, "" + team.chatColor, team.name)
                 this.ending = true
             }
 
@@ -343,7 +343,7 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaC
         val pTeam = data.team
 
         if (pTeam.id == bedteam.id) {
-            p.sendMessage(BedWars.prefix + Language.translate("break_own_bed"))
+            p.sendMessage(BedWars.prefix + (Language.BREAK_OWN_BED.translate2()))
             return false
         }
 
@@ -383,7 +383,7 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaC
         val color = "" + team.chatColor
         val name = team.name
 
-        messageAllPlayers("bed_break", false, "" + bedteam.chatColor, color + p.name, color + name, bedteam.chatColor.toString() + bedteam.name)
+        messageAllPlayers(Language.BED_BREAK, false, "" + bedteam.chatColor, color + p.name, color + name, bedteam.chatColor.toString() + bedteam.name)
         bedteam.onBedBreak()
 
         checkAlive()
@@ -416,15 +416,15 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaC
         val pTeam = teams[team]
         val data = playerData[p.name.toLowerCase()]!!
 
-        if ((isTeamFull(pTeam) || !isTeamFree(pTeam)) && !p.hasPermission("gameteam.vip")) { //TODO: permission
-            p.sendMessage(BedWars.prefix + Language.translate("full_team"))
+        if ((isTeamFull(pTeam) || !isTeamFree(pTeam)) && !p.hasPermission("bedwars.joinfullteam")) {
+            p.sendMessage(BedWars.prefix + (Language.FULL_TEAM.translate2()))
             return
         }
 
         val currentTeam = data.team
 
         if (currentTeam.id == pTeam.id) {
-            p.sendMessage(BedWars.prefix + Language.translate("already_in_team", pTeam.chatColor.toString() + pTeam.name))
+            p.sendMessage(BedWars.prefix + (Language.ALREADY_IN_TEAM.translate2(pTeam.chatColor.toString() + pTeam.name)))
             return
         }
 
@@ -436,7 +436,7 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaC
 
         signManager.updateTeamSigns()
 
-        p.sendMessage(Language.translate("team_join", pTeam.chatColor.toString() + pTeam.name))
+        p.sendMessage(Language.TEAM_JOIN.translate2(pTeam.chatColor.toString() + pTeam.name))
     }
 
     fun isTeamFull(team: Team): Boolean {
@@ -497,43 +497,31 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaC
         }
     }
 
-    fun messageAllPlayers(message: String) {
-        messageAllPlayers(message, false)
+    fun messageAllPlayers(lang: Language, vararg args: String) {
+        messageAllPlayers(lang, false, *args)
     }
 
-    fun messageAllPlayers(message: String, vararg args: String) {
-        this.messageAllPlayers(message, null, null, false, *args)
-    }
-
-    fun messageAllPlayers(message: String, addPrefix: Boolean, vararg args: String) {
-        this.messageAllPlayers(message, null, null, addPrefix, *args)
-    }
-
-    fun messageAllPlayers(message: String, player: Player, data: BedWarsData) {
-        messageAllPlayers(message, player, data, false)
-    }
-
-    fun messageAllPlayers(message: String, player: Player?, data: BedWarsData?, addPrefix: Boolean, vararg args: String) {
-        if (player != null) {
-            val pData = getPlayerData(player) ?: return
-
-            val color = "" + pData.team.chatColor
-            val msg = TextFormat.GRAY.toString() + "[" + color + "All" + TextFormat.GRAY + "]   " + player.displayName + /*data.baseData.chatColor + ": " +*/ message.substring(1) //TODO: chatcolor
-
-            for (p in ArrayList(playerData.values)) {
-                p.player.sendMessage(msg)
-            }
-
-            for (p in spectators.values) {
-                p.sendMessage(msg)
-            }
-            return
-        }
-
-        val translation = Language.translate(message, *args)
+    fun messageAllPlayers(lang: Language, addPrefix: Boolean = false, vararg args: String) {
+        val translation = lang.translate2(*args)
 
         playerData.values.forEach { it.player.sendMessage(if (addPrefix) BedWars.prefix else "" + translation) }
         spectators.values.forEach { it.sendMessage(if (addPrefix) BedWars.prefix else "" + translation) }
+    }
+
+    fun messageAllPlayers(lang: String, player: Player, data: BedWarsData? = null) {
+        val pData = data ?: getPlayerData(player) ?: return
+
+        val color = "" + pData.team.chatColor
+        val msg = TextFormat.GRAY.toString() + "[" + color + "All" + TextFormat.GRAY + "]   " + player.displayName + /*data.baseData.chatColor + ": " +*/ lang.substring(1) //TODO: chatcolor
+
+        for (p in ArrayList(playerData.values)) {
+            p.player.sendMessage(msg)
+        }
+
+        for (p in spectators.values) {
+            p.sendMessage(msg)
+        }
+        return
     }
 
     @JvmOverloads
@@ -562,7 +550,7 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaC
             it.mapConfig = this.mapConfig.teams[it.id]
         }
 
-        messageAllPlayers("select_map", map)
+        messageAllPlayers(Language.SELECT_MAP, map)
     }
 
     private fun checkLobby() {
