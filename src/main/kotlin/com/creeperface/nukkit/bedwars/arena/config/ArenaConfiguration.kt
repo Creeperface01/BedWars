@@ -8,6 +8,11 @@ class ArenaConfiguration(
         override val name: String,
         override val timeLimit: Int,
         override val startTime: Int,
+        override val endingTime: Int,
+        override val startPlayers: Int,
+        override val bronzeDropInterval: Int,
+        override val ironDropInterval: Int,
+        override val goldDropInterval: Int,
         override val fastStartTime: Int,
         override val fastStartPlayers: Int,
         override val teamPlayers: Int,
@@ -21,6 +26,11 @@ interface IArenaConfiguration {
     val name: String
     val timeLimit: Int
     val startTime: Int
+    val endingTime: Int
+    val startPlayers: Int
+    val bronzeDropInterval: Int
+    val ironDropInterval: Int
+    val goldDropInterval: Int
     val fastStartTime: Int
     val fastStartPlayers: Int
     val teamPlayers: Int

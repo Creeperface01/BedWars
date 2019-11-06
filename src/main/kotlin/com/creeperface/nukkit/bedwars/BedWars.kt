@@ -5,11 +5,7 @@ import cn.nukkit.blockentity.BlockEntity
 import cn.nukkit.command.Command
 import cn.nukkit.command.CommandSender
 import cn.nukkit.entity.Entity
-import cn.nukkit.event.EventHandler
 import cn.nukkit.event.Listener
-import cn.nukkit.event.entity.EntityPortalEnterEvent
-import cn.nukkit.event.player.PlayerJoinEvent
-import cn.nukkit.event.player.PlayerQuitEvent
 import cn.nukkit.item.Item
 import cn.nukkit.level.Level
 import cn.nukkit.level.Position
@@ -19,17 +15,18 @@ import cn.nukkit.utils.MainLogger
 import cn.nukkit.utils.TextFormat
 import com.creeperface.nukkit.bedwars.arena.Arena
 import com.creeperface.nukkit.bedwars.arena.config.ArenaConfiguration
+import com.creeperface.nukkit.bedwars.arena.config.ConfigurationSerializer
 import com.creeperface.nukkit.bedwars.arena.config.MapConfiguration
 import com.creeperface.nukkit.bedwars.blockentity.BlockEntityMine
 import com.creeperface.nukkit.bedwars.entity.SpecialItem
 import com.creeperface.nukkit.bedwars.entity.Villager
 import com.creeperface.nukkit.bedwars.entity.WinParticle
-import com.creeperface.nukkit.bedwars.mysql.JoinQuery
+import com.creeperface.nukkit.bedwars.listener.CommandEventListener
+import com.creeperface.nukkit.bedwars.listener.EventListener
 import com.creeperface.nukkit.bedwars.mysql.Stat
 import com.creeperface.nukkit.bedwars.mysql.StatQuery
 import com.creeperface.nukkit.bedwars.obj.GlobalData
 import com.creeperface.nukkit.bedwars.obj.Language
-import com.creeperface.nukkit.bedwars.utils.ConfigurationSerializer
 import com.creeperface.nukkit.bedwars.utils.FireworkUtils
 import org.apache.commons.io.FileUtils
 import java.io.File
@@ -55,6 +52,7 @@ class BedWars : PluginBase(), Listener {
 //    private var queryThread: QueryThread? = null
 
     var players: MutableMap<Long, GlobalData> = HashMap()
+    internal val commandListener = CommandEventListener(this)
 
     var shuttingDown = false
 
@@ -90,6 +88,8 @@ class BedWars : PluginBase(), Listener {
         //entity.registerEntity("TNTShip", TNTShip.class);
         Item.addCreativeItem(Item.get(Item.SPAWN_EGG, 15))
 
+        this.server.pluginManager.registerEvents(commandListener, this)
+        this.server.pluginManager.registerEvents(EventListener(this), this)
 //        this.queryThread = QueryThread()
 //        this.queryThread!!.start()
     }
@@ -134,21 +134,6 @@ class BedWars : PluginBase(), Listener {
 
             arenas[arenaConf.name] = arenaConf
         }
-    }
-
-    @EventHandler
-    fun onJoin(e: PlayerJoinEvent) {
-        val p = e.player
-        this.players[p.id] = GlobalData(p)
-
-        JoinQuery(this, p)
-    }
-
-    @EventHandler
-    fun onQuit(e: PlayerQuitEvent) {
-        val data = this.players.remove(e.player.id) ?: return
-
-        StatQuery(this, data.stats)
     }
 
     override fun onCommand(sender: CommandSender, cmd: Command, label: String, args: Array<String>): Boolean {
@@ -202,19 +187,6 @@ class BedWars : PluginBase(), Listener {
             this.ins[arena]
         } else null
     }
-
-    /*@EventHandler
-    public void onInteract(PlayerInteractEvent e){
-        Player p = e.getPlayer();
-
-        if(!p.isOp()){
-            return;
-        }
-
-        Item item = p.getInventory().getItemInHand();
-
-        if(item.getId() == Item.SPAWN_EGG && item.getDamage() ==)
-    }*/
 
     private fun initLanguage() {
         val languages = arrayOf("english", "czech")
@@ -308,37 +280,8 @@ class BedWars : PluginBase(), Listener {
                 }
 
             }
-            /*List<String> names = new ArrayList<>();
-
-            for(File f : worlds) {
-                names.add(f.getName());
-            }
-
-            System.out.println(Arrays.toString(names.stream().toArray(String[]::new)));*/
         }
     }
-
-    //@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
-//    fun onLevelChange(e: EntityLevelChangeEvent) {
-//        if (e.entity is Player) {
-//            val p = e.entity as Player
-//            val level = e.target
-//
-//            val data = GTGadgets.getData(p) ?: return
-//
-//            if (level.id != server.defaultLevel.id) {
-//                data.disable(AddonType.COSTUME)
-//                data.disable(AddonType.GADGET)
-//                data.disable(AddonType.PET)
-//                data.disable(AddonType.RIDING)
-//            } else {
-//                data.enable(AddonType.COSTUME)
-//                data.enable(AddonType.GADGET)
-//                data.enable(AddonType.PET)
-//                data.enable(AddonType.RIDING)
-//            }
-//        }
-//    }
 
     fun joinRandomArena(p: Player) {
         val a = getFreeArena(p)
@@ -353,7 +296,7 @@ class BedWars : PluginBase(), Listener {
 
     private fun getFreeArena(p: Player): Arena? {
         val pc = p.loginChainData.deviceOS == 7
-        val vip = p.hasPermission("gameteam.vip")
+        val vip = p.hasPermission("gameteam.vip") //TODO: permissions
 
         var arena: Arena? = null
         var players = -1
@@ -368,18 +311,13 @@ class BedWars : PluginBase(), Listener {
                 continue
             }
 
-            if (count > players && (vip || count < Arena.MAX_PLAYERS)) {
+            if (count > players && (vip || count < a.maxPlayers)) {
                 arena = a
                 players = count
             }
         }
 
         return arena
-    }
-
-    @EventHandler
-    fun onPortalEnter(e: EntityPortalEnterEvent) {
-        e.setCancelled()
     }
 
     companion object {

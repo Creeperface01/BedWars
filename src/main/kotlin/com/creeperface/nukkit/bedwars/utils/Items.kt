@@ -15,22 +15,22 @@ object Items {
     val IRON = Item.get(Item.IRON_INGOT).setCustomName("§r§7Iron")
     val GOLD = Item.get(Item.GOLD_INGOT).setCustomName("§r§eGold")
 
-    val CHESTPLATE_I = addEnchantment(addEnchantment(ItemChestplateChain(), Enchantment.ID_DURABILITY, 1), Enchantment.ID_PROTECTION_ALL, 1).setCustomName("Chestplate lvl I")
-    val CHESTPLATE_II = addEnchantment(addEnchantment(ItemChestplateChain(), Enchantment.ID_DURABILITY, 1), Enchantment.ID_PROTECTION_ALL, 2).setCustomName("Chestplate lvl I")
-    val CHESTPLATE_III = addEnchantment(addEnchantment(ItemChestplateChain(), Enchantment.ID_DURABILITY, 1), Enchantment.ID_PROTECTION_ALL, 3).setCustomName("Chestplate lvl I")
+    val CHESTPLATE_I = ItemChestplateChain().addEnchantment(Enchantment.ID_PROTECTION_ALL, 1).addEnchantment(Enchantment.ID_DURABILITY, 1).setCustomName("Chestplate lvl I")
+    val CHESTPLATE_II = ItemChestplateChain().addEnchantment(Enchantment.ID_DURABILITY, 1).addEnchantment(Enchantment.ID_PROTECTION_ALL, 2).setCustomName("Chestplate lvl I")
+    val CHESTPLATE_III = ItemChestplateChain().addEnchantment(Enchantment.ID_DURABILITY, 1).addEnchantment(Enchantment.ID_PROTECTION_ALL, 3).setCustomName("Chestplate lvl I")
 
-    val SWORD_I = addEnchantment(addEnchantment(ItemSwordGold(), Enchantment.ID_DURABILITY, 1), Enchantment.ID_DAMAGE_ALL, 1).setCustomName("Sword lvl I")
-    val SWORD_II = addEnchantment(addEnchantment(ItemSwordGold(), Enchantment.ID_DURABILITY, 1), Enchantment.ID_DAMAGE_ALL, 2).setCustomName("Sword lvl I")
-    val SWORD_III = addEnchantment(addEnchantment(addEnchantment(ItemSwordIron(), Enchantment.ID_KNOCKBACK, 1), Enchantment.ID_DAMAGE_ALL, 2).setCustomName("Sword lvl III"), Enchantment.ID_DURABILITY, 2)
+    val SWORD_I = ItemSwordGold().addEnchantment(Enchantment.ID_DURABILITY, 1).addEnchantment(Enchantment.ID_DAMAGE_ALL, 1).setCustomName("Sword lvl I")
+    val SWORD_II = ItemSwordGold().addEnchantment(Enchantment.ID_DURABILITY, 1).addEnchantment(Enchantment.ID_DAMAGE_ALL, 2).setCustomName("Sword lvl I")
+    val SWORD_III = ItemSwordIron().addEnchantment(Enchantment.ID_KNOCKBACK, 1).addEnchantment(Enchantment.ID_DAMAGE_ALL, 2).setCustomName("Sword lvl III").addEnchantment(Enchantment.ID_DURABILITY, 2)
 
-    val PICK_I = addEnchantment(addEnchantment(ItemPickaxeWood(), Enchantment.ID_EFFICIENCY, 1), Enchantment.ID_DURABILITY, 1).setCustomName("Pickaxe lvl I")
-    val PICK_II = addEnchantment(addEnchantment(ItemPickaxeStone(), Enchantment.ID_EFFICIENCY, 1), Enchantment.ID_DURABILITY, 1).setCustomName("Pickaxe lvl II")
-    val PICK_III = addEnchantment(addEnchantment(ItemPickaxeIron(), Enchantment.ID_EFFICIENCY, 3), Enchantment.ID_DURABILITY, 1).setCustomName("Pickaxe lvl III")
+    val PICK_I = ItemPickaxeWood().addEnchantment(Enchantment.ID_EFFICIENCY, 1).addEnchantment(Enchantment.ID_DURABILITY, 1).setCustomName("Pickaxe lvl I")
+    val PICK_II = ItemPickaxeStone().addEnchantment(Enchantment.ID_EFFICIENCY, 1).addEnchantment(Enchantment.ID_DURABILITY, 1).setCustomName("Pickaxe lvl II")
+    val PICK_III = ItemPickaxeIron().addEnchantment(Enchantment.ID_EFFICIENCY, 3).addEnchantment(Enchantment.ID_DURABILITY, 1).setCustomName("Pickaxe lvl III")
 
-    val BOW_I = addEnchantment(ItemBow(), Enchantment.ID_BOW_INFINITY, 1).setCustomName("Bow lvl I")
-    val BOW_II = addEnchantment(addEnchantment(ItemBow(), Enchantment.ID_BOW_INFINITY, 1), Enchantment.ID_BOW_POWER, 1).setCustomName("Bow lvl II")
-    val BOW_III = addEnchantment(addEnchantment(addEnchantment(ItemBow(), Enchantment.ID_BOW_INFINITY, 1), Enchantment.ID_BOW_POWER, 1), Enchantment.ID_BOW_KNOCKBACK, 1).setCustomName("Bow lvl III")
-    val EXP_BOW = addEnchantment(ItemBow(), Enchantment.ID_BOW_INFINITY, 1).setCustomName("Explosive Bow")
+    val BOW_I = ItemBow().addEnchantment(Enchantment.ID_BOW_INFINITY, 1).setCustomName("Bow lvl I")
+    val BOW_II = ItemBow().addEnchantment(Enchantment.ID_BOW_INFINITY, 1).addEnchantment(Enchantment.ID_BOW_POWER, 1).setCustomName("Bow lvl II")
+    val BOW_III = ItemBow().addEnchantment(Enchantment.ID_BOW_INFINITY, 1).addEnchantment(Enchantment.ID_BOW_POWER, 1).addEnchantment(Enchantment.ID_BOW_KNOCKBACK, 1).setCustomName("Bow lvl III")
+    val EXP_BOW = ItemBow().addEnchantment(Enchantment.ID_BOW_INFINITY, 1).setCustomName("Explosive Bow")
     val ARROW: Item = ItemArrow()
 
     val CHEST = Item.get(Item.CHEST)
@@ -49,9 +49,9 @@ object Items {
     val G_APPLE: Item = ItemAppleGold()
 
     //legendary
-    val LEGEND_SWORD = addEnchantment(addEnchantment(addEnchantment(addEnchantment(ItemSwordDiamond(), Enchantment.ID_DAMAGE_ALL, 3), Enchantment.ID_KNOCKBACK, 2), Enchantment.ID_FIRE_ASPECT, 2), Enchantment.ID_DURABILITY, 3).setCustomName(TextFormat.AQUA.toString() + "Legendary Sword")
-    val LEGEND_BOW = addEnchantment(addEnchantment(addEnchantment(addEnchantment(addEnchantment(ItemBow(), Enchantment.ID_BOW_POWER, 4), Enchantment.ID_BOW_KNOCKBACK, 1), Enchantment.ID_BOW_FLAME, 1), Enchantment.ID_DURABILITY, 3), Enchantment.ID_BOW_INFINITY, 1).setCustomName(TextFormat.AQUA.toString() + "Legendary Bow")
-    val LEGEND_PICKAXE = addEnchantment(addEnchantment(ItemPickaxeDiamond(), Enchantment.ID_EFFICIENCY, 5), Enchantment.ID_DURABILITY, 3).setCustomName(TextFormat.AQUA.toString() + "Legendary Pickaxe")
+    val LEGEND_SWORD = ItemSwordDiamond().addEnchantment(Enchantment.ID_DAMAGE_ALL, 3).addEnchantment(Enchantment.ID_KNOCKBACK, 2).addEnchantment(Enchantment.ID_FIRE_ASPECT, 2).addEnchantment(Enchantment.ID_DURABILITY, 3).setCustomName(TextFormat.AQUA.toString() + "Legendary Sword")
+    val LEGEND_BOW = ItemBow().addEnchantment(Enchantment.ID_BOW_POWER, 4).addEnchantment(Enchantment.ID_BOW_KNOCKBACK, 1).addEnchantment(Enchantment.ID_BOW_FLAME, 1).addEnchantment(Enchantment.ID_DURABILITY, 3).addEnchantment(Enchantment.ID_BOW_INFINITY, 1).setCustomName(TextFormat.AQUA.toString() + "Legendary Bow")
+    val LEGEND_PICKAXE = ItemPickaxeDiamond().addEnchantment(Enchantment.ID_EFFICIENCY, 5).addEnchantment(Enchantment.ID_DURABILITY, 3).setCustomName(TextFormat.AQUA.toString() + "Legendary Pickaxe")
 
     val SHEEP = Item.get(Item.SPAWN_EGG, TNTShip.NETWORK_ID).setCustomName("${TextFormat.RED}Sheepy ${TextFormat.GOLD}Sheep ${TextFormat.YELLOW}Sheep")
 
@@ -139,11 +139,11 @@ object Items {
         return item
     }
 
-    fun addEnchantment(item: Item, id: Int, lvl: Int): Item {
+    private fun Item.addEnchantment(id: Int, lvl: Int): Item {
         val e = Enchantment.get(id)
         e.setLevel(lvl, false)
-        item.addEnchantment(e)
+        this.addEnchantment(e)
 
-        return item
+        return this
     }
 }

@@ -56,9 +56,9 @@ class VotingManager(val plugin: Arena) {
         this.players[p.name.toLowerCase()] = index
         p.sendMessage(BedWars.prefix + Language.translate("vote", this.currentTable[index]))
 
-        plugin.scoreabordManager.updateVote(index)
+        plugin.scoreboardManager.updateVote(index)
         if (oldIndex >= 0) {
-            plugin.scoreabordManager.updateVote(oldIndex)
+            plugin.scoreboardManager.updateVote(oldIndex)
         }
     }
 }

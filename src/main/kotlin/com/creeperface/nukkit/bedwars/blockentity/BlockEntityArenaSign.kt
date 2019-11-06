@@ -8,7 +8,10 @@ import com.creeperface.nukkit.bedwars.arena.Arena
 
 class BlockEntityArenaSign(chunk: FullChunk, nbt: CompoundTag) : BlockEntitySign(chunk, nbt) {
 
-    private lateinit var arena: Arena
+    lateinit var arena: Arena
+        private set
+
+    private var lastSignUpdate = 0L
 
     init {
         val arena = BedWars.instance.getArena(nbt.getString("bw-arena"))
@@ -18,21 +21,26 @@ class BlockEntityArenaSign(chunk: FullChunk, nbt: CompoundTag) : BlockEntitySign
         } else {
             this.arena = arena
         }
-    }
 
-    private var lastSignUpdate = 0L
+        scheduleUpdate()
+    }
 
     override fun onUpdate(): Boolean {
         val time = System.currentTimeMillis()
 
-        if (time - lastSignUpdate > 1000) {
+        if (arena.signManager.lastMainSignUpdate > lastSignUpdate) {
+            updateData()
             lastSignUpdate = time
-
         }
         return true
     }
 
     private fun updateData() {
+        this.setText(*arena.signManager.mainSign)
+    }
 
+    companion object {
+
+        const val NETWORK_ID = "bw-sign"
     }
 }

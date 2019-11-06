@@ -1,10 +1,8 @@
-package com.creeperface.nukkit.bedwars.utils
+package com.creeperface.nukkit.bedwars.arena.config
 
 import cn.nukkit.math.Vector3
 import cn.nukkit.utils.ConfigSection
-import com.creeperface.nukkit.bedwars.arena.config.IArenaConfiguration
 import com.creeperface.nukkit.bedwars.obj.Team
-import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
 import kotlin.reflect.KType
@@ -40,7 +38,11 @@ object ConfigurationSerializer {
                 return@forEach
             }
 
-            params[param] = this[param.name]
+            if (this.contains(param.name)) {
+                params[param] = this[param.name]
+            } else if (!param.isOptional) {
+                throw RuntimeException("Parameter ${param.name} is missing in the configuration")
+            }
         }
 
         return constructor.callBy(params)
@@ -67,13 +69,5 @@ object ConfigurationSerializer {
         }
 
         return teams
-    }
-
-    fun offsetMap(map: HashMap<String, Vector3>, x: Double, z: Double) {
-        for ((key, v) in map) {
-            if (key == "sign") continue
-
-            v.setComponents(v.x + x, v.y, v.z + z)
-        }
     }
 }

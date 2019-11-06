@@ -8,37 +8,47 @@ import com.creeperface.nukkit.bedwars.arena.Arena
 
 class BlockEntityTeamSign(chunk: FullChunk, nbt: CompoundTag) : BlockEntitySign(chunk, nbt) {
 
-    val team: Int = nbt.getInt("bw-team")
+    val team = nbt.getInt("bw-team")
     private lateinit var arena: Arena
 
-    init {
-        val arena = BedWars.instance.getArena(nbt.getString("bw-arena"))
+    private var lastSignUpdate = 0L
 
-        if (arena == null) {
+    init {
+        if (!nbt.contains("bw-team")) {
             close()
         } else {
-            this.arena = arena
-        }
-    }
+            val arena = BedWars.instance.getArena(nbt.getString("bw-arena"))
 
-    private var lastSignUpdate = 0L
+            if (arena == null) {
+                close()
+            } else {
+                this.arena = arena
+            }
+        }
+
+        scheduleUpdate()
+    }
 
     override fun onUpdate(): Boolean {
         val time = System.currentTimeMillis()
 
-        if (time - lastSignUpdate > 1000) {
+        if (arena.signManager.lastTeamSignsUpdate > lastSignUpdate) {
+            updateData()
             lastSignUpdate = time
-
         }
         return true
     }
 
     private fun updateData() {
+        val data = arena.signManager.teamSigns
 
+        if (this.team < data.size) {
+            this.setText(*data[this.team])
+        }
     }
 
-    enum class SignType {
-        ARENA,
-        TEAM
+    companion object {
+
+        const val NETWORK_ID = "bw-team-sign"
     }
 }

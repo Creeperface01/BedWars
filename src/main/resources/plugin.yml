@@ -1,15 +1,15 @@
 name: BedWars
 version: "1.0"
 api: ["1.0.0"]
-main: bedWars.BedWars
-author: "GameTeam"
+main: com.creeperface.nukkit.bedwars.BedWars
+author: "CreeperFace"
 description: "bedWars minigame"
 depend: ["Actaeon"]
 softdepend: ["KotlinLib", "DbLib", "PlaceholderAPI"]
 
 commands:
   bw:
-    description: "main bedwars command"
+    description: "main bedwars command" #TODO: commands
   blue:
     description: "join to blue team"
   red:

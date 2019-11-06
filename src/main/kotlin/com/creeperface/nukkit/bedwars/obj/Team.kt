@@ -80,14 +80,14 @@ class Team(var arena: Arena,
         recalculateStatus()
 
         if (arena.game == Arena.ArenaState.GAME) {
-            arena.scoreabordManager.updateTeam(this.id)
+            arena.scoreboardManager.updateTeam(this.id)
         }
     }
 
     fun onBedBreak() {
         this.bed = false
         recalculateStatus()
-        arena.scoreabordManager.updateTeam(this.id)
+        arena.scoreboardManager.updateTeam(this.id)
     }
 
     private fun recalculateStatus() {
