@@ -26,8 +26,9 @@ import com.creeperface.nukkit.bedwars.listener.EventListener
 import com.creeperface.nukkit.bedwars.mysql.Stat
 import com.creeperface.nukkit.bedwars.mysql.StatQuery
 import com.creeperface.nukkit.bedwars.obj.GlobalData
-import com.creeperface.nukkit.bedwars.obj.Language
+import com.creeperface.nukkit.bedwars.placeholder.Placeholders
 import com.creeperface.nukkit.bedwars.utils.FireworkUtils
+import com.creeperface.nukkit.bedwars.utils.Lang
 import org.apache.commons.io.FileUtils
 import java.io.File
 import java.io.FileFilter
@@ -83,13 +84,13 @@ class BedWars : PluginBase(), Listener {
         this.registerArenas()
         this.mainLobby = this.level.spawnLocation
         this.server.pluginManager.registerEvents(this, this)
-        this.level.time = 5000
-        this.level.stopTime()
         //entity.registerEntity("TNTShip", TNTShip.class);
         Item.addCreativeItem(Item.get(Item.SPAWN_EGG, 15))
 
         this.server.pluginManager.registerEvents(commandListener, this)
         this.server.pluginManager.registerEvents(EventListener(this), this)
+
+        Placeholders.init(this)
 //        this.queryThread = QueryThread()
 //        this.queryThread!!.start()
     }
@@ -151,7 +152,7 @@ class BedWars : PluginBase(), Listener {
 
                         val stats = data.stats
 
-                        sender.sendMessage(Language.STATS.translate2(stats[Stat.KILLS].toString(), stats[Stat.DEATHS].toString(), stats[Stat.WINS].toString(), stats[Stat.LOSSES].toString(), stats[Stat.BEDS].toString()))
+                        sender.sendMessage(Lang.STATS.translate(stats[Stat.KILLS].toString(), stats[Stat.DEATHS].toString(), stats[Stat.WINS].toString(), stats[Stat.LOSSES].toString(), stats[Stat.BEDS].toString()))
                     }
                     "vote" -> {
                         if (args.size != 1) {
@@ -203,7 +204,7 @@ class BedWars : PluginBase(), Listener {
             saveResource("$it.yml", false)
         }
 
-        Language.init(Config("$lang.yml", Config.YAML).all as Map<String, String>)
+        Lang.init(Config("$lang.yml", Config.YAML).all as Map<String, String>)
     }
 
 //    fun refreshQuery(async: Boolean): HashMap<String, String> {
@@ -285,7 +286,7 @@ class BedWars : PluginBase(), Listener {
         val a = getFreeArena(p)
 
         if (a == null) {
-            p.sendMessage(Language.NO_ARENA_FOUND.translate2())
+            p.sendMessage(Lang.NO_ARENA_FOUND.translate())
             return
         }
 

@@ -3,7 +3,7 @@ package com.creeperface.nukkit.bedwars.arena.manager
 import cn.nukkit.Player
 import com.creeperface.nukkit.bedwars.BedWars
 import com.creeperface.nukkit.bedwars.arena.Arena
-import com.creeperface.nukkit.bedwars.obj.Language
+import com.creeperface.nukkit.bedwars.utils.Lang
 
 class VotingManager(val plugin: Arena) {
 
@@ -29,7 +29,7 @@ class VotingManager(val plugin: Arena) {
 
     fun onVote(p: Player, vote: String) {
         if (this.plugin.game == Arena.ArenaState.GAME || !this.plugin.inArena(p)) {
-            p.sendMessage(BedWars.prefix + (Language.CAN_NOT_VOTE.translate2()))
+            p.sendMessage(BedWars.prefix + (Lang.CAN_NOT_VOTE.translate()))
             return
         }
 
@@ -40,7 +40,7 @@ class VotingManager(val plugin: Arena) {
         }
 
         if (index < 0 || index >= currentTable.size) {
-            p.sendMessage(BedWars.prefix + (Language.USE_VOTE.translate2()))
+            p.sendMessage(BedWars.prefix + (Lang.USE_VOTE.translate()))
             return
         }
 
@@ -54,7 +54,7 @@ class VotingManager(val plugin: Arena) {
         this.stats[index]++
 
         this.players[p.name.toLowerCase()] = index
-        p.sendMessage(BedWars.prefix + (Language.VOTE.translate2(this.currentTable[index])))
+        p.sendMessage(BedWars.prefix + (Lang.VOTE.translate(this.currentTable[index])))
 
         plugin.scoreboardManager.updateVote(index)
         if (oldIndex >= 0) {

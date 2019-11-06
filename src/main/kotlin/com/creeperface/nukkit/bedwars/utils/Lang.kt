@@ -1,6 +1,6 @@
-package com.creeperface.nukkit.bedwars.obj
+package com.creeperface.nukkit.bedwars.utils
 
-enum class Language {
+enum class Lang {
     USE_VOTE,
     PLAYER_LEAVE,
     BED_BREAK,
@@ -60,7 +60,7 @@ enum class Language {
 
     private lateinit var translation: String
 
-    fun translate2(vararg args: Any): String {
+    fun translate(vararg args: Any): String {
         if (args.isEmpty()) return this.translation
 
         val base = StringBuilder(this.translation)

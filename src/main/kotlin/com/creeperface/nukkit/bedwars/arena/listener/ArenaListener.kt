@@ -33,12 +33,12 @@ import com.creeperface.nukkit.bedwars.entity.TNTShip
 import com.creeperface.nukkit.bedwars.entity.Villager
 import com.creeperface.nukkit.bedwars.mysql.Stat
 import com.creeperface.nukkit.bedwars.obj.BedWarsData
-import com.creeperface.nukkit.bedwars.obj.Language
 import com.creeperface.nukkit.bedwars.shop.ItemWindow
 import com.creeperface.nukkit.bedwars.shop.ShopWindow
 import com.creeperface.nukkit.bedwars.shop.Window
 import com.creeperface.nukkit.bedwars.utils.BedWarsExplosion
 import com.creeperface.nukkit.bedwars.utils.Items
+import com.creeperface.nukkit.bedwars.utils.Lang
 import java.util.*
 
 class ArenaListener(private val arena: Arena) : Listener {
@@ -255,7 +255,7 @@ class ArenaListener(private val arena: Arena) : Listener {
 
             if (!data.canRespawn()) {
                 this.arena.unsetPlayer(p)
-                p.sendMessage(BedWars.prefix + (Language.JOIN_SPECTATOR.translate2()))
+                p.sendMessage(BedWars.prefix + (Lang.JOIN_SPECTATOR.translate()))
                 this.arena.setSpectator(p, true)
 
 //                data.baseData.addExp(200) //played
@@ -307,7 +307,7 @@ class ArenaListener(private val arena: Arena) : Listener {
             val randomItem = Items.luckyBlock
 
             if (TextFormat.clean(randomItem.customName).startsWith("Legendary")) {
-                arena.messageAllPlayers(Language.LEGEND_FOUND, data.team.chatColor.toString() + p.name, randomItem.customName)
+                arena.messageAllPlayers(Lang.LEGEND_FOUND, data.team.chatColor.toString() + p.name, randomItem.customName)
             }
 
             e.drops = arrayOf(randomItem)
@@ -468,19 +468,19 @@ class ArenaListener(private val arena: Arena) : Listener {
                 val item = inv2.item
 
                 if (!Items.containsItem(inv, cost)) {
-                    p.sendMessage(Language.LOW_SHOP.translate2(cost.customName))
+                    p.sendMessage(Lang.LOW_SHOP.translate(cost.customName))
                     return
                 }
 
                 if (!inv.canAddItem(item)) {
-                    p.sendMessage(Language.FULL_INVENTORY.translate2())
+                    p.sendMessage(Lang.FULL_INVENTORY.translate())
                     return
                 }
 
                 Items.removeItem(inv, cost)
                 inv.addItem(item)
 
-                p.sendMessage(BedWars.prefix + (Language.BUY.translate2(if (item.hasCustomName()) item.customName else item.name)))
+                p.sendMessage(BedWars.prefix + (Lang.BUY.translate(if (item.hasCustomName()) item.customName else item.name)))
             } else {
                 val window = inv2.getWindow(slot)
 

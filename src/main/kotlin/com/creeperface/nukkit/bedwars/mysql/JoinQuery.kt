@@ -2,7 +2,6 @@ package com.creeperface.nukkit.bedwars.mysql
 
 import cn.nukkit.Player
 import cn.nukkit.Server
-import cn.nukkit.math.Vector3
 import cn.nukkit.scheduler.AsyncTask
 import com.creeperface.nukkit.bedwars.BedWars
 import java.sql.SQLException
@@ -10,13 +9,9 @@ import java.util.*
 
 class JoinQuery(plugin: BedWars, private val playerInstance: Player) : AsyncTask() {
 
-    internal var registered = false
+    private var registered = false
 
     internal lateinit var data: Map<String, Any>
-
-    init {
-        plugin.server.scheduler.scheduleAsyncTask(plugin, this)
-    }
 
     override fun onRun() {
         MySQLManager.connection.use {
@@ -33,7 +28,7 @@ class JoinQuery(plugin: BedWars, private val playerInstance: Player) : AsyncTask
         }
     }
 
-    fun registerPlayer(player: String): HashMap<String, Any> {
+    private fun registerPlayer(player: String): HashMap<String, Any> {
         val name = player.toLowerCase().trim { it == ' ' }
 
         val data = HashMap<String, Any>()
@@ -65,9 +60,7 @@ class JoinQuery(plugin: BedWars, private val playerInstance: Player) : AsyncTask
             return
         }
 
-        this.playerInstance.teleport(Vector3(128.5, 50.0, 128.5))
-
-        val globalData = BedWars.instance.players[this.playerInstance.id]
-        globalData?.stats?.init(data)
+        val globalData = BedWars.instance.players[this.playerInstance.id] ?: return
+        globalData.stats.init(data)
     }
 }

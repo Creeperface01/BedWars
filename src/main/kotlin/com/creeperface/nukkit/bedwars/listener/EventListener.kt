@@ -2,16 +2,18 @@ package com.creeperface.nukkit.bedwars.listener
 
 import cn.nukkit.event.EventHandler
 import cn.nukkit.event.Listener
+import cn.nukkit.event.player.PlayerAsyncPreLoginEvent
 import cn.nukkit.event.player.PlayerInteractEvent
-import cn.nukkit.event.player.PlayerJoinEvent
+import cn.nukkit.event.player.PlayerPreLoginEvent
 import cn.nukkit.event.player.PlayerQuitEvent
 import com.creeperface.nukkit.bedwars.BedWars
 import com.creeperface.nukkit.bedwars.blockentity.BlockEntityArenaSign
 import com.creeperface.nukkit.bedwars.mysql.JoinQuery
 import com.creeperface.nukkit.bedwars.mysql.StatQuery
 import com.creeperface.nukkit.bedwars.obj.GlobalData
-import com.creeperface.nukkit.bedwars.obj.Language
+import com.creeperface.nukkit.bedwars.utils.Lang
 import com.creeperface.nukkit.bedwars.utils.blockEntity
+import java.util.function.Consumer
 
 class EventListener(private val plugin: BedWars) : Listener {
 
@@ -30,7 +32,7 @@ class EventListener(private val plugin: BedWars) : Listener {
         if (be is BlockEntityArenaSign) {
 
             if (!be.arena.multiPlatform && p.loginChainData.deviceOS == 7 && !p.hasPermission("bedwars.crossplatform")) {
-                p.sendMessage(Language.PE_ONLY.translate2())
+                p.sendMessage(Lang.PE_ONLY.translate())
                 return
             }
 
@@ -39,11 +41,17 @@ class EventListener(private val plugin: BedWars) : Listener {
     }
 
     @EventHandler
-    fun onJoin(e: PlayerJoinEvent) {
+    fun onPreLogin(e: PlayerPreLoginEvent) {
         val p = e.player
         plugin.players[p.id] = GlobalData(p)
+    }
 
-        JoinQuery(plugin, p) //TODO: move into async login
+    @EventHandler
+    fun onAsyncLogin(e: PlayerAsyncPreLoginEvent) {
+        val query = JoinQuery(plugin, e.player)
+        e.scheduledActions.add(Consumer { server -> query.onCompletion(server) })
+
+        query.onRun()
     }
 
     @EventHandler

@@ -9,8 +9,8 @@ import cn.nukkit.nbt.tag.DoubleTag
 import cn.nukkit.nbt.tag.FloatTag
 import cn.nukkit.nbt.tag.ListTag
 import cn.nukkit.scheduler.Task
-import com.creeperface.nukkit.bedwars.obj.Language
 import com.creeperface.nukkit.bedwars.utils.FireworkUtils
+import com.creeperface.nukkit.bedwars.utils.Lang
 import java.util.*
 
 class PopupTask(var plugin: Arena) : Task() {
@@ -40,7 +40,7 @@ class PopupTask(var plugin: Arena) : Task() {
 
     private fun sendPlayerCount() {
         this.plugin.playerData.values.forEach {
-            it.player.sendPopup(Language.PLAYER_COUNT.translate2(plugin.playerData.size.toString(), plugin.maxPlayers))
+            it.player.sendPopup(Lang.PLAYER_COUNT.translate(plugin.playerData.size.toString(), plugin.maxPlayers))
         }
     }
 

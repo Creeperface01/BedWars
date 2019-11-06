@@ -38,13 +38,9 @@ import com.creeperface.nukkit.bedwars.blockentity.BlockEntityTeamSign
 import com.creeperface.nukkit.bedwars.entity.SpecialItem
 import com.creeperface.nukkit.bedwars.mysql.Stat
 import com.creeperface.nukkit.bedwars.obj.BedWarsData
-import com.creeperface.nukkit.bedwars.obj.Language
 import com.creeperface.nukkit.bedwars.obj.Team
 import com.creeperface.nukkit.bedwars.task.WorldCopyTask
-import com.creeperface.nukkit.bedwars.utils.BedWarsExplosion
-import com.creeperface.nukkit.bedwars.utils.Items
-import com.creeperface.nukkit.bedwars.utils.blockEntity
-import com.creeperface.nukkit.bedwars.utils.plus
+import com.creeperface.nukkit.bedwars.utils.*
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -112,14 +108,14 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaC
 
     fun joinToArena(p: Player) {
         if (this.game == ArenaState.GAME) {
-            p.sendMessage(BedWars.prefix + (Language.JOIN_SPECTATOR.translate2()))
+            p.sendMessage(BedWars.prefix + (Lang.JOIN_SPECTATOR.translate()))
             this.setSpectator(p)
             scoreboardManager.addPlayer(p)
             return
         }
 
         if (this.playerData.size >= this.maxPlayers && !p.hasPermission("bedwars.joinfullarena")) {
-            p.sendMessage(BedWars.prefix + (Language.GAME_FULL.translate2()))
+            p.sendMessage(BedWars.prefix + (Lang.GAME_FULL.translate()))
             return
         }
 
@@ -134,7 +130,7 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaC
         playerData[p.name.toLowerCase()] = pl
 
         p.nameTag = p.name
-        p.sendMessage(BedWars.prefix + (Language.JOIN.translate2(this.name)))
+        p.sendMessage(BedWars.prefix + (Lang.JOIN.translate(this.name)))
         p.teleport(this.lobby)
         scoreboardManager.addPlayer(p)
         p.setSpawn(this.lobby)
@@ -173,12 +169,12 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaC
             val pTeam = data.team
 
             if (this.game == ArenaState.GAME) {
-                pTeam.messagePlayers(Language.PLAYER_LEAVE.translate2(pTeam.chatColor + p.name))
+                pTeam.messagePlayers(Lang.PLAYER_LEAVE.translate(pTeam.chatColor + p.name))
                 data.add(Stat.LOSSES)
             }
 
             if (p.isOnline) {
-                p.sendMessage(BedWars.prefix + (Language.LEAVE.translate2()))
+                p.sendMessage(BedWars.prefix + (Lang.LEAVE.translate()))
             }
 
             signManager.updateTeamSigns()
@@ -257,7 +253,7 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaC
 //            }
         }
 
-        this.messageAllPlayers(Language.START_GAME, false)
+        this.messageAllPlayers(Lang.START_GAME, false)
 
         scoreboardManager.initGame()
     }
@@ -289,7 +285,7 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaC
                     pl.add(Stat.WINS)
                 }
 
-                messageAllPlayers(Language.END_GAME, false, "" + team.chatColor, team.name)
+                messageAllPlayers(Lang.END_GAME, false, "" + team.chatColor, team.name)
                 this.ending = true
             }
 
@@ -343,7 +339,7 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaC
         val pTeam = data.team
 
         if (pTeam.id == bedteam.id) {
-            p.sendMessage(BedWars.prefix + (Language.BREAK_OWN_BED.translate2()))
+            p.sendMessage(BedWars.prefix + (Lang.BREAK_OWN_BED.translate()))
             return false
         }
 
@@ -383,7 +379,7 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaC
         val color = "" + team.chatColor
         val name = team.name
 
-        messageAllPlayers(Language.BED_BREAK, false, "" + bedteam.chatColor, color + p.name, color + name, bedteam.chatColor.toString() + bedteam.name)
+        messageAllPlayers(Lang.BED_BREAK, false, "" + bedteam.chatColor, color + p.name, color + name, bedteam.chatColor.toString() + bedteam.name)
         bedteam.onBedBreak()
 
         checkAlive()
@@ -417,14 +413,14 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaC
         val data = playerData[p.name.toLowerCase()]!!
 
         if ((isTeamFull(pTeam) || !isTeamFree(pTeam)) && !p.hasPermission("bedwars.joinfullteam")) {
-            p.sendMessage(BedWars.prefix + (Language.FULL_TEAM.translate2()))
+            p.sendMessage(BedWars.prefix + (Lang.FULL_TEAM.translate()))
             return
         }
 
         val currentTeam = data.team
 
         if (currentTeam.id == pTeam.id) {
-            p.sendMessage(BedWars.prefix + (Language.ALREADY_IN_TEAM.translate2(pTeam.chatColor.toString() + pTeam.name)))
+            p.sendMessage(BedWars.prefix + (Lang.ALREADY_IN_TEAM.translate(pTeam.chatColor.toString() + pTeam.name)))
             return
         }
 
@@ -436,7 +432,7 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaC
 
         signManager.updateTeamSigns()
 
-        p.sendMessage(Language.TEAM_JOIN.translate2(pTeam.chatColor.toString() + pTeam.name))
+        p.sendMessage(Lang.TEAM_JOIN.translate(pTeam.chatColor.toString() + pTeam.name))
     }
 
     fun isTeamFull(team: Team): Boolean {
@@ -497,12 +493,12 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaC
         }
     }
 
-    fun messageAllPlayers(lang: Language, vararg args: String) {
+    fun messageAllPlayers(lang: Lang, vararg args: String) {
         messageAllPlayers(lang, false, *args)
     }
 
-    fun messageAllPlayers(lang: Language, addPrefix: Boolean = false, vararg args: String) {
-        val translation = lang.translate2(*args)
+    fun messageAllPlayers(lang: Lang, addPrefix: Boolean = false, vararg args: String) {
+        val translation = lang.translate(*args)
 
         playerData.values.forEach { it.player.sendMessage(if (addPrefix) BedWars.prefix else "" + translation) }
         spectators.values.forEach { it.sendMessage(if (addPrefix) BedWars.prefix else "" + translation) }
@@ -550,7 +546,7 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaC
             it.mapConfig = this.mapConfig.teams[it.id]
         }
 
-        messageAllPlayers(Language.SELECT_MAP, map)
+        messageAllPlayers(Lang.SELECT_MAP, map)
     }
 
     private fun checkLobby() {
