@@ -89,16 +89,5 @@ enum class Language {
                 valueOf(key.toUpperCase()).translation = value
             }
         }
-
-        @Deprecated("deprecated", ReplaceWith("Language..translate2(*args)"))
-        fun translate(message: String, vararg args: String): String {
-            var base: String = valueOf(message).translation.replace('&', '§')
-
-            for (i in args.indices) {
-                base = base.replace("%$i", args[i])
-            }
-
-            return base
-        }
     }
 }

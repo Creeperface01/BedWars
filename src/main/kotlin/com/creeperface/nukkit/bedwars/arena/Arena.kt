@@ -245,16 +245,16 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaC
             p.health = 20f
             p.setSpawn(p.temporalVector.setComponents(d.x, d.y + 2, d.z))
 
-            if (p.hasPermission("gameteam.vip")) {
-                val bronze = Items.BRONZE.clone()
-                bronze.setCount(16)
-                val iron = Items.IRON.clone()
-                iron.setCount(3)
-
-                p.inventory.addItem(bronze.clone())
-                p.inventory.addItem(iron.clone())
-                p.inventory.addItem(Items.GOLD.clone())
-            }
+//            if (p.hasPermission("gameteam.vip")) { //TODO: bonus
+//                val bronze = Items.BRONZE.clone()
+//                bronze.setCount(16)
+//                val iron = Items.IRON.clone()
+//                iron.setCount(3)
+//
+//                p.inventory.addItem(bronze.clone())
+//                p.inventory.addItem(iron.clone())
+//                p.inventory.addItem(Items.GOLD.clone())
+//            }
         }
 
         this.messageAllPlayers(Language.START_GAME, false)
@@ -267,7 +267,7 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaC
         val p = data.player
 
         for (team in teams) {
-            if (!isTeamFull(team) || isTeamFree(team) || p.hasPermission("gameteam.vip")) { //TODO: permission
+            if (!isTeamFull(team) || isTeamFree(team) || p.hasPermission("bedwars.joinfullteam")) {
                 teamm = team
             }
         }

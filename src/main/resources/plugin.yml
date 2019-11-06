@@ -53,3 +53,6 @@ permissions:
       bedwars.joinfullteam:
         defaul: op
         description: "Allows player to join full teams"
+      bedwars.crossplatform:
+        default: op
+        description: "Allows player to join platform-specific arenas"

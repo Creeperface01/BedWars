@@ -294,7 +294,7 @@ class BedWars : PluginBase(), Listener {
 
     private fun getFreeArena(p: Player): Arena? {
         val pc = p.loginChainData.deviceOS == 7
-        val vip = p.hasPermission("gameteam.vip") //TODO: permissions
+        val vip = p.hasPermission("bedwars.joinfullarena")
 
         var arena: Arena? = null
         var players = -1

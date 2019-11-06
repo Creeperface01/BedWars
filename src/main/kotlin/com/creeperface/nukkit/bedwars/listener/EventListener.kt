@@ -29,7 +29,7 @@ class EventListener(private val plugin: BedWars) : Listener {
         val be = b.blockEntity
         if (be is BlockEntityArenaSign) {
 
-            if (!be.arena.multiPlatform && p.loginChainData.deviceOS == 7 && !p.hasPermission("gameteam.helper")) { //TODO: permissions
+            if (!be.arena.multiPlatform && p.loginChainData.deviceOS == 7 && !p.hasPermission("bedwars.crossplatform")) {
                 p.sendMessage(Language.PE_ONLY.translate2())
                 return
             }
