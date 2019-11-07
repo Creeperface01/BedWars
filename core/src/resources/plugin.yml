@@ -1,0 +1,58 @@
+name: BedWars
+version: "1.0"
+api: ["1.0.0"]
+main: com.creeperface.nukkit.bedwars.BedWars
+author: "CreeperFace"
+description: "bedWars minigame"
+depend: ["Actaeon"]
+softdepend: ["KotlinLib", "DbLib", "PlaceholderAPI"]
+
+commands:
+  bedwars:
+    aliases: ["bedwars"]
+    description: "main bedwars command"
+  stats:
+    description: "shows your or someones game stats"
+  vote:
+    description: "vote command"
+
+permissions:
+  bedwars:
+    default: op
+    description: "Allows player to perform all actions"
+    children:
+      bedwars.command:
+        default: op
+        description: "Allows player to use all commands"
+        children:
+          bedwars.command.vote:
+            default: true
+            description: "Allows player to use vote command"
+          bedwars.command.stats:
+            default: true
+            description: "Allows player to use stats command"
+          bedwars.command.start:
+            default: op
+            description: "Allows player to use start command"
+          bedwars.command.stop:
+            default: op
+            description: "Allows player to use stop command"
+          bedwars.command.quickjoin:
+            default: op
+            description: "Allows player to use quickjoin command"
+          bedwars.command.sign:
+            default: op
+            description: "Allows player to use sign command"
+
+      bedwars.sign:
+        default: op
+        description: "Allows player to use bedwars signs"
+      bedwars.joinfullarena:
+        default: op
+        description: "Allows player to join full arenas"
+      bedwars.joinfullteam:
+        defaul: op
+        description: "Allows player to join full teams"
+      bedwars.crossplatform:
+        default: op
+        description: "Allows player to join platform-specific arenas"
