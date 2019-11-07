@@ -22,4 +22,6 @@ interface EconomyProvider {
     fun transferMoney(from: String, to: String, amount: Int, currency: Currency = defaultCurrency): CompletableFuture<Boolean>
 
     interface Currency
+
+    object NullCurrency : Currency
 }
