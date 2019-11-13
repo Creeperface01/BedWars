@@ -28,12 +28,12 @@ import cn.nukkit.utils.MainLogger
 import cn.nukkit.utils.TextFormat
 import com.creeperface.nukkit.bedwars.BedWars
 import com.creeperface.nukkit.bedwars.api.arena.Arena.ArenaState
+import com.creeperface.nukkit.bedwars.api.data.Stat
 import com.creeperface.nukkit.bedwars.api.utils.Lang
 import com.creeperface.nukkit.bedwars.arena.Arena
 import com.creeperface.nukkit.bedwars.blockentity.BlockEntityMine
 import com.creeperface.nukkit.bedwars.entity.TNTShip
 import com.creeperface.nukkit.bedwars.entity.Villager
-import com.creeperface.nukkit.bedwars.mysql.Stat
 import com.creeperface.nukkit.bedwars.obj.BedWarsData
 import com.creeperface.nukkit.bedwars.shop.ItemWindow
 import com.creeperface.nukkit.bedwars.shop.ShopWindow

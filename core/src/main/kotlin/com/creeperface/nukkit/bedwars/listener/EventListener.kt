@@ -9,11 +9,10 @@ import cn.nukkit.event.player.PlayerQuitEvent
 import com.creeperface.nukkit.bedwars.BedWars
 import com.creeperface.nukkit.bedwars.api.utils.Lang
 import com.creeperface.nukkit.bedwars.blockentity.BlockEntityArenaSign
-import com.creeperface.nukkit.bedwars.mysql.JoinQuery
 import com.creeperface.nukkit.bedwars.mysql.StatQuery
 import com.creeperface.nukkit.bedwars.obj.GlobalData
 import com.creeperface.nukkit.bedwars.utils.blockEntity
-import java.util.function.Consumer
+import kotlinx.coroutines.runBlocking
 
 class EventListener(private val plugin: BedWars) : Listener {
 
@@ -48,10 +47,13 @@ class EventListener(private val plugin: BedWars) : Listener {
 
     @EventHandler
     fun onAsyncLogin(e: PlayerAsyncPreLoginEvent) {
-        val query = JoinQuery(plugin, e.player)
-        e.scheduledActions.add(Consumer { server -> query.onCompletion(server) })
+        plugin.dataProvider?.let {
+            runBlocking {
+                val stats = it.getData(e.name)
 
-        query.onRun()
+
+            }
+        }
     }
 
     @EventHandler

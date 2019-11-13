@@ -15,18 +15,21 @@ import cn.nukkit.utils.MainLogger
 import cn.nukkit.utils.TextFormat
 import com.creeperface.nukkit.bedwars.api.BedWarsAPI
 import com.creeperface.nukkit.bedwars.api.arena.Arena.ArenaState
+import com.creeperface.nukkit.bedwars.api.arena.configuration.ArenaConfiguration
+import com.creeperface.nukkit.bedwars.api.arena.configuration.MapConfiguration
+import com.creeperface.nukkit.bedwars.api.data.Stat
+import com.creeperface.nukkit.bedwars.api.data.provider.DataProvider
+import com.creeperface.nukkit.bedwars.api.economy.EconomyProvider
 import com.creeperface.nukkit.bedwars.api.utils.Lang
 import com.creeperface.nukkit.bedwars.arena.Arena
-import com.creeperface.nukkit.bedwars.arena.config.ArenaConfiguration
 import com.creeperface.nukkit.bedwars.arena.config.ConfigurationSerializer
-import com.creeperface.nukkit.bedwars.arena.config.MapConfiguration
 import com.creeperface.nukkit.bedwars.blockentity.BlockEntityMine
+import com.creeperface.nukkit.bedwars.dataprovider.MySQLDataProvider
 import com.creeperface.nukkit.bedwars.entity.SpecialItem
 import com.creeperface.nukkit.bedwars.entity.Villager
 import com.creeperface.nukkit.bedwars.entity.WinParticle
 import com.creeperface.nukkit.bedwars.listener.CommandEventListener
 import com.creeperface.nukkit.bedwars.listener.EventListener
-import com.creeperface.nukkit.bedwars.mysql.Stat
 import com.creeperface.nukkit.bedwars.mysql.StatQuery
 import com.creeperface.nukkit.bedwars.obj.GlobalData
 import com.creeperface.nukkit.bedwars.placeholder.Placeholders
@@ -36,7 +39,6 @@ import java.io.File
 import java.io.FileFilter
 import java.io.IOException
 import java.util.*
-import java.util.regex.Pattern
 import kotlin.reflect.jvm.javaField
 
 class BedWars : PluginBase(), Listener, BedWarsAPI {
@@ -60,6 +62,12 @@ class BedWars : PluginBase(), Listener, BedWarsAPI {
 
     var shuttingDown = false
 
+    private val economyProviders = mutableMapOf<String, EconomyProvider>()
+    private val dataProviders = mutableMapOf<String, DataProvider>()
+
+    override var economyProvider: EconomyProvider? = null
+    override var dataProvider: DataProvider? = null
+
     init {
         initInstance()
     }
@@ -75,6 +83,9 @@ class BedWars : PluginBase(), Listener, BedWarsAPI {
         BlockEntity.registerBlockEntity("BedWarsMine", BlockEntityMine::class.java)
 
         FireworkUtils.init()
+
+        initDataProviders()
+        initEconomyProviders()
     }
 
     override fun onEnable() {
@@ -280,9 +291,7 @@ class BedWars : PluginBase(), Listener, BedWarsAPI {
                 return@FileFilter false
             }
 
-            val matcher = bedwarsPattern.matcher(pathname.name)
-
-            matcher.matches()
+            pathname.name.matches(bedwarsPattern)
         })
 
         if (worlds != null && worlds.isNotEmpty()) {
@@ -334,14 +343,37 @@ class BedWars : PluginBase(), Listener, BedWarsAPI {
         return arena
     }
 
+    private fun loadEconomy() {
+
+    }
+
+    private fun loadData() {
+
+    }
+
+    private fun initDataProviders() {
+        registerDataProvider("mysql", MySQLDataProvider())
+    }
+
+    private fun initEconomyProviders() {
+
+    }
+
+    override fun registerDataProvider(name: String, provider: DataProvider) {
+        this.dataProviders[name] = provider
+    }
+
+    override fun registerEconomyProvider(name: String, provider: EconomyProvider) {
+        this.economyProviders[name] = provider
+    }
+
     companion object {
 
         lateinit var instance: BedWars
             private set
 
-        val prefix: String
-            get() = "§l§7[§cBed§fWars§7] §r§f "
+        const val prefix = "§l§7[§cBed§fWars§7]§r§f "
 
-        private val bedwarsPattern = Pattern.compile("^.*_bw-[0-9]+$")
+        private val bedwarsPattern = Regex("""^.*_bw-[0-9]+$""")
     }
 }

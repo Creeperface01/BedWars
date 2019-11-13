@@ -1,9 +1,12 @@
 package com.creeperface.nukkit.bedwars.api.arena
 
 import cn.nukkit.Player
+import cn.nukkit.level.Level
+import com.creeperface.nukkit.bedwars.api.arena.configuration.IArenaConfiguration
+import com.creeperface.nukkit.bedwars.api.arena.configuration.MapConfiguration
 import com.creeperface.nukkit.bedwars.api.utils.Lang
 
-interface Arena {
+interface Arena : IArenaConfiguration {
 
     val players: Map<String, PlayerData>
     
@@ -12,6 +15,12 @@ interface Arena {
     var gameState: ArenaState
 
     val aliveTeams: List<Team>
+
+    val mapConfig: MapConfiguration
+    val level: Level
+
+    val starting: Boolean
+    val ending: Boolean
 
     fun joinToArena(p: Player)
 

@@ -2,7 +2,8 @@ package com.creeperface.nukkit.bedwars.mysql
 
 import cn.nukkit.scheduler.AsyncTask
 import com.creeperface.nukkit.bedwars.BedWars
-import com.creeperface.nukkit.bedwars.obj.Stats
+import com.creeperface.nukkit.bedwars.api.data.Stat
+import com.creeperface.nukkit.bedwars.api.data.Stats
 
 class StatQuery(plugin: BedWars, internal var stats: Stats) : AsyncTask() {
 

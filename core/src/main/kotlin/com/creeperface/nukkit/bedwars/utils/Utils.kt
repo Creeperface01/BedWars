@@ -7,6 +7,7 @@ import cn.nukkit.command.CommandSender
 import cn.nukkit.level.format.FullChunk
 import cn.nukkit.utils.DyeColor
 import cn.nukkit.utils.TextFormat
+import java.sql.ResultSet
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
 
@@ -49,4 +50,25 @@ fun requirePlayer(sender: CommandSender, action: (() -> Unit)? = null) {
     if (sender !is Player) {
         action?.invoke()
     }
+}
+
+fun ResultSet.toMap(): Map<String, Any> {
+    val map = mutableMapOf<String, Any>()
+    val metadata = this.metaData
+
+    for (i in 1..metadata.columnCount) {
+        map[metadata.getColumnName(i)] = this.getObject(i)
+    }
+
+    return map
+}
+
+fun String?.ucFirst(): String {
+    if (this.isNullOrEmpty()) {
+        return String()
+    }
+
+    val chars = this.toCharArray()
+    chars[0] = chars[0].toUpperCase()
+    return String(chars)
 }

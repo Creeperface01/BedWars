@@ -29,10 +29,11 @@ import com.creeperface.nukkit.bedwars.BedWars
 import com.creeperface.nukkit.bedwars.api.arena.Arena
 import com.creeperface.nukkit.bedwars.api.arena.Arena.ArenaState
 import com.creeperface.nukkit.bedwars.api.arena.PlayerData
+import com.creeperface.nukkit.bedwars.api.arena.configuration.ArenaConfiguration
+import com.creeperface.nukkit.bedwars.api.arena.configuration.IArenaConfiguration
+import com.creeperface.nukkit.bedwars.api.arena.configuration.MapConfiguration
+import com.creeperface.nukkit.bedwars.api.data.Stat
 import com.creeperface.nukkit.bedwars.api.utils.Lang
-import com.creeperface.nukkit.bedwars.arena.config.ArenaConfiguration
-import com.creeperface.nukkit.bedwars.arena.config.IArenaConfiguration
-import com.creeperface.nukkit.bedwars.arena.config.MapConfiguration
 import com.creeperface.nukkit.bedwars.arena.manager.DeathManager
 import com.creeperface.nukkit.bedwars.arena.manager.ScoreboardManager
 import com.creeperface.nukkit.bedwars.arena.manager.SignManager
@@ -40,7 +41,6 @@ import com.creeperface.nukkit.bedwars.arena.manager.VotingManager
 import com.creeperface.nukkit.bedwars.blockentity.BlockEntityMine
 import com.creeperface.nukkit.bedwars.blockentity.BlockEntityTeamSign
 import com.creeperface.nukkit.bedwars.entity.SpecialItem
-import com.creeperface.nukkit.bedwars.mysql.Stat
 import com.creeperface.nukkit.bedwars.obj.BedWarsData
 import com.creeperface.nukkit.bedwars.obj.Team
 import com.creeperface.nukkit.bedwars.task.WorldCopyTask
@@ -73,16 +73,16 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaC
     internal val deathManager: DeathManager
 
     var map = "Voting"
-    var winnerTeam: Int = 0
+    var winnerTeam = 0
     internal var canJoin = true
     var isLevelLoaded = false
 
     override var gameState = ArenaState.LOBBY
-    var starting = false
-    var ending = false
+    override var starting = false
+    override var ending = false
 
-    lateinit var level: Level
-    lateinit var mapConfig: MapConfiguration
+    override lateinit var level: Level
+    override lateinit var mapConfig: MapConfiguration
 
     override val aliveTeams: List<Team>
         get() {

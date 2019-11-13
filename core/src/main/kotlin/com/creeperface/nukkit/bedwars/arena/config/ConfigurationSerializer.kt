@@ -2,6 +2,7 @@ package com.creeperface.nukkit.bedwars.arena.config
 
 import cn.nukkit.math.Vector3
 import cn.nukkit.utils.ConfigSection
+import com.creeperface.nukkit.bedwars.api.arena.configuration.IArenaConfiguration
 import com.creeperface.nukkit.bedwars.obj.Team
 import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
@@ -49,12 +50,14 @@ object ConfigurationSerializer {
     }
 
     private fun ConfigSection.readVector3(key: String): Vector3 {
-        val section1 = this.getSection(key)
+        return this.getSection(key).readVector3()
+    }
 
+    private fun ConfigSection.readVector3(): Vector3 {
         val vector = Vector3()
-        vector.x = section1.getDouble("x")
-        vector.y = section1.getDouble("y")
-        vector.z = section1.getDouble("z")
+        vector.x = this.getDouble("x")
+        vector.y = this.getDouble("y")
+        vector.z = this.getDouble("z")
 
         return vector
     }

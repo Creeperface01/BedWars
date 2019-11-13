@@ -1,4 +1,4 @@
-package com.creeperface.nukkit.bedwars.arena.config
+package com.creeperface.nukkit.bedwars.api.arena.configuration
 
 import cn.nukkit.math.Vector3
 import cn.nukkit.utils.DyeColor

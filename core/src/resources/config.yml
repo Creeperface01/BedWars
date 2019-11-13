@@ -1,2 +1,56 @@
 #language
-language: "english"
+general:
+  language: "english"
+  prefix: "§l§7[§cBed§fWars§7]§r§f"
+  #Try to automatically join to an arena after player login
+  auto_join: false
+
+chat:
+  all_prefix: '!'
+  team_format: '§7[%team_color%TEAM§7] §f%player%§7:%team_color% %message%'
+  all_format: '§7[%team_color%ALL§7] §f%player%§7:%team_color% %message%'
+  spectator_format: '§7[§9SPECTATOR§7] §f%player%§7: %message%'
+
+data:
+  save_player_data: false
+  data_provider: mysql
+  use_db_lib: true
+  #in case you don't use dblib
+  mysql:
+    host: 127.0.0.1
+    port: 3306
+    user: root
+    password: mysql
+    database: default
+  mongodb:
+    host: 127.0.0.1
+    port: 27017
+    user: root
+    password: mongodb
+    database: default
+    options: []
+
+economy:
+  enable_economy: false
+  economy_provider: EconomyAPI
+  rewards:
+    #    For economy systems with multiple currencies you can specify the currency like that, else the default (or random) one will be chosen
+    #    kill:
+    #      coin: 10 #currency 'coin'
+    #      token: 3 #currency 'token'
+    kill: 0
+    win: 0
+    bed_destroy: 0
+    game_played: 0
+
+game:
+  #You can choose between form window shop (form) or chest inventory shop (inventory)
+  shop: inventory
+  #How many maps should be added into a voting
+  vote_table_size: 4
+  allow_spectators: true
+
+synapse:
+  enable: false
+  #If enabled, player will be transferred to the lobby server instead of kicked out of the game
+  transfer: true

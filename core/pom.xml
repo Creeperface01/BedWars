@@ -50,11 +50,18 @@
             <groupId>gt.creeperface.nukkit.scoreboardapi</groupId>
             <artifactId>ScoreboardAPI</artifactId>
             <version>1.0</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.creeperface.nukkitx.bedwars</groupId>
             <artifactId>api</artifactId>
             <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>me.onebone</groupId>
+            <artifactId>economyapi</artifactId>
+            <version>2.0.1</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>
