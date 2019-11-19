@@ -12,10 +12,12 @@ chat:
   spectator_format: '§7[§9SPECTATOR§7] §f%player%§7: %message%'
 
 data:
-  save_player_data: false
+  enable: false
   data_provider: mysql
   use_db_lib: true
-  #in case you don't use dblib
+  #Attempt to load arenas from the specified data source
+  load_arenas: false
+  #in case you don't use dblib:
   mysql:
     host: 127.0.0.1
     port: 3306
@@ -51,6 +53,5 @@ game:
   allow_spectators: true
 
 synapse:
-  enable: false
   #If enabled, player will be transferred to the lobby server instead of kicked out of the game
   transfer: true
