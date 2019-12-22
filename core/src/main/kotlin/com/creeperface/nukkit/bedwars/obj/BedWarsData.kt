@@ -4,6 +4,7 @@ import cn.nukkit.Player
 import com.creeperface.nukkit.bedwars.api.arena.PlayerData
 import com.creeperface.nukkit.bedwars.api.data.Stat
 import com.creeperface.nukkit.bedwars.arena.Arena
+import com.creeperface.nukkit.bedwars.arena.Team
 
 class BedWarsData(override val arena: Arena,
                   override val player: Player,

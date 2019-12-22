@@ -132,18 +132,4 @@ object Items {
             }
         }
     }
-
-    fun setCount(i: Item, count: Int): Item {
-        val item = i.clone()
-        item.setCount(count)
-        return item
-    }
-
-    private fun Item.addEnchantment(id: Int, lvl: Int): Item {
-        val e = Enchantment.get(id)
-        e.setLevel(lvl, false)
-        this.addEnchantment(e)
-
-        return this
-    }
 }

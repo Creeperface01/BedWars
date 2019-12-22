@@ -1,11 +1,11 @@
 package com.creeperface.nukkit.bedwars.economy
 
-import com.creeperface.nukkit.bedwars.BedWars
 import com.creeperface.nukkit.bedwars.api.economy.EconomyProvider
+import com.creeperface.nukkit.bedwars.utils.Configuration
 import me.onebone.economyapi.EconomyAPI
 import java.util.concurrent.CompletableFuture
 
-class EconomyAPIProvider(plugin: BedWars) : EconomyProvider {
+internal class EconomyAPIProvider(private val configuration: Configuration) : EconomyProvider {
 
     override val defaultCurrency = EconomyProvider.NullCurrency
 

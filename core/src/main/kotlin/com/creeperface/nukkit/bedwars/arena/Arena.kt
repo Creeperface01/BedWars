@@ -42,7 +42,6 @@ import com.creeperface.nukkit.bedwars.blockentity.BlockEntityMine
 import com.creeperface.nukkit.bedwars.blockentity.BlockEntityTeamSign
 import com.creeperface.nukkit.bedwars.entity.SpecialItem
 import com.creeperface.nukkit.bedwars.obj.BedWarsData
-import com.creeperface.nukkit.bedwars.obj.Team
 import com.creeperface.nukkit.bedwars.task.WorldCopyTask
 import com.creeperface.nukkit.bedwars.utils.BedWarsExplosion
 import com.creeperface.nukkit.bedwars.utils.Items

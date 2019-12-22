@@ -5,7 +5,7 @@ import cn.nukkit.item.ItemFirework
 import cn.nukkit.item.ItemFirework.FireworkExplosion
 import cn.nukkit.item.ItemFirework.FireworkExplosion.ExplosionType
 import cn.nukkit.utils.DyeColor
-import com.creeperface.nukkit.bedwars.obj.Team
+import com.creeperface.nukkit.bedwars.arena.Team
 import java.util.*
 
 object FireworkUtils {

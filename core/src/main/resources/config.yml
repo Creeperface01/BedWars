@@ -15,6 +15,8 @@ data:
   enable: false
   data_provider: mysql
   use_db_lib: true
+  #unique player identifier. Can be whether 'name' or 'uuid'. UUID is recommended unless you're running server in offline mode
+  player_identifier: uuid
   #Attempt to load arenas from the specified data source
   load_arenas: false
   #in case you don't use dblib:
@@ -30,20 +32,25 @@ data:
     user: root
     password: mongodb
     database: default
-    options: []
+    #additional mongo options
+#    options:
+#      opt1: val1
+#      op2: val2
 
 economy:
   enable_economy: false
   economy_provider: EconomyAPI
   rewards:
-    #    For economy systems with multiple currencies you can specify the currency like that, else the default (or random) one will be chosen
-    #    kill:
+    #    For economy systems with multiple currencies you can specif y the currency like that, else the default (or random) one will be chosen
+    #    kills:
     #      coin: 10 #currency 'coin'
     #      token: 3 #currency 'token'
-    kill: 0
-    win: 0
-    bed_destroy: 0
-    game_played: 0
+    kills: 0
+    wins: 0
+    #on bed destroyed
+    beds: 0
+    #per game played
+    games: 0
 
 game:
   #You can choose between form window shop (form) or chest inventory shop (inventory)

@@ -4,9 +4,12 @@ import cn.nukkit.Player
 import cn.nukkit.block.Block
 import cn.nukkit.blockentity.BlockEntity
 import cn.nukkit.command.CommandSender
+import cn.nukkit.item.Item
+import cn.nukkit.item.enchantment.Enchantment
 import cn.nukkit.level.format.FullChunk
 import cn.nukkit.utils.DyeColor
 import cn.nukkit.utils.TextFormat
+import com.creeperface.nukkit.bedwars.BedWars
 import java.sql.ResultSet
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
@@ -72,3 +75,21 @@ fun String?.ucFirst(): String {
     chars[0] = chars[0].toUpperCase()
     return String(chars)
 }
+
+fun Item.setCountR(count: Int): Item {
+    val item = this.clone()
+    item.setCount(count)
+    return item
+}
+
+fun Item.addEnchantment(id: Int, lvl: Int): Item {
+    val e = Enchantment.get(id)
+    e.setLevel(lvl, false)
+    this.addEnchantment(e)
+
+    return this
+}
+
+val Player.identifier: String
+    get() = BedWars.instance.configuration.playerIdentifier.get(this).toString()
+//fun ItemColorArmor.setColor(rgb: Int) = this.setColor();

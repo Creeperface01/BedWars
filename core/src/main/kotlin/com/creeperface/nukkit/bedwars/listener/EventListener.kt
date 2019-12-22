@@ -4,15 +4,19 @@ import cn.nukkit.event.EventHandler
 import cn.nukkit.event.Listener
 import cn.nukkit.event.player.PlayerAsyncPreLoginEvent
 import cn.nukkit.event.player.PlayerInteractEvent
-import cn.nukkit.event.player.PlayerPreLoginEvent
 import cn.nukkit.event.player.PlayerQuitEvent
 import com.creeperface.nukkit.bedwars.BedWars
+import com.creeperface.nukkit.bedwars.api.data.Stats
 import com.creeperface.nukkit.bedwars.api.utils.Lang
 import com.creeperface.nukkit.bedwars.blockentity.BlockEntityArenaSign
-import com.creeperface.nukkit.bedwars.mysql.StatQuery
 import com.creeperface.nukkit.bedwars.obj.GlobalData
+import com.creeperface.nukkit.bedwars.utils.Configuration
 import com.creeperface.nukkit.bedwars.utils.blockEntity
+import com.creeperface.nukkit.bedwars.utils.identifier
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
+import java.util.function.Consumer
 
 class EventListener(private val plugin: BedWars) : Listener {
 
@@ -40,26 +44,41 @@ class EventListener(private val plugin: BedWars) : Listener {
     }
 
     @EventHandler
-    fun onPreLogin(e: PlayerPreLoginEvent) {
-        val p = e.player
-        plugin.players[p.id] = GlobalData(p)
-    }
-
-    @EventHandler
     fun onAsyncLogin(e: PlayerAsyncPreLoginEvent) {
         plugin.dataProvider?.let {
             runBlocking {
-                val stats = it.getData(e.name)
+                val identifier = when (plugin.configuration.playerIdentifier) {
+                    Configuration.PlayerIdentifier.UUID -> e.uuid.toString()
+                    Configuration.PlayerIdentifier.NAME -> e.name
+                }
 
+                val stats = it.getData(identifier)
 
+                if (stats == null) {
+                    it.register(e.name, identifier)
+                }
+
+                e.scheduledActions.add(Consumer {
+                    val po = it.getPlayer(e.uuid)
+
+                    po.ifPresent { p ->
+                        plugin.players[p.id] = GlobalData(p, stats ?: Stats.initial())
+                    }
+                })
             }
+
+            return
         }
+
+
     }
 
     @EventHandler
     fun onQuit(e: PlayerQuitEvent) {
         val data = plugin.players.remove(e.player.id) ?: return
 
-        StatQuery(plugin, data.stats)
+        GlobalScope.async {
+            plugin.dataProvider?.saveData(e.player.identifier, data.stats)
+        }
     }
 }

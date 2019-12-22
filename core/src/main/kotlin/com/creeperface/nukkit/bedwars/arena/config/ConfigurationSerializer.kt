@@ -3,7 +3,7 @@ package com.creeperface.nukkit.bedwars.arena.config
 import cn.nukkit.math.Vector3
 import cn.nukkit.utils.ConfigSection
 import com.creeperface.nukkit.bedwars.api.arena.configuration.IArenaConfiguration
-import com.creeperface.nukkit.bedwars.obj.Team
+import com.creeperface.nukkit.bedwars.arena.Team
 import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
 import kotlin.reflect.KType

@@ -4,16 +4,30 @@ import com.creeperface.nukkit.bedwars.api.data.Stat
 import com.creeperface.nukkit.bedwars.api.data.Stats
 import com.creeperface.nukkit.bedwars.api.data.provider.DataProvider
 import com.creeperface.nukkit.bedwars.api.utils.set
+import com.creeperface.nukkit.bedwars.utils.Configuration
 import com.creeperface.nukkit.bedwars.utils.toMap
 import ru.nukkit.dblib.DbLib
 import java.sql.Connection
+import java.sql.ResultSet
 
-class MySQLDataProvider : DataProvider {
+internal class MySQLDataProvider(private val configuration: Configuration) : DataProvider {
+
+    private lateinit var connectionFactory: () -> Connection
 
     private val connection: Connection
-        get() = DbLib.getDefaultConnection()
+        get() = connectionFactory()
 
     override fun init() {
+        connectionFactory = if (configuration.useDbLib) {
+            { DbLib.getDefaultConnection() }
+        } else {
+            val mysql = configuration.mysql
+
+            {
+                DbLib.getMySqlConnection(mysql.host, mysql.port, mysql.database, mysql.user, mysql.password)
+            }
+        }
+
         connection.use { con ->
             con.prepareStatement("CREATE TABLE IF NOT EXISTS bedwars (" +
                     "id INT PRIMARY KEY auto_increment," +
@@ -53,38 +67,42 @@ class MySQLDataProvider : DataProvider {
         }
     }
 
-    override suspend fun getData(identifier: String): Stats {
+    override suspend fun getData(identifier: String): Stats? {
         connection.use { con ->
             con.prepareStatement("SELECT (kills, deaths, wins, losses, beds, placed, broken, games) FROM bedwars WHERE identifier = ?").use { statement ->
                 statement.setString(1, identifier)
 
                 val result = statement.executeQuery()
-                val stats = Array(Stat.values().size) { 0 }
 
-                result.toMap().forEach { (key, value) ->
-                    stats[Stat.valueOf(key)] = value as Int
-                }
-
-                return Stats(stats)
+                return parseResult(result)
             }
         }
     }
 
-    override suspend fun getDataByName(name: String): Stats {
+    override suspend fun getDataByName(name: String): Stats? {
         connection.use { con ->
             con.prepareStatement("SELECT (kills, deaths, wins, losses, beds, placed, broken, games) FROM bedwars WHERE name = ?").use { statement ->
                 statement.setString(1, name)
 
                 val result = statement.executeQuery()
-                val stats = Array(Stat.values().size) { 0 }
 
-                result.toMap().forEach { (key, value) ->
-                    stats[Stat.valueOf(key)] = value as Int
-                }
-
-                return Stats(stats)
+                return parseResult(result)
             }
         }
+    }
+
+    private fun parseResult(result: ResultSet): Stats? {
+        if (!result.next()) {
+            return null
+        }
+
+        val stats = Array(Stat.values().size) { 0 }
+
+        result.toMap().forEach { (key, value) ->
+            stats[Stat.valueOf(key)] = value as Int
+        }
+
+        return Stats(stats)
     }
 
     override suspend fun saveData(identifier: String, data: Stats) {

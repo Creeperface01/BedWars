@@ -7,9 +7,7 @@ import com.creeperface.nukkit.bedwars.arena.Arena
 /**
  * Created by CreeperFace on 3.7.2017.
  */
-class GlobalData(val player: Player) {
+class GlobalData(val player: Player, val stats: Stats) {
 
     var arena: Arena? = null
-
-    val stats = Stats(player)
 }

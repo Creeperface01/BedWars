@@ -1,0 +1,24 @@
+#shop configuration file
+#shop sections
+blocks:
+
+armor:
+  name: "Armor"
+  icon:
+    item_id: 24
+    item_damage: 0
+
+pickaxe:
+
+sword:
+
+bow:
+
+food:
+
+chest:
+
+potion:
+
+special:
+

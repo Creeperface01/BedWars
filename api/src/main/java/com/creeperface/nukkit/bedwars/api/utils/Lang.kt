@@ -1,5 +1,7 @@
 package com.creeperface.nukkit.bedwars.api.utils
 
+import cn.nukkit.utils.Config
+
 enum class Lang {
     USE_VOTE,
     PLAYER_LEAVE,
@@ -84,9 +86,9 @@ enum class Lang {
 
     companion object {
 
-        fun init(data: Map<String, String>) {
-            for ((key, value) in data) {
-                valueOf(key.toUpperCase()).translation = value
+        fun init(data: Config) {
+            for ((key, value) in data.all) {
+                valueOf(key.toUpperCase()).translation = value.toString()
             }
         }
     }

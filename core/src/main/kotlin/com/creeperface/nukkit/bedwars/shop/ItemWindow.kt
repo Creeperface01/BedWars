@@ -11,7 +11,8 @@ class ItemWindow @JvmOverloads constructor(main: Boolean = false) : Window() {
 
     private var previousWindow: Window? = null
 
-    private val windows = LinkedHashMap<Int, Window>()
+    val windows: MutableMap<Int, Window> = LinkedHashMap()
+        get() = field.toMutableMap()
 
     @JvmOverloads
     fun setWindows(list: Map<Item, Window>, previousWindow: Window? = null) {

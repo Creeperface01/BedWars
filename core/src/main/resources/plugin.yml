@@ -4,17 +4,8 @@ api: ["1.0.0"]
 main: com.creeperface.nukkit.bedwars.BedWars
 author: "CreeperFace"
 description: "bedWars minigame"
-depend: ["Actaeon"]
-softdepend: ["KotlinLib", "DbLib", "PlaceholderAPI"]
-
-commands:
-  bedwars:
-    aliases: ["bedwars"]
-    description: "main bedwars command"
-  stats:
-    description: "shows your or someones game stats"
-  vote:
-    description: "vote command"
+depend: ["Actaeon", "DbLib", "PlaceholderAPI", "KotlinLib"]
+softdepend: ["BedWarsHelper"]
 
 permissions:
   bedwars:
@@ -30,7 +21,10 @@ permissions:
             description: "Allows player to use vote command"
           bedwars.command.stats:
             default: true
-            description: "Allows player to use stats command"
+            description: "Allows player to see their game stats"
+          bedwars.command.stats.others:
+            default: false
+            description: "Allows player to see others game stats"
           bedwars.command.start:
             default: op
             description: "Allows player to use start command"
