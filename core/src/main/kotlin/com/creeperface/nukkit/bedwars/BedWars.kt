@@ -31,7 +31,9 @@ import com.creeperface.nukkit.bedwars.blockentity.BlockEntityMine
 import com.creeperface.nukkit.bedwars.command.ReloadCommand
 import com.creeperface.nukkit.bedwars.dataprovider.MongoDBDataProvider
 import com.creeperface.nukkit.bedwars.dataprovider.MySQLDataProvider
+import com.creeperface.nukkit.bedwars.dataprovider.NoneDataProvider
 import com.creeperface.nukkit.bedwars.economy.EconomyAPIProvider
+import com.creeperface.nukkit.bedwars.economy.NoneEconomyProvider
 import com.creeperface.nukkit.bedwars.entity.SpecialItem
 import com.creeperface.nukkit.bedwars.entity.TNTShip
 import com.creeperface.nukkit.bedwars.entity.Villager
@@ -111,6 +113,9 @@ class BedWars : PluginBase(), BedWarsAPI {
         logger.info("Loading configuration")
         loadConfiguration()
         initLanguage()
+
+        loadData()
+        loadEconomy()
 
         this.registerCommands()
         Placeholders.init(this)
@@ -308,20 +313,24 @@ class BedWars : PluginBase(), BedWarsAPI {
     }
 
     private fun loadEconomy() {
-
+        this.economyProvider = this.economyProviders[this.configuration.economyProvider]
+                ?: throw RuntimeException("Undefined economy provider '${this.configuration.economyProvider}'")
     }
 
     private fun loadData() {
-
+        this.dataProvider = this.dataProviders[this.configuration.dataProvider]
+                ?: throw RuntimeException("Undefined data provider '${this.configuration.dataProvider}'")
     }
 
     private fun initDataProviders() {
         registerDataProvider("mysql", MySQLDataProvider(configuration))
         registerDataProvider("mongodb", MongoDBDataProvider(configuration))
+        registerDataProvider("none", NoneDataProvider)
     }
 
     private fun initEconomyProviders() {
         registerEconomyProvider("economyapi", EconomyAPIProvider(configuration))
+        registerEconomyProvider("none", NoneEconomyProvider)
     }
 
     override fun registerDataProvider(name: String, provider: DataProvider) {

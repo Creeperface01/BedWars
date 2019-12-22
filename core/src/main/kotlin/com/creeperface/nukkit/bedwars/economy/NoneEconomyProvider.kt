@@ -5,18 +5,17 @@ import java.util.concurrent.CompletableFuture
 
 object NoneEconomyProvider : EconomyProvider {
 
-    override val defaultCurrency: EconomyProvider.Currency
-        get() = throw UnsupportedOperationException()
+    override val defaultCurrency = EconomyProvider.NullCurrency
 
     override fun addMoney(player: String, amount: Int, currency: EconomyProvider.Currency) {
-        throw UnsupportedOperationException()
+
     }
 
     override fun getMoney(player: String, currency: EconomyProvider.Currency): CompletableFuture<Int> {
-        throw UnsupportedOperationException()
+        return CompletableFuture.completedFuture(0)
     }
 
     override fun transferMoney(from: String, to: String, amount: Int, currency: EconomyProvider.Currency): CompletableFuture<Boolean> {
-        throw UnsupportedOperationException()
+        return CompletableFuture.completedFuture(true)
     }
 }
