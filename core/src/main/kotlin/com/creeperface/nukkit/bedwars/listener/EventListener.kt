@@ -14,7 +14,7 @@ import com.creeperface.nukkit.bedwars.utils.Configuration
 import com.creeperface.nukkit.bedwars.utils.blockEntity
 import com.creeperface.nukkit.bedwars.utils.identifier
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.util.function.Consumer
 
@@ -45,40 +45,34 @@ class EventListener(private val plugin: BedWars) : Listener {
 
     @EventHandler
     fun onAsyncLogin(e: PlayerAsyncPreLoginEvent) {
-        plugin.dataProvider?.let {
-            runBlocking {
-                val identifier = when (plugin.configuration.playerIdentifier) {
-                    Configuration.PlayerIdentifier.UUID -> e.uuid.toString()
-                    Configuration.PlayerIdentifier.NAME -> e.name
-                }
-
-                val stats = it.getData(identifier)
-
-                if (stats == null) {
-                    it.register(e.name, identifier)
-                }
-
-                e.scheduledActions.add(Consumer {
-                    val po = it.getPlayer(e.uuid)
-
-                    po.ifPresent { p ->
-                        plugin.players[p.id] = GlobalData(p, stats ?: Stats.initial())
-                    }
-                })
+        runBlocking {
+            val identifier = when (plugin.configuration.playerIdentifier) {
+                Configuration.PlayerIdentifier.UUID -> e.uuid.toString()
+                Configuration.PlayerIdentifier.NAME -> e.name
             }
 
-            return
+            val stats = plugin.dataProvider.getData(identifier)
+
+            if (stats == null) {
+                plugin.dataProvider.register(e.name, identifier)
+            }
+
+            e.scheduledActions.add(Consumer {
+                val po = it.getPlayer(e.uuid)
+
+                po.ifPresent { p ->
+                    plugin.players[p.id] = GlobalData(p, stats ?: Stats.initial())
+                }
+            })
         }
-
-
     }
 
     @EventHandler
     fun onQuit(e: PlayerQuitEvent) {
         val data = plugin.players.remove(e.player.id) ?: return
 
-        GlobalScope.async {
-            plugin.dataProvider?.saveData(e.player.identifier, data.stats)
+        GlobalScope.launch {
+            plugin.dataProvider.saveData(e.player.identifier, data.stats)
         }
     }
 }

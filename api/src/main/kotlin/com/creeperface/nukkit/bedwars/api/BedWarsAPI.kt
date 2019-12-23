@@ -7,9 +7,9 @@ import com.creeperface.nukkit.bedwars.api.economy.EconomyProvider
 
 interface BedWarsAPI {
 
-    val economyProvider: EconomyProvider?
+    val economyProvider: EconomyProvider
 
-    val dataProvider: DataProvider?
+    val dataProvider: DataProvider
 
     fun getPlayerArena(p: Player): Arena?
 

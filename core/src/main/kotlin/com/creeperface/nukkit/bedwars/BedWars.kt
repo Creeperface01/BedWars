@@ -82,8 +82,8 @@ class BedWars : PluginBase(), BedWarsAPI {
     private val economyProviders = mutableMapOf<String, EconomyProvider>()
     private val dataProviders = mutableMapOf<String, DataProvider>()
 
-    override var economyProvider: EconomyProvider? = null
-    override var dataProvider: DataProvider? = null
+    override lateinit var economyProvider: EconomyProvider
+    override lateinit var dataProvider: DataProvider
 
     init {
         initInstance()
@@ -142,14 +142,14 @@ class BedWars : PluginBase(), BedWarsAPI {
 
         for (data in this.players.values) {
             runBlocking {
-                dataProvider?.saveData(data.player.identifier, data.stats)
+                dataProvider.saveData(data.player.identifier, data.stats)
             }
         }
 
         this.players.clear()
 
         deleteOldMaps()
-        dataProvider?.deinit()
+        dataProvider.deinit()
     }
 
     private fun initInstance() {
