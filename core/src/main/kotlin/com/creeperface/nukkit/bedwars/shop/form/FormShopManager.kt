@@ -1,4 +1,4 @@
-package com.creeperface.nukkit.bedwars.shop.formShop
+package com.creeperface.nukkit.bedwars.shop.form
 
 import cn.nukkit.Player
 import cn.nukkit.form.element.ElementButton

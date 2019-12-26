@@ -1,4 +1,4 @@
-package com.creeperface.nukkit.bedwars.shop
+package com.creeperface.nukkit.bedwars.shop.inventory
 
 import cn.nukkit.Player
 import cn.nukkit.block.Block
@@ -18,13 +18,11 @@ import java.util.*
 
 open class ShopInventory : BaseInventory(FakeHolder(), InventoryType.CHEST) {
 
-    private val spawnedBlocks = HashMap<String, BlockVector3>()
+    private val spawnedBlocks = HashMap<Long, BlockVector3>()
 
-    var pos = BlockVector3()
+    private var pos = BlockVector3()
 
-    override fun getHolder(): FakeHolder {
-        return this.holder as FakeHolder
-    }
+    override fun getHolder() = this.holder as FakeHolder
 
     override fun onOpen(who: Player) { //method called when player opens an inventory
         super.onOpen(who)
@@ -36,10 +34,9 @@ open class ShopInventory : BaseInventory(FakeHolder(), InventoryType.CHEST) {
         updateBlockPacket.y = pos.y
         updateBlockPacket.z = pos.z
         updateBlockPacket.blockRuntimeId = GlobalBlockPalette.getOrCreateRuntimeId(Block.CHEST, 0)
-        updateBlockPacket.flags = UpdateBlockPacket.FLAG_NONE
+        updateBlockPacket.flags = UpdateBlockPacket.FLAG_ALL_PRIORITY
 
-
-        spawnedBlocks[who.name.toLowerCase()] = pos.clone()
+        spawnedBlocks[who.id] = pos.clone()
         who.dataPacket(updateBlockPacket)
 
         val bep = BlockEntityDataPacket()
@@ -75,13 +72,13 @@ open class ShopInventory : BaseInventory(FakeHolder(), InventoryType.CHEST) {
         pk2.windowId = who.getWindowId(this).toByte().toInt()
         who.dataPacket(pk2)
 
-        val v = spawnedBlocks[who.name.toLowerCase()]
+        val v = spawnedBlocks[who.id]
 
         if (v != null && who.getLevel().isChunkLoaded(v.x shr 4, v.z shr 4)) {
-            who.getLevel().sendBlocks(arrayOf(who), arrayOf(Vector3(v.x.toDouble(), v.y.toDouble(), v.z.toDouble())))
+            who.getLevel().sendBlocks(arrayOf(who), arrayOf(Vector3(v.x.toDouble(), v.y.toDouble(), v.z.toDouble())), UpdateBlockPacket.FLAG_ALL_PRIORITY)
         }
 
-        spawnedBlocks.remove(who.name.toLowerCase())
+        spawnedBlocks.remove(who.id)
 
         super.onClose(who)
     }

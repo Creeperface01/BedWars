@@ -13,6 +13,8 @@ import com.creeperface.nukkit.bedwars.BedWars
 import java.sql.ResultSet
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
+import kotlin.reflect.KClass
+import kotlin.reflect.full.isSubclassOf
 
 private val RGB_CONVERTER = arrayOf(
         1908001,
@@ -90,6 +92,63 @@ fun Item.addEnchantment(id: Int, lvl: Int): Item {
     return this
 }
 
+fun <T : Any> KClass<T>.initClass(vararg params: Any): T {
+    this.objectInstance?.let { return it }
+
+    this.constructors.forEach const@{ constructor ->
+        val values = ArrayList<Any>(constructor.parameters.size)
+        val localParams = params.toList()
+
+        constructor.parameters.forEach param@{ param ->
+            val classifier = param.type.classifier
+
+            if (classifier is KClass<*>) {
+                localParams.forEach { lp ->
+                    if (lp::class.isSubclassOf(classifier)) {
+                        values.add(lp)
+                        return@param
+                    }
+                }
+            }
+
+            return@const
+        }
+
+        if (values.size != constructor.parameters.size) {
+            return@const
+        }
+
+        constructor.call(*values.toTypedArray())
+    }
+
+    throw RuntimeException("Callable constructor not found")
+}
+
 val Player.identifier: String
     get() = BedWars.instance.configuration.playerIdentifier.get(this).toString()
-//fun ItemColorArmor.setColor(rgb: Int) = this.setColor();
+
+fun <T> MutableList<T>.merge(list: List<T>): List<T> {
+    this.addAll(list)
+    return this
+}
+
+@Suppress("UNCHECKED_CAST")
+fun <K, V> MutableMap<K, V>.deepMerge(map: Map<K, V>): Map<K, V> {
+    map.forEach { (k, v) ->
+        val v1 = this[k]
+
+        if (v is Map<*, *> && v1 is MutableMap<*, *>) {
+            (v1 as MutableMap<Any, Any>).deepMerge(v as Map<Any, Any>)
+            return@forEach
+        }
+
+        if (v is List<*> && v1 is MutableList<*>) {
+            (v1 as MutableList<Any>).merge(v as List<Any>)
+            return@forEach
+        }
+
+        this[k] = v
+    }
+
+    return this
+}

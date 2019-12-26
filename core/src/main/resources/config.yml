@@ -13,7 +13,7 @@ chat:
 
 data:
   enable: false
-  data_provider: mysql
+  data_provider: none
   use_db_lib: true
   #unique player identifier. Can be whether 'name' or 'uuid'. UUID is recommended unless you're running server in offline mode
   player_identifier: uuid
@@ -39,7 +39,7 @@ data:
 
 economy:
   enable_economy: false
-  economy_provider: EconomyAPI
+  economy_provider: none
   rewards:
     #    For economy systems with multiple currencies you can specif y the currency like that, else the default (or random) one will be chosen
     #    kills:

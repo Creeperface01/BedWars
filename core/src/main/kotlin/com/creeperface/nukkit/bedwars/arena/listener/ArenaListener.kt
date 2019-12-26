@@ -35,9 +35,9 @@ import com.creeperface.nukkit.bedwars.blockentity.BlockEntityMine
 import com.creeperface.nukkit.bedwars.entity.TNTShip
 import com.creeperface.nukkit.bedwars.entity.Villager
 import com.creeperface.nukkit.bedwars.obj.BedWarsData
-import com.creeperface.nukkit.bedwars.shop.ItemWindow
-import com.creeperface.nukkit.bedwars.shop.ShopWindow
-import com.creeperface.nukkit.bedwars.shop.Window
+import com.creeperface.nukkit.bedwars.shop.inventory.MenuWindow
+import com.creeperface.nukkit.bedwars.shop.inventory.OfferWindow
+import com.creeperface.nukkit.bedwars.shop.inventory.Window
 import com.creeperface.nukkit.bedwars.utils.BedWarsExplosion
 import com.creeperface.nukkit.bedwars.utils.Items
 import java.util.*
@@ -463,7 +463,7 @@ class ArenaListener(private val arena: Arena) : Listener {
             return
         }
 
-        if (inv2 is ShopWindow) {
+        if (inv2 is OfferWindow) {
             if (slot == 0) {
                 val cost = inv2.cost
                 val item = inv2.item
@@ -490,7 +490,7 @@ class ArenaListener(private val arena: Arena) : Listener {
                     onOpen(p)
                 }
             }
-        } else if (inv2 is ItemWindow) {
+        } else if (inv2 is MenuWindow) {
             val newWindow = inv2.getWindow(slot)
 
             if (newWindow != null) {

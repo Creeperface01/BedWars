@@ -1,4 +1,4 @@
-package com.creeperface.nukkit.bedwars.shop
+package com.creeperface.nukkit.bedwars.shop.inventory
 
 import cn.nukkit.inventory.InventoryHolder
 

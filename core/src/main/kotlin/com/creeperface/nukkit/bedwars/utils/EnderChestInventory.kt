@@ -1,7 +1,7 @@
 package com.creeperface.nukkit.bedwars.utils
 
 import cn.nukkit.inventory.InventoryType
-import com.creeperface.nukkit.bedwars.shop.ShopInventory
+import com.creeperface.nukkit.bedwars.shop.inventory.ShopInventory
 import org.joor.Reflect
 
 /**

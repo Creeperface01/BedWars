@@ -42,9 +42,9 @@ import com.creeperface.nukkit.bedwars.listener.CommandEventListener
 import com.creeperface.nukkit.bedwars.listener.EventListener
 import com.creeperface.nukkit.bedwars.obj.GlobalData
 import com.creeperface.nukkit.bedwars.placeholder.Placeholders
-import com.creeperface.nukkit.bedwars.shop.ItemWindow
-import com.creeperface.nukkit.bedwars.shop.ShopWindow
-import com.creeperface.nukkit.bedwars.shop.Window
+import com.creeperface.nukkit.bedwars.shop.inventory.MenuWindow
+import com.creeperface.nukkit.bedwars.shop.inventory.OfferWindow
+import com.creeperface.nukkit.bedwars.shop.inventory.Window
 import com.creeperface.nukkit.bedwars.utils.*
 import kotlinx.coroutines.runBlocking
 import org.apache.commons.io.FileUtils
@@ -56,6 +56,7 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.reflect.KClass
 import kotlin.reflect.jvm.javaField
 
 class BedWars : PluginBase(), BedWarsAPI {
@@ -79,8 +80,8 @@ class BedWars : PluginBase(), BedWarsAPI {
 
     internal lateinit var configuration: Configuration
 
-    private val economyProviders = mutableMapOf<String, EconomyProvider>()
-    private val dataProviders = mutableMapOf<String, DataProvider>()
+    private val economyProviders = mutableMapOf<String, KClass<out EconomyProvider>>()
+    private val dataProviders = mutableMapOf<String, KClass<out DataProvider>>()
 
     override lateinit var economyProvider: EconomyProvider
     override lateinit var dataProvider: DataProvider
@@ -101,6 +102,8 @@ class BedWars : PluginBase(), BedWarsAPI {
 
         FireworkUtils.init()
 
+        logger.info("Loading configuration")
+        loadConfiguration()
         initDataProviders()
         initEconomyProviders()
     }
@@ -110,8 +113,7 @@ class BedWars : PluginBase(), BedWarsAPI {
         logger.info("Deleting old worlds...")
         deleteOldMaps()
 
-        logger.info("Loading configuration")
-        loadConfiguration()
+        logger.info("Applying configuration")
         initLanguage()
 
         loadData()
@@ -129,6 +131,8 @@ class BedWars : PluginBase(), BedWarsAPI {
 
         this.server.pluginManager.registerEvents(commandListener, this)
         this.server.pluginManager.registerEvents(EventListener(this), this)
+
+        convertShop()
     }
 
     override fun onDisable() {
@@ -313,31 +317,31 @@ class BedWars : PluginBase(), BedWarsAPI {
     }
 
     private fun loadEconomy() {
-        this.economyProvider = this.economyProviders[this.configuration.economyProvider]
+        this.economyProvider = this.economyProviders[this.configuration.economyProvider]?.initClass(configuration, this)
                 ?: throw RuntimeException("Undefined economy provider '${this.configuration.economyProvider}'")
     }
 
     private fun loadData() {
-        this.dataProvider = this.dataProviders[this.configuration.dataProvider]
+        this.dataProvider = this.dataProviders[this.configuration.dataProvider]?.initClass(configuration, this)
                 ?: throw RuntimeException("Undefined data provider '${this.configuration.dataProvider}'")
     }
 
     private fun initDataProviders() {
-        registerDataProvider("mysql", MySQLDataProvider(configuration))
-        registerDataProvider("mongodb", MongoDBDataProvider(configuration))
-        registerDataProvider("none", NoneDataProvider)
+        registerDataProvider("mysql", MySQLDataProvider::class)
+        registerDataProvider("mongodb", MongoDBDataProvider::class)
+        registerDataProvider("none", NoneDataProvider::class)
     }
 
     private fun initEconomyProviders() {
-        registerEconomyProvider("economyapi", EconomyAPIProvider(configuration))
-        registerEconomyProvider("none", NoneEconomyProvider)
+        registerEconomyProvider("economyapi", EconomyAPIProvider::class)
+        registerEconomyProvider("none", NoneEconomyProvider::class)
     }
 
-    override fun registerDataProvider(name: String, provider: DataProvider) {
+    override fun registerDataProvider(name: String, provider: KClass<out DataProvider>) {
         this.dataProviders[name] = provider
     }
 
-    override fun registerEconomyProvider(name: String, provider: EconomyProvider) {
+    override fun registerEconomyProvider(name: String, provider: KClass<out EconomyProvider>) {
         this.economyProviders[name] = provider
     }
 
@@ -369,74 +373,74 @@ class BedWars : PluginBase(), BedWarsAPI {
     }
 
     fun convertShop() {
-        val main = ItemWindow(true)
+        val main = MenuWindow(true)
 
-        val blocksW = ItemWindow()
-        val armorW = ItemWindow()
-        val pickaxeW = ItemWindow()
-        val swordW = ItemWindow()
-        val bowW = ItemWindow()
-        val foodW = ItemWindow()
-        val chestW = ItemWindow()
-        val potionW = ItemWindow()
-        val specialW = ItemWindow()
+        val blocksW = MenuWindow()
+        val armorW = MenuWindow()
+        val pickaxeW = MenuWindow()
+        val swordW = MenuWindow()
+        val bowW = MenuWindow()
+        val foodW = MenuWindow()
+        val chestW = MenuWindow()
+        val potionW = MenuWindow()
+        val specialW = MenuWindow()
 
         val blocks = LinkedHashMap<Item, Window>()
-        blocks[Item.get(Item.SANDSTONE)] = ShopWindow(Item.get(Item.SANDSTONE, 0, 2), Items.BRONZE.clone(), blocksW)
-        blocks[Item.get(Item.SANDSTONE)] = ShopWindow(Item.get(Item.SANDSTONE, 0, 16), Items.BRONZE.setCountR(8), blocksW)
-        blocks[Item.get(Item.END_STONE)] = ShopWindow(Item.get(Item.END_STONE), Items.BRONZE.setCountR(7), blocksW)
-        blocks[Item.get(Item.GLOWSTONE_BLOCK)] = ShopWindow(Item.get(Item.GLOWSTONE_BLOCK, 0, 4), Items.BRONZE.setCountR(15), blocksW)
-        blocks[Item.get(Item.IRON_BLOCK)] = ShopWindow(Item.get(Item.IRON_BLOCK), Items.IRON.setCountR(1), blocksW)
-        blocks[Item.get(Item.GLASS)] = ShopWindow(Item.get(Item.GLASS), Items.BRONZE.setCountR(4), blocksW)
+        blocks[Item.get(Item.SANDSTONE)] = OfferWindow(Item.get(Item.SANDSTONE, 0, 2), Items.BRONZE.clone(), blocksW)
+        blocks[Item.get(Item.SANDSTONE)] = OfferWindow(Item.get(Item.SANDSTONE, 0, 16), Items.BRONZE.setCountR(8), blocksW)
+        blocks[Item.get(Item.END_STONE)] = OfferWindow(Item.get(Item.END_STONE), Items.BRONZE.setCountR(7), blocksW)
+        blocks[Item.get(Item.GLOWSTONE_BLOCK)] = OfferWindow(Item.get(Item.GLOWSTONE_BLOCK, 0, 4), Items.BRONZE.setCountR(15), blocksW)
+        blocks[Item.get(Item.IRON_BLOCK)] = OfferWindow(Item.get(Item.IRON_BLOCK), Items.IRON.setCountR(1), blocksW)
+        blocks[Item.get(Item.GLASS)] = OfferWindow(Item.get(Item.GLASS), Items.BRONZE.setCountR(4), blocksW)
 
         val armor = LinkedHashMap<Item, Window>()
-        armor[ItemHelmetLeather().setCompoundTag(CompoundTag().putInt("customColor", 0)).addEnchantment(Enchantment.ID_DURABILITY, 1)] = ShopWindow(ItemHelmetLeather().setCompoundTag(CompoundTag().putInt("customColor", 0)).addEnchantment(Enchantment.ID_DURABILITY, 1), Items.BRONZE.clone(), armorW)
-        armor[ItemLeggingsLeather().setCompoundTag(CompoundTag().putInt("customColor", 0)).addEnchantment(Enchantment.ID_DURABILITY, 1)] = ShopWindow(ItemLeggingsLeather().setCompoundTag(CompoundTag().putInt("customColor", 0)).addEnchantment(Enchantment.ID_DURABILITY, 1), Items.BRONZE.clone(), armorW)
-        armor[ItemBootsLeather().setCompoundTag(CompoundTag().putInt("customColor", 0)).addEnchantment(Enchantment.ID_DURABILITY, 1)] = ShopWindow(ItemBootsLeather().setCompoundTag(CompoundTag().putInt("customColor", 0)).addEnchantment(Enchantment.ID_DURABILITY, 1), Items.BRONZE.clone(), armorW)
-        armor[ItemChestplateChain().addEnchantment(Enchantment.ID_DURABILITY, 1).addEnchantment(Enchantment.ID_PROTECTION_ALL, 1).setCustomName("Chestplate lvl I")] = ShopWindow(ItemChestplateChain().addEnchantment(Enchantment.ID_DURABILITY, 1).addEnchantment(Enchantment.ID_PROTECTION_ALL, 1).setCustomName("Chestplate lvl I"), Items.IRON.setCountR(1), armorW)
-        armor[ItemChestplateChain().addEnchantment(Enchantment.ID_DURABILITY, 1).addEnchantment(Enchantment.ID_PROTECTION_ALL, 2).setCustomName("Chestplate lvl II")] = ShopWindow(ItemChestplateChain().addEnchantment(Enchantment.ID_DURABILITY, 1).addEnchantment(Enchantment.ID_PROTECTION_ALL, 2).setCustomName("Chestplate lvl II"), Items.IRON.setCountR(3), armorW)
-        armor[ItemChestplateChain().addEnchantment(Enchantment.ID_DURABILITY, 1).addEnchantment(Enchantment.ID_PROTECTION_ALL, 3).setCustomName("Chestplate lvl III")] = ShopWindow(ItemChestplateChain().addEnchantment(Enchantment.ID_DURABILITY, 1).addEnchantment(Enchantment.ID_PROTECTION_ALL, 3).setCustomName("Chestplate lvl III"), Items.IRON.setCountR(7), armorW)
+        armor[ItemHelmetLeather().setCompoundTag(CompoundTag().putInt("customColor", 0)).addEnchantment(Enchantment.ID_DURABILITY, 1)] = OfferWindow(ItemHelmetLeather().setCompoundTag(CompoundTag().putInt("customColor", 0)).addEnchantment(Enchantment.ID_DURABILITY, 1), Items.BRONZE.clone(), armorW)
+        armor[ItemLeggingsLeather().setCompoundTag(CompoundTag().putInt("customColor", 0)).addEnchantment(Enchantment.ID_DURABILITY, 1)] = OfferWindow(ItemLeggingsLeather().setCompoundTag(CompoundTag().putInt("customColor", 0)).addEnchantment(Enchantment.ID_DURABILITY, 1), Items.BRONZE.clone(), armorW)
+        armor[ItemBootsLeather().setCompoundTag(CompoundTag().putInt("customColor", 0)).addEnchantment(Enchantment.ID_DURABILITY, 1)] = OfferWindow(ItemBootsLeather().setCompoundTag(CompoundTag().putInt("customColor", 0)).addEnchantment(Enchantment.ID_DURABILITY, 1), Items.BRONZE.clone(), armorW)
+        armor[ItemChestplateChain().addEnchantment(Enchantment.ID_DURABILITY, 1).addEnchantment(Enchantment.ID_PROTECTION_ALL, 1).setCustomName("Chestplate lvl I")] = OfferWindow(ItemChestplateChain().addEnchantment(Enchantment.ID_DURABILITY, 1).addEnchantment(Enchantment.ID_PROTECTION_ALL, 1).setCustomName("Chestplate lvl I"), Items.IRON.setCountR(1), armorW)
+        armor[ItemChestplateChain().addEnchantment(Enchantment.ID_DURABILITY, 1).addEnchantment(Enchantment.ID_PROTECTION_ALL, 2).setCustomName("Chestplate lvl II")] = OfferWindow(ItemChestplateChain().addEnchantment(Enchantment.ID_DURABILITY, 1).addEnchantment(Enchantment.ID_PROTECTION_ALL, 2).setCustomName("Chestplate lvl II"), Items.IRON.setCountR(3), armorW)
+        armor[ItemChestplateChain().addEnchantment(Enchantment.ID_DURABILITY, 1).addEnchantment(Enchantment.ID_PROTECTION_ALL, 3).setCustomName("Chestplate lvl III")] = OfferWindow(ItemChestplateChain().addEnchantment(Enchantment.ID_DURABILITY, 1).addEnchantment(Enchantment.ID_PROTECTION_ALL, 3).setCustomName("Chestplate lvl III"), Items.IRON.setCountR(7), armorW)
 
         val pickaxes = LinkedHashMap<Item, Window>()
-        pickaxes[ItemPickaxeWood().addEnchantment(Enchantment.ID_EFFICIENCY, 1).addEnchantment(Enchantment.ID_DURABILITY, 1).setCustomName("Pickaxe lvl I")] = ShopWindow(ItemPickaxeWood().addEnchantment(Enchantment.ID_EFFICIENCY, 1).addEnchantment(Enchantment.ID_DURABILITY, 1).setCustomName("Pickaxe lvl I"), Items.BRONZE.setCountR(4), pickaxeW)
-        pickaxes[ItemPickaxeStone().addEnchantment(Enchantment.ID_EFFICIENCY, 1).addEnchantment(Enchantment.ID_DURABILITY, 1).setCustomName("Pickaxe lvl II")] = ShopWindow(ItemPickaxeStone().addEnchantment(Enchantment.ID_EFFICIENCY, 1).addEnchantment(Enchantment.ID_DURABILITY, 1).setCustomName("Pickaxe lvl II"), Items.IRON.setCountR(2), pickaxeW)
-        pickaxes[ItemPickaxeIron().addEnchantment(Enchantment.ID_EFFICIENCY, 3).addEnchantment(Enchantment.ID_DURABILITY, 1).setCustomName("Pickaxe lvl III")] = ShopWindow(ItemPickaxeIron().addEnchantment(Enchantment.ID_EFFICIENCY, 3).addEnchantment(Enchantment.ID_DURABILITY, 1).setCustomName("Pickaxe lvl III"), Items.GOLD.clone(), pickaxeW)
+        pickaxes[ItemPickaxeWood().addEnchantment(Enchantment.ID_EFFICIENCY, 1).addEnchantment(Enchantment.ID_DURABILITY, 1).setCustomName("Pickaxe lvl I")] = OfferWindow(ItemPickaxeWood().addEnchantment(Enchantment.ID_EFFICIENCY, 1).addEnchantment(Enchantment.ID_DURABILITY, 1).setCustomName("Pickaxe lvl I"), Items.BRONZE.setCountR(4), pickaxeW)
+        pickaxes[ItemPickaxeStone().addEnchantment(Enchantment.ID_EFFICIENCY, 1).addEnchantment(Enchantment.ID_DURABILITY, 1).setCustomName("Pickaxe lvl II")] = OfferWindow(ItemPickaxeStone().addEnchantment(Enchantment.ID_EFFICIENCY, 1).addEnchantment(Enchantment.ID_DURABILITY, 1).setCustomName("Pickaxe lvl II"), Items.IRON.setCountR(2), pickaxeW)
+        pickaxes[ItemPickaxeIron().addEnchantment(Enchantment.ID_EFFICIENCY, 3).addEnchantment(Enchantment.ID_DURABILITY, 1).setCustomName("Pickaxe lvl III")] = OfferWindow(ItemPickaxeIron().addEnchantment(Enchantment.ID_EFFICIENCY, 3).addEnchantment(Enchantment.ID_DURABILITY, 1).setCustomName("Pickaxe lvl III"), Items.GOLD.clone(), pickaxeW)
 
         val swords = LinkedHashMap<Item, Window>()
-        swords[ItemStick().addEnchantment(Enchantment.ID_KNOCKBACK, 1).setCustomName("Knockback Stick")] = ShopWindow(ItemStick().addEnchantment(Enchantment.ID_KNOCKBACK, 1).setCustomName("Knockback Stick"), Items.BRONZE.setCountR(8), swordW)
-        swords[ItemSwordGold().addEnchantment(Enchantment.ID_DURABILITY, 1).addEnchantment(Enchantment.ID_DAMAGE_ALL, 1).setCustomName("Sword lvl I")] = ShopWindow(ItemSwordGold().addEnchantment(Enchantment.ID_DURABILITY, 1).addEnchantment(Enchantment.ID_DAMAGE_ALL, 1).setCustomName("Sword lvl I"), Items.IRON.clone(), swordW)
-        swords[ItemSwordGold().addEnchantment(Enchantment.ID_DURABILITY, 1).addEnchantment(Enchantment.ID_DAMAGE_ALL, 2).setCustomName("Sword lvl II")] = ShopWindow(ItemSwordGold().addEnchantment(Enchantment.ID_DURABILITY, 1).addEnchantment(Enchantment.ID_DAMAGE_ALL, 2).setCustomName("Sword lvl II"), Items.IRON.setCountR(3), swordW)
-        swords[ItemSwordIron().addEnchantment(Enchantment.ID_KNOCKBACK, 1).addEnchantment(Enchantment.ID_DAMAGE_ALL, 2).setCustomName("Sword lvl III").addEnchantment(Enchantment.ID_DURABILITY, 2)] = ShopWindow(ItemSwordIron().addEnchantment(Enchantment.ID_KNOCKBACK, 1).addEnchantment(Enchantment.ID_DAMAGE_ALL, 2).addEnchantment(Enchantment.ID_DURABILITY, 2).setCustomName("Sword lvl III"), Items.GOLD.setCountR(5), swordW)
+        swords[ItemStick().addEnchantment(Enchantment.ID_KNOCKBACK, 1).setCustomName("Knockback Stick")] = OfferWindow(ItemStick().addEnchantment(Enchantment.ID_KNOCKBACK, 1).setCustomName("Knockback Stick"), Items.BRONZE.setCountR(8), swordW)
+        swords[ItemSwordGold().addEnchantment(Enchantment.ID_DURABILITY, 1).addEnchantment(Enchantment.ID_DAMAGE_ALL, 1).setCustomName("Sword lvl I")] = OfferWindow(ItemSwordGold().addEnchantment(Enchantment.ID_DURABILITY, 1).addEnchantment(Enchantment.ID_DAMAGE_ALL, 1).setCustomName("Sword lvl I"), Items.IRON.clone(), swordW)
+        swords[ItemSwordGold().addEnchantment(Enchantment.ID_DURABILITY, 1).addEnchantment(Enchantment.ID_DAMAGE_ALL, 2).setCustomName("Sword lvl II")] = OfferWindow(ItemSwordGold().addEnchantment(Enchantment.ID_DURABILITY, 1).addEnchantment(Enchantment.ID_DAMAGE_ALL, 2).setCustomName("Sword lvl II"), Items.IRON.setCountR(3), swordW)
+        swords[ItemSwordIron().addEnchantment(Enchantment.ID_KNOCKBACK, 1).addEnchantment(Enchantment.ID_DAMAGE_ALL, 2).setCustomName("Sword lvl III").addEnchantment(Enchantment.ID_DURABILITY, 2)] = OfferWindow(ItemSwordIron().addEnchantment(Enchantment.ID_KNOCKBACK, 1).addEnchantment(Enchantment.ID_DAMAGE_ALL, 2).addEnchantment(Enchantment.ID_DURABILITY, 2).setCustomName("Sword lvl III"), Items.GOLD.setCountR(5), swordW)
 
         val bows = LinkedHashMap<Item, Window>()
-        bows[ItemBow().addEnchantment(Enchantment.ID_BOW_INFINITY, 1).setCustomName("Bow lvl I")] = ShopWindow(ItemBow().addEnchantment(Enchantment.ID_BOW_INFINITY, 1), Items.GOLD.setCountR(3), bowW)
-        bows[ItemBow().addEnchantment(Enchantment.ID_BOW_INFINITY, 1).addEnchantment(Enchantment.ID_BOW_POWER, 1).setCustomName("Bow lvl II")] = ShopWindow(ItemBow().addEnchantment(Enchantment.ID_BOW_INFINITY, 1).addEnchantment(Enchantment.ID_BOW_POWER, 1).setCustomName("Bow lvl II"), Items.GOLD.setCountR(7), bowW)
-        bows[ItemBow().addEnchantment(Enchantment.ID_BOW_INFINITY, 1).addEnchantment(Enchantment.ID_BOW_POWER, 1).addEnchantment(Enchantment.ID_BOW_KNOCKBACK, 1).setCustomName("Bow lvl III")] = ShopWindow(ItemBow().addEnchantment(Enchantment.ID_BOW_INFINITY, 1).addEnchantment(Enchantment.ID_BOW_POWER, 1).addEnchantment(Enchantment.ID_BOW_KNOCKBACK, 1).setCustomName("Bow lvl III"), Items.GOLD.setCountR(13), bowW)
-        bows[ItemBow().addEnchantment(Enchantment.ID_BOW_INFINITY, 1).setCustomName("Explosive Bow")] = ShopWindow(ItemBow().addEnchantment(Enchantment.ID_BOW_INFINITY, 1).setCustomName("Explosive Bow"), Items.GOLD.setCountR(20), bowW)
-        bows[ItemArrow()] = ShopWindow(ItemArrow(), Items.GOLD.clone(), bowW)
+        bows[ItemBow().addEnchantment(Enchantment.ID_BOW_INFINITY, 1).setCustomName("Bow lvl I")] = OfferWindow(ItemBow().addEnchantment(Enchantment.ID_BOW_INFINITY, 1), Items.GOLD.setCountR(3), bowW)
+        bows[ItemBow().addEnchantment(Enchantment.ID_BOW_INFINITY, 1).addEnchantment(Enchantment.ID_BOW_POWER, 1).setCustomName("Bow lvl II")] = OfferWindow(ItemBow().addEnchantment(Enchantment.ID_BOW_INFINITY, 1).addEnchantment(Enchantment.ID_BOW_POWER, 1).setCustomName("Bow lvl II"), Items.GOLD.setCountR(7), bowW)
+        bows[ItemBow().addEnchantment(Enchantment.ID_BOW_INFINITY, 1).addEnchantment(Enchantment.ID_BOW_POWER, 1).addEnchantment(Enchantment.ID_BOW_KNOCKBACK, 1).setCustomName("Bow lvl III")] = OfferWindow(ItemBow().addEnchantment(Enchantment.ID_BOW_INFINITY, 1).addEnchantment(Enchantment.ID_BOW_POWER, 1).addEnchantment(Enchantment.ID_BOW_KNOCKBACK, 1).setCustomName("Bow lvl III"), Items.GOLD.setCountR(13), bowW)
+        bows[ItemBow().addEnchantment(Enchantment.ID_BOW_INFINITY, 1).setCustomName("Explosive Bow")] = OfferWindow(ItemBow().addEnchantment(Enchantment.ID_BOW_INFINITY, 1).setCustomName("Explosive Bow"), Items.GOLD.setCountR(20), bowW)
+        bows[ItemArrow()] = OfferWindow(ItemArrow(), Items.GOLD.clone(), bowW)
 
         val food = LinkedHashMap<Item, Window>()
-        food[ItemApple()] = ShopWindow(ItemApple(), Items.BRONZE.clone(), foodW)
-        food[ItemPorkchopCooked()] = ShopWindow(ItemPorkchopCooked(), Items.BRONZE.setCountR(2), foodW)
-        food[ItemCake()] = ShopWindow(ItemCake(), Items.IRON.clone(), foodW)
-        food[ItemAppleGold()] = ShopWindow(ItemAppleGold(), Items.GOLD.setCountR(3), foodW)
+        food[ItemApple()] = OfferWindow(ItemApple(), Items.BRONZE.clone(), foodW)
+        food[ItemPorkchopCooked()] = OfferWindow(ItemPorkchopCooked(), Items.BRONZE.setCountR(2), foodW)
+        food[ItemCake()] = OfferWindow(ItemCake(), Items.IRON.clone(), foodW)
+        food[ItemAppleGold()] = OfferWindow(ItemAppleGold(), Items.GOLD.setCountR(3), foodW)
 
         val chests = LinkedHashMap<Item, Window>()
-        chests[Item.get(Item.CHEST)] = ShopWindow(Item.get(Item.CHEST), Items.IRON.clone(), chestW)
-        chests[Item.get(Item.ENDER_CHEST)] = ShopWindow(Item.get(Item.ENDER_CHEST), Items.GOLD.clone(), chestW)
+        chests[Item.get(Item.CHEST)] = OfferWindow(Item.get(Item.CHEST), Items.IRON.clone(), chestW)
+        chests[Item.get(Item.ENDER_CHEST)] = OfferWindow(Item.get(Item.ENDER_CHEST), Items.GOLD.clone(), chestW)
 
         val potions = LinkedHashMap<Item, Window>()
-        potions[ItemPotion(ItemPotion.INSTANT_HEALTH)] = ShopWindow(ItemPotion(ItemPotion.INSTANT_HEALTH), Items.IRON.setCountR(3), potionW)
-        potions[ItemPotion(ItemPotion.INSTANT_HEALTH_II)] = ShopWindow(ItemPotion(ItemPotion.INSTANT_HEALTH_II), Items.IRON.setCountR(5), potionW)
-        potions[ItemPotion(ItemPotion.SPEED_LONG)] = ShopWindow(ItemPotion(ItemPotion.SPEED_LONG), Items.IRON.setCountR(7), potionW)
-        potions[ItemPotion(ItemPotion.STRENGTH_LONG)] = ShopWindow(ItemPotion(ItemPotion.STRENGTH_LONG), Items.GOLD.setCountR(8), potionW)
+        potions[ItemPotion(ItemPotion.INSTANT_HEALTH)] = OfferWindow(ItemPotion(ItemPotion.INSTANT_HEALTH), Items.IRON.setCountR(3), potionW)
+        potions[ItemPotion(ItemPotion.INSTANT_HEALTH_II)] = OfferWindow(ItemPotion(ItemPotion.INSTANT_HEALTH_II), Items.IRON.setCountR(5), potionW)
+        potions[ItemPotion(ItemPotion.SPEED_LONG)] = OfferWindow(ItemPotion(ItemPotion.SPEED_LONG), Items.IRON.setCountR(7), potionW)
+        potions[ItemPotion(ItemPotion.STRENGTH_LONG)] = OfferWindow(ItemPotion(ItemPotion.STRENGTH_LONG), Items.GOLD.setCountR(8), potionW)
 
         val specials = LinkedHashMap<Item, Window>()
-        specials[Item.get(Item.SPONGE).setCustomName(TextFormat.GOLD.toString() + "Lucky Block")] = ShopWindow(Item.get(Item.SPONGE).setCustomName(TextFormat.GOLD.toString() + "Lucky Block"), Items.IRON.setCountR(5), specialW)
-        specials[Item.get(Item.ENDER_PEARL)] = ShopWindow(Item.get(Item.ENDER_PEARL), Items.GOLD.setCountR(13), specialW)
-        specials[Item.get(Item.SPAWN_EGG, TNTShip.NETWORK_ID).setCustomName("${TextFormat.RED}Sheepy ${TextFormat.GOLD}Sheep ${TextFormat.YELLOW}Sheep")] = ShopWindow(Item.get(Item.SPAWN_EGG, TNTShip.NETWORK_ID).setCustomName("${TextFormat.RED}Sheepy ${TextFormat.GOLD}Sheep ${TextFormat.YELLOW}Sheep"), Items.BRONZE.setCountR(64), specialW)
-        specials[Item.get(Item.STONE_PRESSURE_PLATE).setCustomName(TextFormat.GOLD.toString() + "Mine")] = ShopWindow(Item.get(Item.STONE_PRESSURE_PLATE).setCustomName(TextFormat.GOLD.toString() + "Mine"), Items.IRON.setCountR(5), specialW)
-        specials[Item.get(Item.FISHING_ROD)] = ShopWindow(Item.get(Item.FISHING_ROD), Items.IRON.setCountR(2), specialW)
+        specials[Item.get(Item.SPONGE).setCustomName(TextFormat.GOLD.toString() + "Lucky Block")] = OfferWindow(Item.get(Item.SPONGE).setCustomName(TextFormat.GOLD.toString() + "Lucky Block"), Items.IRON.setCountR(5), specialW)
+        specials[Item.get(Item.ENDER_PEARL)] = OfferWindow(Item.get(Item.ENDER_PEARL), Items.GOLD.setCountR(13), specialW)
+        specials[Item.get(Item.SPAWN_EGG, TNTShip.NETWORK_ID).setCustomName("${TextFormat.RED}Sheepy ${TextFormat.GOLD}Sheep ${TextFormat.YELLOW}Sheep")] = OfferWindow(Item.get(Item.SPAWN_EGG, TNTShip.NETWORK_ID).setCustomName("${TextFormat.RED}Sheepy ${TextFormat.GOLD}Sheep ${TextFormat.YELLOW}Sheep"), Items.BRONZE.setCountR(64), specialW)
+        specials[Item.get(Item.STONE_PRESSURE_PLATE).setCustomName(TextFormat.GOLD.toString() + "Mine")] = OfferWindow(Item.get(Item.STONE_PRESSURE_PLATE).setCustomName(TextFormat.GOLD.toString() + "Mine"), Items.IRON.setCountR(5), specialW)
+        specials[Item.get(Item.FISHING_ROD)] = OfferWindow(Item.get(Item.FISHING_ROD), Items.IRON.setCountR(2), specialW)
         //TODO: WARP DUST
 
         ////////////////////////////////////////////////////////////////////
@@ -469,47 +473,14 @@ class BedWars : PluginBase(), BedWarsAPI {
         fun process(item: Item, window: Window): ConfigSection {
             val section = ConfigSection()
             section["name"] = window.name
+            section.putItem("icon", item)
 
-            val icon = ConfigSection()
-            icon["item_id"] = item.id
-            icon["item_damage"] = item.damage
-
-            if (item.hasCustomName())
-                icon["item_custom_name"] = item.customName
-
-            item.lore?.let { lore ->
-                if (lore.isEmpty())
-                    return@let
-
-                icon["lore"] = lore
-            }
-
-            item.enchantments?.let { enchants ->
-                if (enchants.isEmpty())
-                    return@let
-
-                val ench = enchants.map {
-                    val sec = ConfigSection()
-
-                    sec["id"] = it.id
-                    sec["level"] = it.level
-
-                    sec
-                }
-
-                icon["enchantments"] = ench
-            }
-
-            icon["item_path"] = item.name
-
-            section["icon"] = icon
-
-            if (window is ItemWindow) {
+            if (window is MenuWindow) {
                 section["type"] = "menu"
 
                 val children = ArrayList<ConfigSection>()
 
-                for (i in 0 until window.size) {
+                for (i in 0 until window.size - 1) {
                     val subItem = window.getItem(i)
                     val subWindow = window.getWindow(i)
 
@@ -521,14 +492,16 @@ class BedWars : PluginBase(), BedWarsAPI {
                 }
 
                 section["children"] = children
-            } else if (window is ShopWindow) {
+            } else if (window is OfferWindow) {
                 section["type"] = "shop"
+                section.putItem("purchase_item", window.item)
+                section.putItem("cost", window.cost)
             }
 
             return section
         }
 
-        main.windows.forEach { (_, window) -> shop.add(process(Item.get(0), window)) }
+        shop.add(process(Item.get(0), main))
 
         val cfg = Config(Config.YAML)
         cfg["section"] = shop

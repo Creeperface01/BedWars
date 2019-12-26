@@ -90,7 +90,7 @@ internal class Configuration(plugin: BedWars, file: File) {
 
         with(conf.getSection("economy")) {
             enableEconomy = getBoolean("enable_economy")
-            economyProvider = getString("economy_Provider")
+            economyProvider = getString("economy_provider")
 
             with(getSection("rewards")) {
                 this.keys.forEach { key ->
@@ -116,7 +116,7 @@ internal class Configuration(plugin: BedWars, file: File) {
 
         with(conf.getSection("game")) {
             shopType = try {
-                ShopType.valueOf(getString("shop"))
+                ShopType.valueOf(getString("shop").toUpperCase())
             } catch (e: IllegalArgumentException) {
                 plugin.logger.error("Invalid shop type ${getString("shop")} using default 'inventory'")
                 ShopType.INVENTORY

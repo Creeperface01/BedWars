@@ -4,6 +4,7 @@ import cn.nukkit.Player
 import com.creeperface.nukkit.bedwars.api.arena.Arena
 import com.creeperface.nukkit.bedwars.api.data.provider.DataProvider
 import com.creeperface.nukkit.bedwars.api.economy.EconomyProvider
+import kotlin.reflect.KClass
 
 interface BedWarsAPI {
 
@@ -19,9 +20,9 @@ interface BedWarsAPI {
 
     fun getFreeArena(p: Player): Arena?
 
-    fun registerEconomyProvider(name: String, provider: EconomyProvider)
+    fun registerEconomyProvider(name: String, provider: KClass<out EconomyProvider>)
 
-    fun registerDataProvider(name: String, provider: DataProvider)
+    fun registerDataProvider(name: String, provider: KClass<out DataProvider>)
 
     companion object {
 

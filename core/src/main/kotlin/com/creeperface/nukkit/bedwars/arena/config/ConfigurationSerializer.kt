@@ -4,6 +4,7 @@ import cn.nukkit.math.Vector3
 import cn.nukkit.utils.ConfigSection
 import com.creeperface.nukkit.bedwars.api.arena.configuration.IArenaConfiguration
 import com.creeperface.nukkit.bedwars.arena.Team
+import com.creeperface.nukkit.bedwars.utils.getVector3
 import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
 import kotlin.reflect.KType
@@ -19,7 +20,7 @@ object ConfigurationSerializer {
     private val typeReaders = mutableMapOf<KType, (ConfigSection, String) -> Any?>()
 
     init {
-        typeReaders[Vector3::class.createType()] = { section, key -> section.readVector3(key) }
+        typeReaders[Vector3::class.createType()] = { section, key -> section.getVector3(key) }
         typeReaders[List::class.createType(
                 listOf(
                         KTypeProjection.invariant(Team::class.createType())
@@ -30,36 +31,33 @@ object ConfigurationSerializer {
     fun <T : Any> loadClass(cfg: ConfigSection, clazz: KClass<T>) = cfg.readClass(clazz)
 
     private fun <T : Any> ConfigSection.readClass(clazz: KClass<T>): T {
-        val constructor = clazz.primaryConstructor!!
-        val params = mutableMapOf<KParameter, Any?>()
+        val constructors = clazz.constructors.toMutableList()
 
-        constructor.parameters.forEach { param ->
-            typeReaders[param.type]?.let {
-                params[param] = it(this, param.name!!)
-                return@forEach
-            }
-
-            if (this.contains(param.name)) {
-                params[param] = this[param.name]
-            } else if (!param.isOptional) {
-                throw RuntimeException("Parameter ${param.name} is missing in the configuration")
-            }
+        clazz.primaryConstructor?.let {
+            constructors.add(0, it)
         }
 
-        return constructor.callBy(params)
-    }
+        val params = mutableMapOf<KParameter, Any?>()
 
-    private fun ConfigSection.readVector3(key: String): Vector3 {
-        return this.getSection(key).readVector3()
-    }
+        constructors.forEach const@{ constructor ->
+            constructor.parameters.forEach param@{ param ->
+                typeReaders[param.type]?.let {
+                    params[param] = it(this, param.name!!)
+                    return@param
+                }
 
-    private fun ConfigSection.readVector3(): Vector3 {
-        val vector = Vector3()
-        vector.x = this.getDouble("x")
-        vector.y = this.getDouble("y")
-        vector.z = this.getDouble("z")
+                if (this.contains(param.name)) {
+                    params[param] = this[param.name]
+                } else if (!param.isOptional) {
+//                    throw RuntimeException("Parameter ${param.name} is missing in the configuration")
+                    return@const
+                }
+            }
 
-        return vector
+            return constructor.callBy(params)
+        }
+
+        throw RuntimeException("Callable constructor not found")
     }
 
     private fun ConfigSection.readTeams(key: String): List<IArenaConfiguration.TeamConfiguration> {

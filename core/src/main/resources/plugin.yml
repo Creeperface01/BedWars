@@ -5,7 +5,7 @@ main: com.creeperface.nukkit.bedwars.BedWars
 author: "CreeperFace"
 description: "bedWars minigame"
 depend: ["Actaeon", "DbLib", "PlaceholderAPI", "KotlinLib"]
-softdepend: ["BedWarsHelper"]
+softdepend: ["BedWarsHelper", "EconomyAPI"]
 
 permissions:
   bedwars:
