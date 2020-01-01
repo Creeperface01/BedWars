@@ -1,0 +1,41 @@
+##TODO list
+- [ ] plugin API
+  - [ ] tested
+- [ ] API events
+  - [ ] tested
+- [x] configuration
+  - [ ] tested
+- [x] arena configuration
+  - [ ] tested
+- [x] map configuration
+  - [ ] tested
+- [ ] data providers
+  - [x] provider implementation
+    - [ ] tested
+  - [x] player data
+    - [ ] tested
+  - [ ] plugin & arena configuration
+    - [ ] tested
+  - [ ] map configuration
+    - [ ] tested
+- [x] economy providers
+  - [ ] tested
+- [ ] shop
+  - [x] inventory
+    - [ ] tested
+  - [ ] forms
+    - [ ] tested
+- [ ] shop per map
+  - [ ] tested
+- [ ] select specific maps per arena
+  - [ ] tested
+- [ ] reward system
+  - [ ] tested
+- [x] configuration tool
+  - [ ] tested
+- [ ] customizable game currencies (drops)
+  - [ ] tested
+- [ ] kill streaks
+  - [ ] tested
+- [ ] multilingual translation
+  - [ ] tested

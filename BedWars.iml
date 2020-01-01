@@ -3,8 +3,8 @@
   <component name="AutoImportedSourceRoots">
     <option name="directories">
       <list>
-        <option value="C:\Users\honza\IdeaProjects\BedWars/src/main/java" />
-        <option value="C:\Users\honza\IdeaProjects\BedWars/src/main/kotlin" />
+        <option value="$MODULE_DIR$/src/main/java" />
+        <option value="$MODULE_DIR$/src/main/kotlin" />
       </list>
     </option>
   </component>
@@ -74,6 +74,5 @@
     <orderEntry type="library" scope="TEST" name="Maven: org.jetbrains.kotlin:kotlin-test-common:1.3.61" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.jetbrains.kotlin:kotlin-reflect:1.3.61" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: cn.nukkit:nukkit:1.0-SNAPSHOT" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Maven: com.creeperface.nukkit.placeholderapi:PlaceholderAPI:1.4-SNAPSHOT" level="project" />
   </component>
 </module>

@@ -9,11 +9,11 @@ import com.creeperface.nukkit.bedwars.api.utils.Lang
 interface Arena : IArenaConfiguration {
 
     val players: Map<String, PlayerData>
-    
     val spectators: Map<String, Player>
 
     var gameState: ArenaState
 
+    val teams: List<Team>
     val aliveTeams: List<Team>
 
     val mapConfig: MapConfiguration

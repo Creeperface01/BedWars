@@ -8,9 +8,9 @@ import cn.nukkit.event.entity.EntityDamageEvent
 import cn.nukkit.level.format.FullChunk
 import cn.nukkit.nbt.tag.CompoundTag
 import cn.nukkit.network.protocol.AddEntityPacket
+import com.creeperface.nukkit.bedwars.api.utils.BedWarsExplosion
 import com.creeperface.nukkit.bedwars.arena.Arena
 import com.creeperface.nukkit.bedwars.arena.Team
-import com.creeperface.nukkit.bedwars.utils.BedWarsExplosion
 import me.onebone.actaeon.entity.MovingEntity
 import me.onebone.actaeon.target.EntityTarget
 

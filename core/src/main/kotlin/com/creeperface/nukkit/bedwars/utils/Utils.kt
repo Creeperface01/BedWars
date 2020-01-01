@@ -4,17 +4,26 @@ import cn.nukkit.Player
 import cn.nukkit.block.Block
 import cn.nukkit.blockentity.BlockEntity
 import cn.nukkit.command.CommandSender
+import cn.nukkit.inventory.Inventory
 import cn.nukkit.item.Item
 import cn.nukkit.item.enchantment.Enchantment
 import cn.nukkit.level.format.FullChunk
 import cn.nukkit.utils.DyeColor
 import cn.nukkit.utils.TextFormat
 import com.creeperface.nukkit.bedwars.BedWars
+import com.creeperface.nukkit.bedwars.api.shop.ShopMenuWindow
+import com.creeperface.nukkit.bedwars.api.shop.ShopOfferWindow
+import com.creeperface.nukkit.bedwars.api.shop.ShopWindow
+import com.creeperface.nukkit.bedwars.shop.inventory.MenuWindow
+import com.creeperface.nukkit.bedwars.shop.inventory.OfferWindow
+import com.creeperface.nukkit.bedwars.shop.inventory.Window
 import java.sql.ResultSet
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
 import kotlin.reflect.KClass
 import kotlin.reflect.full.isSubclassOf
+
+typealias TF = TextFormat
 
 private val RGB_CONVERTER = arrayOf(
         1908001,
@@ -152,3 +161,32 @@ fun <K, V> MutableMap<K, V>.deepMerge(map: Map<K, V>): Map<K, V> {
 
     return this
 }
+
+operator fun Appendable.plusAssign(str: String) {
+    this.append(str)
+}
+
+operator fun TextFormat.plus(str: String) = str + this.toString()
+
+fun ShopWindow.toInventory(): Window {
+    return when (this) {
+        is Window -> this
+        is ShopMenuWindow -> MenuWindow(this)
+        is ShopOfferWindow -> OfferWindow(this)
+        else -> throw RuntimeException("Unknown window class '${this::class.qualifiedName}'")
+    }
+}
+
+fun Player.openInventory(inv: Inventory) {
+    val id = this.getWindowId(inv)
+
+    if (id >= 0) {
+        inv.onOpen(this)
+    } else {
+        this.addWindow(inv)
+    }
+}
+
+//operator fun StringBuilder.plusAssign(obj: Any) {
+//    this.append(obj)
+//}

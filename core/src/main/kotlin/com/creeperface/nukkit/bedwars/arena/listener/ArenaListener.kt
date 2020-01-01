@@ -16,6 +16,7 @@ import cn.nukkit.event.inventory.InventoryClickEvent
 import cn.nukkit.event.inventory.InventoryPickupArrowEvent
 import cn.nukkit.event.inventory.InventoryTransactionEvent
 import cn.nukkit.event.player.*
+import cn.nukkit.form.response.FormResponseSimple
 import cn.nukkit.inventory.transaction.action.SlotChangeAction
 import cn.nukkit.item.Item
 import cn.nukkit.math.Vector3
@@ -29,6 +30,7 @@ import cn.nukkit.utils.TextFormat
 import com.creeperface.nukkit.bedwars.BedWars
 import com.creeperface.nukkit.bedwars.api.arena.Arena.ArenaState
 import com.creeperface.nukkit.bedwars.api.data.Stat
+import com.creeperface.nukkit.bedwars.api.utils.BedWarsExplosion
 import com.creeperface.nukkit.bedwars.api.utils.Lang
 import com.creeperface.nukkit.bedwars.arena.Arena
 import com.creeperface.nukkit.bedwars.blockentity.BlockEntityMine
@@ -38,8 +40,8 @@ import com.creeperface.nukkit.bedwars.obj.BedWarsData
 import com.creeperface.nukkit.bedwars.shop.inventory.MenuWindow
 import com.creeperface.nukkit.bedwars.shop.inventory.OfferWindow
 import com.creeperface.nukkit.bedwars.shop.inventory.Window
-import com.creeperface.nukkit.bedwars.utils.BedWarsExplosion
 import com.creeperface.nukkit.bedwars.utils.Items
+import com.creeperface.nukkit.bedwars.utils.openInventory
 import java.util.*
 
 class ArenaListener(private val arena: Arena) : Listener {
@@ -217,13 +219,7 @@ class ArenaListener(private val arena: Arena) : Listener {
                     kData = arena.playerData[killer.name.toLowerCase()]!!
                     val inv = kData.team.shop
 
-                    val id = killer.getWindowId(inv)
-
-                    if (id >= 0) {
-                        inv.onOpen(killer)
-                    } else {
-                        killer.addWindow(inv)
-                    }
+                    killer.openInventory(inv)
 
                     e.setCancelled()
                 }
@@ -465,33 +461,15 @@ class ArenaListener(private val arena: Arena) : Listener {
 
         if (inv2 is OfferWindow) {
             if (slot == 0) {
-                val cost = inv2.cost
-                val item = inv2.item
-
-                if (!Items.containsItem(inv, cost)) {
-                    p.sendMessage(Lang.LOW_SHOP.translate(cost.customName))
-                    return
-                }
-
-                if (!inv.canAddItem(item)) {
-                    p.sendMessage(Lang.FULL_INVENTORY.translate())
-                    return
-                }
-
-                Items.removeItem(inv, cost)
-                inv.addItem(item)
-
-                p.sendMessage(BedWars.prefix + (Lang.BUY.translate(if (item.hasCustomName()) item.customName else item.name)))
-            } else {
-                val window = inv2.getWindow(slot)
-
-                window?.run {
-                    p.addWindow(this)
-                    onOpen(p)
+                arena.plugin.shop.processTransaction(p, inv2.item, inv2.cost)
+            } else if (slot == inv2.size - 1) {
+                inv2.parent?.let {
+                    p.addWindow(it)
+                    it.onOpen(p)
                 }
             }
         } else if (inv2 is MenuWindow) {
-            val newWindow = inv2.getWindow(slot)
+            val newWindow = inv2[slot]
 
             if (newWindow != null) {
                 val id = p.addWindow(newWindow)
@@ -550,5 +528,19 @@ class ArenaListener(private val arena: Arena) : Listener {
         if (p is Player && p.gamemode > 1) {
             e.setCancelled()
         }
+    }
+
+    @EventHandler
+    fun onFormResponse(e: PlayerFormRespondedEvent) {
+        if (arena.gameState != ArenaState.GAME) {
+            return
+        }
+
+        val p = e.player
+
+        val data = arena.getPlayerData(p) ?: return
+        val response = e.response as? FormResponseSimple ?: return
+
+        this.arena.plugin.formManager.handleResponse(p, data, e.formID, response)
     }
 }

@@ -33,6 +33,7 @@ import com.creeperface.nukkit.bedwars.api.arena.configuration.ArenaConfiguration
 import com.creeperface.nukkit.bedwars.api.arena.configuration.IArenaConfiguration
 import com.creeperface.nukkit.bedwars.api.arena.configuration.MapConfiguration
 import com.creeperface.nukkit.bedwars.api.data.Stat
+import com.creeperface.nukkit.bedwars.api.utils.BedWarsExplosion
 import com.creeperface.nukkit.bedwars.api.utils.Lang
 import com.creeperface.nukkit.bedwars.arena.manager.DeathManager
 import com.creeperface.nukkit.bedwars.arena.manager.ScoreboardManager
@@ -43,7 +44,6 @@ import com.creeperface.nukkit.bedwars.blockentity.BlockEntityTeamSign
 import com.creeperface.nukkit.bedwars.entity.SpecialItem
 import com.creeperface.nukkit.bedwars.obj.BedWarsData
 import com.creeperface.nukkit.bedwars.task.WorldCopyTask
-import com.creeperface.nukkit.bedwars.utils.BedWarsExplosion
 import com.creeperface.nukkit.bedwars.utils.Items
 import com.creeperface.nukkit.bedwars.utils.blockEntity
 import com.creeperface.nukkit.bedwars.utils.plus
@@ -61,7 +61,7 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaC
     override val spectators: Map<String, Player>
         get() = gameSpectators.toMap()
 
-    val teams = ArrayList<Team>(teamData.size)
+    override val teams = ArrayList<Team>(teamData.size)
 
     private val task = ArenaSchedule(this)
     private val popupTask = PopupTask(this)
@@ -361,7 +361,7 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaC
 
         for (pl in ArrayList(bedteam.players.values)) {
             if (p.isOnline) {
-                pl.player.setSpawn(this.plugin.mainLobby)
+                pl.player.setSpawn(this.plugin.server.defaultLevel.spawnLocation)
             }
         }
 
@@ -668,6 +668,8 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaC
         BedWarsExplosion(b.add(0.5, 0.5, 0.5), 0.8, null).explode(this, blockEntity.getTeam())
         b.level.setBlock(b, BlockAir(), true, false)
     }
+
+    override fun toString() = this.name
 
     companion object {
 

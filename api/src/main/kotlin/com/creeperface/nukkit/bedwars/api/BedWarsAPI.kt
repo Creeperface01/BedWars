@@ -4,6 +4,7 @@ import cn.nukkit.Player
 import com.creeperface.nukkit.bedwars.api.arena.Arena
 import com.creeperface.nukkit.bedwars.api.data.provider.DataProvider
 import com.creeperface.nukkit.bedwars.api.economy.EconomyProvider
+import com.creeperface.nukkit.bedwars.api.shop.Shop
 import kotlin.reflect.KClass
 
 interface BedWarsAPI {
@@ -11,6 +12,8 @@ interface BedWarsAPI {
     val economyProvider: EconomyProvider
 
     val dataProvider: DataProvider
+
+    val shop: Shop
 
     fun getPlayerArena(p: Player): Arena?
 

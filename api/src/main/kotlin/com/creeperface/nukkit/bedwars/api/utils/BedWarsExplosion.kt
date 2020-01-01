@@ -1,4 +1,4 @@
-package com.creeperface.nukkit.bedwars.utils
+package com.creeperface.nukkit.bedwars.api.utils
 
 import cn.nukkit.Player
 import cn.nukkit.entity.Entity
@@ -12,7 +12,8 @@ import cn.nukkit.level.particle.HugeExplodeParticle
 import cn.nukkit.math.NukkitMath
 import cn.nukkit.math.SimpleAxisAlignedBB
 import cn.nukkit.math.Vector3
-import com.creeperface.nukkit.bedwars.arena.Arena
+import com.creeperface.nukkit.bedwars.api.arena.Arena
+import kotlin.math.max
 
 /**
  * Created by CreeperFace on 14. 12. 2016.
@@ -20,7 +21,7 @@ import com.creeperface.nukkit.bedwars.arena.Arena
 class BedWarsExplosion(private val source: Position, size: Double, private val what: Entity?) {
 
     private val level: Level = source.getLevel()
-    private val size: Double = Math.max(size, 0.0)
+    private val size: Double = max(size, 0.0)
 
     fun explode(arena: Arena, team: Int): Boolean {
         val source = Vector3(this.source.x, this.source.y, this.source.z).floor()
@@ -39,9 +40,9 @@ class BedWarsExplosion(private val source: Position, size: Double, private val w
         for (entity in list) {
 
             if (entity is Player) {
-                val data = arena.getPlayerData(entity)
+                val playerTeam = arena.getPlayerData(entity)?.team ?: continue
 
-                if (data?.team?.id == team)
+                if (playerTeam.id == team)
                     continue
             }
 
@@ -65,7 +66,7 @@ class BedWarsExplosion(private val source: Position, size: Double, private val w
             }
         }
 
-        this.level.addParticle(HugeExplodeParticle(source)) //TODO: check
+        this.level.addParticle(HugeExplodeParticle(source))
         this.level.addSound(source, Sound.RANDOM_EXPLODE)
         return true
     }

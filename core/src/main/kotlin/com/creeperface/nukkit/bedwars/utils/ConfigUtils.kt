@@ -4,23 +4,25 @@ import cn.nukkit.item.Item
 import cn.nukkit.item.enchantment.Enchantment
 import cn.nukkit.math.Vector3
 import cn.nukkit.utils.ConfigSection
+import com.creeperface.nukkit.placeholderapi.api.PlaceholderAPI
+import com.creeperface.nukkit.placeholderapi.api.util.AnyContext
+import kotlin.reflect.KClass
 
-fun ConfigSection.getVector3(key: String): Vector3 {
-    return this.getSection(key).getVector3()
-}
+fun ConfigSection.getVector3(key: String? = null): Vector3 {
+    val sec = if (key != null) this.getSection(key) else this
 
-fun ConfigSection.getVector3(): Vector3 {
     val vector = Vector3()
-    vector.x = this.getDouble("x")
-    vector.y = this.getDouble("y")
-    vector.z = this.getDouble("z")
+    vector.x = sec.getDouble("x")
+    vector.y = sec.getDouble("y")
+    vector.z = sec.getDouble("z")
 
     return vector
 }
 
 @Suppress("UNCHECKED_CAST")
-fun ConfigSection.getItem(key: String): Item {
-    val sec = this.getSection(key)
+fun ConfigSection.getItem(key: String? = null, context: AnyContext): Item {
+    val sec = if (key != null) this.getSection(key) else this
+    val papi = PlaceholderAPI.getInstance()
 
     val item = Item.get(
             sec.getInt("item_id"),
@@ -29,11 +31,11 @@ fun ConfigSection.getItem(key: String): Item {
     )
 
     if (sec.containsKey("item_custom_name")) {
-        item.customName = sec.getString("item_custom_name")
+        item.customName = papi.translateString(sec.getString("item_custom_name"), context = context)
     }
 
     if (sec.containsKey("lore")) {
-        item.setLore(*sec.getStringList("lore").toTypedArray())
+        item.setLore(*sec.getStringList("lore").map { papi.translateString(it, context = context) }.toTypedArray())
     }
 
     if (sec.containsKey("enchantments")) {
@@ -81,7 +83,14 @@ fun ConfigSection.putItem(key: String, item: Item) {
             this["enchantments"] = ench
         }
 
-        this["item_path"] = item.name
         this@putItem[key] = this
     }
+}
+
+fun <T : Enum<T>> ConfigSection.getEnum(enumClass: KClass<T>, key: String): T {
+    return java.lang.Enum.valueOf(enumClass.java, this[key].toString().toUpperCase())
+}
+
+fun <T : Enum<T>> ConfigSection.setEnum(key: String, value: T) {
+    this[key] = value.name.toLowerCase()
 }

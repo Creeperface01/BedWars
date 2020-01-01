@@ -37,12 +37,9 @@ object FireworkUtils {
     }
 
     fun init() {
-        var blue = ItemFirework()
-        var red = ItemFirework()
-        var yellow = ItemFirework()
-        var green = ItemFirework()
 
         //blue
+        var blue = ItemFirework()
         blue.addExplosion(FireworkExplosion()
                 .addColor(DyeColor.BLUE)
                 .addColor(DyeColor.LIGHT_BLUE)
@@ -86,7 +83,7 @@ object FireworkUtils {
                 .type(ExplosionType.LARGE_BALL)
         )
         BLUE.add(blue)
-        red = ItemFirework()
+        var red = ItemFirework()
 
         //red
 
@@ -133,7 +130,7 @@ object FireworkUtils {
                 .type(ExplosionType.LARGE_BALL)
         )
         RED.add(red)
-        yellow = ItemFirework()
+        var yellow = ItemFirework()
 
         //yellow
         yellow.addExplosion(FireworkExplosion()
@@ -179,7 +176,7 @@ object FireworkUtils {
                 .type(ExplosionType.LARGE_BALL)
         )
         YELLOW.add(yellow)
-        green = ItemFirework()
+        var green = ItemFirework()
 
         //green
         green.addExplosion(FireworkExplosion()

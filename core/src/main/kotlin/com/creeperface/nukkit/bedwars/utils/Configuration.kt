@@ -5,6 +5,7 @@ import cn.nukkit.utils.Config
 import com.creeperface.nukkit.bedwars.BedWars
 import com.creeperface.nukkit.bedwars.api.data.Stat
 import com.creeperface.nukkit.bedwars.api.economy.EconomyProvider
+import com.creeperface.nukkit.bedwars.api.shop.ShopType
 import java.io.File
 import java.util.*
 
@@ -148,11 +149,6 @@ internal class Configuration(plugin: BedWars, file: File) {
             val currency: EconomyProvider.Currency,
             val amount: Int
     )
-
-    enum class ShopType {
-        INVENTORY,
-        FORM
-    }
 
     enum class PlayerIdentifier {
         NAME {
