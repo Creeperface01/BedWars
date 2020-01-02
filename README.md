@@ -23,7 +23,7 @@
 - [ ] shop
   - [x] inventory
     - [ ] tested
-  - [ ] forms
+  - [x] forms
     - [ ] tested
 - [ ] shop per map
   - [ ] tested

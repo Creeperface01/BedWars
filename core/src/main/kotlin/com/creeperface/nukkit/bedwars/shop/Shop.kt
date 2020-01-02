@@ -2,6 +2,8 @@ package com.creeperface.nukkit.bedwars.shop
 
 import cn.nukkit.Player
 import cn.nukkit.item.Item
+import cn.nukkit.item.ItemBlock
+import cn.nukkit.level.GlobalBlockPalette
 import cn.nukkit.utils.Config
 import cn.nukkit.utils.ConfigSection
 import com.creeperface.nukkit.bedwars.BedWars
@@ -46,14 +48,7 @@ class Shop(private val plugin: BedWars) : Shop {
         }
     }
 
-//    override fun createMenuWindow(icon: ShopWindow.WindowIcon, windows: List<ShopWindow>): ShopMenuWindow {
-//        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-//    }
-//
-//    override fun createOfferWindow(icon: ShopWindow.WindowIcon, item: Item, cost: Collection<Item>): ShopMenuWindow {
-//        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-//    }
-
+    //TODO: item texture names
     fun load(arena: Arena, team: Team): MenuWindow {
         if (config.isEmpty()) {
             return GenericMenuWindow.create(0, "Shop").inventory
@@ -67,6 +62,14 @@ class Shop(private val plugin: BedWars) : Shop {
                     section.getItem("icon", teamContext),
                     section.getString("item_path")
             )
+
+            val textureType = if (icon.item is ItemBlock) {
+                "blocks"
+            } else {
+                "items"
+            }
+
+            section.getSection("icon").set("item_path", "textures/$textureType/" + GlobalBlockPalette.getName(icon.item.id).substring(10) + ".png")
 
             val type = section.getEnum(ShopWindow.WindowType::class, "type")
 

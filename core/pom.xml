@@ -90,9 +90,11 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <finalName>bedwars-${project.version}</finalName>
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
+                    <appendAssemblyId>false</appendAssemblyId>
                 </configuration>
             </plugin>
         </plugins>
