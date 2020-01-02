@@ -47,14 +47,6 @@ internal class MongoDBDataProvider(private val configuration: Configuration) : D
         val doc = Document()
                 .append("identifier", identifier)
                 .append("name", name)
-                .append("kills", 0)
-                .append("deaths", 0)
-                .append("wins", 0)
-                .append("losses", 0)
-                .append("beds", 0)
-                .append("place", 0)
-                .append("break", 0)
-                .append("games", 0)
 
         collection.insertOne(doc)
     }
