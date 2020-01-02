@@ -17,6 +17,9 @@ import com.creeperface.nukkit.bedwars.api.shop.ShopWindow
 import com.creeperface.nukkit.bedwars.shop.inventory.MenuWindow
 import com.creeperface.nukkit.bedwars.shop.inventory.OfferWindow
 import com.creeperface.nukkit.bedwars.shop.inventory.Window
+import com.fasterxml.jackson.databind.json.JsonMapper
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import java.sql.ResultSet
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
@@ -187,6 +190,16 @@ fun Player.openInventory(inv: Inventory) {
     }
 }
 
-//operator fun StringBuilder.plusAssign(obj: Any) {
-//    this.append(obj)
-//}
+private val jacksonMapper = JsonMapper.builder()
+        .addModule(Jdk8Module())
+        .addModule(JavaTimeModule())
+        .build()
+
+fun <T : Any> KClass<T>.fromJson(data: String): T = jacksonMapper.readValue(data, this.java)
+
+fun <T : Any> KClass<T>.fromMap(data: Map<String, *>): T = jacksonMapper.convertValue(data, this.java)
+
+fun Any.toJson(): String = jacksonMapper.writeValueAsString(this)
+
+@Suppress("UNCHECKED_CAST")
+fun Any.toMap(): Map<String, *> = jacksonMapper.convertValue(this, Map::class.java) as Map<String, *>

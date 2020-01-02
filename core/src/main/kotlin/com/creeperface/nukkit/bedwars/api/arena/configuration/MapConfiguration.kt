@@ -3,14 +3,17 @@ package com.creeperface.nukkit.bedwars.api.arena.configuration
 import cn.nukkit.math.Vector3
 import cn.nukkit.utils.DyeColor
 import cn.nukkit.utils.TextFormat
+import com.creeperface.nukkit.bedwars.api.utils.Modifiable
+import java.time.Instant
 
 class MapConfiguration(
         val name: String,
         val bronze: List<Vector3>,
         val iron: List<Vector3>,
         val gold: List<Vector3>,
+        override val lastModification: Instant,
         val teams: List<TeamData>
-) {
+) : Modifiable {
 
     data class TeamData(
             val name: String,

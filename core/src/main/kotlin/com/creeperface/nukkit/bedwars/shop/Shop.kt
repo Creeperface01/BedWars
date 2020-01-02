@@ -59,7 +59,7 @@ class Shop(private val plugin: BedWars) : Shop {
         fun loadWindow(parent: MenuWindow, section: ConfigSection, level: Int, id: Int): Window {
             val name = section.getString("name")
             val icon = ShopWindow.WindowIcon(
-                    section.getItem("icon", teamContext),
+                    section.readItem("icon", teamContext),
                     section.getString("item_path")
             )
 
@@ -71,13 +71,13 @@ class Shop(private val plugin: BedWars) : Shop {
 
             section.getSection("icon").set("item_path", "textures/$textureType/" + GlobalBlockPalette.getName(icon.item.id).substring(10) + ".png")
 
-            val type = section.getEnum(ShopWindow.WindowType::class, "type")
+            val type = section.readEnum(ShopWindow.WindowType::class, "type")
 
             if (type == ShopWindow.WindowType.OFFER) {
-                val item = section.getItem("item", teamContext)
+                val item = section.readItem("item", teamContext)
 
                 val cost = section.getList("cost").filterIsInstance<ConfigSection>().map {
-                    it.getItem(context = teamContext)
+                    it.readItem(context = teamContext)
                 }
 
                 return GenericOfferWindow(id, item, cost, name, icon, parent).inventory

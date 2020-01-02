@@ -1,10 +1,14 @@
 package com.creeperface.nukkit.bedwars.dataprovider
 
+import com.creeperface.nukkit.bedwars.api.arena.configuration.ArenaConfiguration
+import com.creeperface.nukkit.bedwars.api.arena.configuration.MapConfiguration
 import com.creeperface.nukkit.bedwars.api.data.Stat
 import com.creeperface.nukkit.bedwars.api.data.Stats
 import com.creeperface.nukkit.bedwars.api.data.provider.DataProvider
+import com.creeperface.nukkit.bedwars.api.utils.Modifiable
 import com.creeperface.nukkit.bedwars.api.utils.set
 import com.creeperface.nukkit.bedwars.utils.Configuration
+import com.creeperface.nukkit.bedwars.utils.fromJson
 import com.mongodb.client.MongoClient
 import com.mongodb.client.MongoClients
 import com.mongodb.client.MongoCollection
@@ -16,6 +20,8 @@ internal class MongoDBDataProvider(private val configuration: Configuration) : D
 
     private lateinit var client: MongoClient
     private lateinit var collection: MongoCollection<Document>
+    private lateinit var arenasCollection: MongoCollection<Document>
+    private lateinit var mapsCollection: MongoCollection<Document>
 
     override fun init() {
         val mongoConf = configuration.mongo
@@ -28,7 +34,9 @@ internal class MongoDBDataProvider(private val configuration: Configuration) : D
         client = MongoClients.create(builder.build().toString())
         val database = client.getDatabase(mongoConf.database)
 
-        collection = database.getCollection("bedwars")
+        collection = database.getCollection(STATS)
+        arenasCollection = database.getCollection(ARENAS)
+        mapsCollection = database.getCollection(MAPS)
     }
 
     override fun deinit() {
@@ -82,6 +90,42 @@ internal class MongoDBDataProvider(private val configuration: Configuration) : D
     }
 
     override suspend fun saveData(identifier: String, data: Stats) {
+        val doc = Document()
 
+        Stat.values().forEach {
+            doc.append(it.name.toLowerCase(), data.getDelta(it))
+        }
+
+        collection.updateOne(Filters.eq("identifier", identifier), Document()
+                .append("\$inc", doc)
+        )
+    }
+
+    private inline fun <reified T : Modifiable> sync(data: MutableMap<String, T>, collection: MongoCollection<Document>) {
+        collection.find().forEach {
+            val name = it.getString("name")
+            val local = data[name]
+
+            val modifyTime = it.getDate("last_update").toInstant()
+
+            if (local == null || modifyTime > local.lastModification) {
+                data[name] = T::class.fromJson(it.getString("data"))
+            }
+        }
+    }
+
+    override suspend fun syncArenas(arenas: MutableMap<String, ArenaConfiguration>) {
+        sync(arenas, arenasCollection)
+    }
+
+    override suspend fun syncMaps(maps: MutableMap<String, MapConfiguration>) {
+        sync(maps, mapsCollection)
+    }
+
+    companion object {
+
+        const val STATS = "bedwars_stats"
+        const val MAPS = "bedwars_maps"
+        const val ARENAS = "bedwars_arenas"
     }
 }

@@ -3,6 +3,8 @@ package com.creeperface.nukkit.bedwars.api.arena.configuration
 import cn.nukkit.math.Vector3
 import cn.nukkit.utils.DyeColor
 import cn.nukkit.utils.TextFormat
+import com.creeperface.nukkit.bedwars.api.utils.Modifiable
+import java.time.Instant
 
 class ArenaConfiguration(
         override val name: String,
@@ -19,10 +21,11 @@ class ArenaConfiguration(
         override val maxPlayers: Int,
         override val multiPlatform: Boolean,
         override val lobby: Vector3,
+        override val lastModification: Instant,
         override val teamData: List<IArenaConfiguration.TeamConfiguration>
 ) : IArenaConfiguration
 
-interface IArenaConfiguration {
+interface IArenaConfiguration : Modifiable {
     val name: String
     val timeLimit: Int
     val startTime: Int
