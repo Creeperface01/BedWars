@@ -43,7 +43,8 @@ class ScoreboardManager(private val arena: Arena) {
     fun initGame() {
         scoreboard.resetAllScores()
 
-        scoreboard.setDisplayName("${TF.DARK_GRAY}Map: ${TF.GOLD}${arena.map}")
+        val map = arena.map ?: "Voting"
+        scoreboard.setDisplayName("${TF.DARK_GRAY}Map: ${TF.GOLD}$map")
 
         arena.teams.forEachIndexed { index, team ->
             scoreboard.setScore(index.toLong(), team.status, index)

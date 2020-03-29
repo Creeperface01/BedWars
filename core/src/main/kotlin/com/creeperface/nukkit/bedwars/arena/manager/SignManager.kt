@@ -25,7 +25,7 @@ class SignManager(private val arena: Arena) {
     }
 
     internal fun updateMainSign() {
-        val mapname = arena.map
+        val mapname = arena.map ?: "Voting"
         val map: String
 
         map = when {

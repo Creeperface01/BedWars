@@ -17,7 +17,7 @@ import java.util.*
 class PopupTask(var plugin: Arena) : Task() {
 
     var ending = 20
-    var fireworkIndex = 0
+    private var fireworkIndex = 0
 
     override fun onRun(tick: Int) {
         /*if (this.plugin.game == 1 && !this.plugin.ending) {

@@ -71,7 +71,7 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaC
     internal val signManager = SignManager(this)
     internal val deathManager: DeathManager
 
-    var map = "Voting"
+    override var map: String? = null
     var winnerTeam = 0
     internal var canJoin = true
     var isLevelLoaded = false
@@ -212,8 +212,9 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaC
         this.starting = false
         isLevelLoaded = false
 
-        this.plugin.server.loadLevel(this.map + "_" + this.name)
-        this.level = this.plugin.server.getLevelByName(this.map + "_" + name)
+        val levelName = this.map + "_" + this.name
+        this.plugin.server.loadLevel(levelName)
+        this.level = this.plugin.server.getLevelByName(levelName)
         this.level.isRaining = false
         this.level.isThundering = false
 
@@ -322,6 +323,7 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaC
         this.ending = false
         this.winnerTeam = -1
         this.gameState = ArenaState.LOBBY
+        this.map = null
 
         this.level.unload()
 

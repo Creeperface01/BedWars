@@ -1,11 +1,15 @@
 package com.creeperface.nukkit.bedwars.placeholder
 
+import cn.nukkit.utils.DyeColor
 import com.creeperface.nukkit.bedwars.BedWars
-import com.creeperface.nukkit.bedwars.api.utils.ArenaContext
-import com.creeperface.nukkit.bedwars.api.utils.TeamContext
+import com.creeperface.nukkit.bedwars.api.arena.Arena
+import com.creeperface.nukkit.bedwars.api.placeholder.ArenaScope
+import com.creeperface.nukkit.bedwars.api.placeholder.TeamScope
 import com.creeperface.nukkit.placeholderapi.api.PlaceholderAPI
 
 object Placeholders {
+
+    private const val PREFIX = "bw_"
 
     fun init(plugin: BedWars) {
         plugin.server.pluginManager.getPlugin("PlaceholderAPI") ?: return
@@ -13,46 +17,75 @@ object Placeholders {
         val api = PlaceholderAPI.getInstance()
 
         //global placeholders
-        api.buildStatic("bedwars_arenas") { _ ->
-            plugin.ins
+        api.build<Collection<String>>("${PREFIX}arenas") {
+            loader {
+                plugin.ins.values.map { it.name }
+            }
         }
 
         //arena placeholders
-        api.buildStatic("arena_players") { _, context: ArenaContext ->
-            context.context.players.values.map { it.player }
-        }.build()
 
-        api.buildStatic("arena_spectators") { _, context: ArenaContext ->
-            context.context.spectators.values
-        }.build()
+        api.build<Collection<String>>("${PREFIX}arena_players") {
+            scopedLoader(ArenaScope) {
+                contextVal.players.values.map { it.player.name }
+            }
+        }
 
-        api.buildStatic("arena_state") { _, context: ArenaContext ->
-            context.context.gameState
-        }.build()
+        api.build<Collection<String>>("${PREFIX}arena_spectators") {
+            scopedLoader(ArenaScope) {
+                contextVal.spectators.values.map { it.player.name }
+            }
+        }
 
-        api.buildStatic("arena_starting") { _, context: ArenaContext ->
-            context.context.starting
-        }.build()
+        api.build<Arena.ArenaState>("${PREFIX}arena_state") {
+            scopedLoader(ArenaScope) {
+                contextVal.gameState
+            }
+        }
 
-        api.buildStatic("arena_ending") { _, context: ArenaContext ->
-            context.context.ending
-        }.build()
+        api.build<Boolean>("${PREFIX}arena_starting") {
+            scopedLoader(ArenaScope) {
+                contextVal.starting
+            }
+        }
+
+        api.build<Boolean>("${PREFIX}arena_ending") {
+            scopedLoader(ArenaScope) {
+                contextVal.ending
+            }
+        }
+
+        api.build<String>("${PREFIX}arena_map") {
+            scopedLoader(ArenaScope) {
+                contextVal.map
+            }
+        }
 
         //team placeholders
-        api.buildStatic("team_color") { _, context: TeamContext ->
-            context.context.color
-        }.build()
+        api.build<DyeColor>("${PREFIX}team_color") {
+            scopedLoader(TeamScope) {
+                contextVal.color
+            }
+        }
 
-        api.buildStatic("team_name") { _, context: TeamContext ->
-            context.context.name
-        }.build()
+        api.build<String>("${PREFIX}team_name") {
+            scopedLoader(TeamScope) {
+                contextVal.name
+            }
+        }
 
-        api.buildStatic("team_bed") { _, context: TeamContext ->
-            context.context.hasBed()
-        }.build()
+        api.build<Boolean>("${PREFIX}team_bed") {
+            scopedLoader(TeamScope) {
+                contextVal.hasBed()
+            }
 
-        api.buildStatic("team_players") { _, context: TeamContext ->
-            context.context.getTeamPlayers().values.map { it.player.name }
-        }.build()
+            aliases("${PREFIX}team_has_bed")
+        }
+
+        api.build<Collection<String>>("${PREFIX}team_players") {
+            scopedLoader(TeamScope) {
+                contextVal.getTeamPlayers().values.map { it.player.name }
+            }
+        }
     }
 }

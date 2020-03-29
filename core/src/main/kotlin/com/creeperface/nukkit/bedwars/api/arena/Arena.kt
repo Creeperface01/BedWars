@@ -22,6 +22,8 @@ interface Arena : IArenaConfiguration {
     val starting: Boolean
     val ending: Boolean
 
+    val map: String?
+
     fun joinToArena(p: Player)
 
     fun leaveArena(p: Player)
