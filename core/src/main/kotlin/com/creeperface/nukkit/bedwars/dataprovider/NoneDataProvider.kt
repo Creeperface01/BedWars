@@ -23,15 +23,11 @@ object NoneDataProvider : DataProvider {
 
     }
 
-    override suspend fun loadArenas() = emptyMap<String, ArenaConfiguration>()
-
-    override suspend fun syncArenas(arenas: Map<String, ArenaConfiguration>) {
+    override suspend fun syncArenas(arenas: MutableMap<String, ArenaConfiguration>) {
 
     }
 
-    override suspend fun loadMaps() = emptyMap<String, MapConfiguration>()
-
-    override suspend fun syncMaps(maps: Map<String, MapConfiguration>) {
+    override suspend fun syncMaps(maps: MutableMap<String, MapConfiguration>) {
 
     }
 }

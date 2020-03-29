@@ -100,18 +100,16 @@ class Shop(private val plugin: BedWars) : Shop {
 
             windows.putAll(children.mapIndexed { index, it ->
                 index to loadWindow(window, it, nextLevel, id or (index shl (level * 5)))
-            }.toMap())
+            })
 
             return window
         }
 
         val mainWindow = GenericMenuWindow.create(-1, "Shop").inventory
 
-        mainWindow.windows.putAll(
-                config.mapIndexed { index, section ->
-                    index to loadWindow(mainWindow, section, 0, index)
-                }.toMap()
-        )
+        mainWindow.windows.putAll(config.mapIndexed { index, section ->
+            index to loadWindow(mainWindow, section, 0, index)
+        })
 
         return mainWindow
     }
