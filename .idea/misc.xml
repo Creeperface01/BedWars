@@ -5,6 +5,7 @@
       <item index="0" class="java.lang.String" itemvalue="cn.nukkit.event.EventHandler" />
     </list>
   </component>
+  <component name="ExternalStorageConfigurationManager" enabled="true" />
   <component name="MavenProjectsManager">
     <option name="originalFiles">
       <list>
@@ -13,6 +14,8 @@
     </option>
     <option name="ignoredFiles">
       <set>
+        <option value="$PROJECT_DIR$/api/pom.xml" />
+        <option value="$PROJECT_DIR$/core/pom.xml" />
         <option value="$PROJECT_DIR$/placeholderapi/pom.xml" />
       </set>
     </option>
