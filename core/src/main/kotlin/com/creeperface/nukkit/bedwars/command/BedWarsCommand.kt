@@ -21,6 +21,15 @@ class BedWarsCommand(plugin: BedWars) : BaseCommand("bedwars", plugin) {
                 CommandParameter("action", arrayOf("randomjoin")),
                 CommandParameter("player", CommandParamType.TARGET, true)
         )
+
+        this.commandParameters["sync"] = arrayOf(
+                CommandParameter("action", arrayOf("maps", "arenas"))
+        )
+
+        reloadParameters()
+    }
+
+    fun reloadParameters() {
         this.commandParameters["sign"] = arrayOf(
                 CommandParameter("action", arrayOf("sign")),
                 CommandParameter("arena", plugin.arenas.keys.toTypedArray())

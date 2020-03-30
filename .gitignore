@@ -204,3 +204,4 @@ local.properties
 
 /lib/
 /.idea/discord.xml
+*.iml
