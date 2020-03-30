@@ -6,6 +6,7 @@ import com.creeperface.nukkit.bedwars.api.data.Stat
 import com.creeperface.nukkit.bedwars.api.data.Stats
 import com.creeperface.nukkit.bedwars.api.data.provider.DataProvider
 import com.creeperface.nukkit.bedwars.api.utils.Modifiable
+import com.creeperface.nukkit.bedwars.api.utils.set
 import com.creeperface.nukkit.bedwars.utils.Configuration
 import com.creeperface.nukkit.bedwars.utils.fromJson
 import com.mongodb.client.MongoClient
@@ -14,10 +15,8 @@ import com.mongodb.client.MongoCollection
 import com.mongodb.client.model.Filters
 import org.apache.http.client.utils.URIBuilder
 import org.bson.Document
-import kotlin.collections.MutableMap
 import kotlin.collections.component1
 import kotlin.collections.component2
-import kotlin.collections.forEach
 import kotlin.collections.set
 
 internal class MongoDBDataProvider(private val configuration: Configuration) : DataProvider {

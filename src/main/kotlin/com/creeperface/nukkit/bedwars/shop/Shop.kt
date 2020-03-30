@@ -3,7 +3,6 @@ package com.creeperface.nukkit.bedwars.shop
 import cn.nukkit.Player
 import cn.nukkit.item.Item
 import cn.nukkit.item.ItemBlock
-import cn.nukkit.level.GlobalBlockPalette
 import cn.nukkit.utils.Config
 import cn.nukkit.utils.ConfigSection
 import com.creeperface.nukkit.bedwars.BedWars
@@ -69,7 +68,8 @@ class Shop(private val plugin: BedWars) : Shop {
                 "items"
             }
 
-            section.getSection("icon").set("item_path", "textures/$textureType/" + GlobalBlockPalette.getName(icon.item.id).substring(10) + ".png")
+            //TODO: state name
+            section.getSection("icon").set("item_path", "textures/$textureType/" + /*GlobalBlockPalette.getName(icon.item.id).substring(10) +*/ ".png")
 
             val type = section.readEnum(ShopWindow.WindowType::class, "type")
 

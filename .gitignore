@@ -210,4 +210,4 @@ local.properties
 
 # Ignore Gradle build output directory
 build
-*/.iml
+*.iml
