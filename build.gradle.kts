@@ -54,7 +54,7 @@ kotlin {
 val compileKotlin: KotlinCompile by tasks
 compileKotlin.kotlinOptions.apply {
     jvmTarget = "1.8"
-    freeCompilerArgs = listOf("-Xjvm-default=enable")
+    freeCompilerArgs = listOf("-Xjvm-default=enable", "-Xopt-in=kotlin.RequiresOptIn")
 }
 
 tasks {

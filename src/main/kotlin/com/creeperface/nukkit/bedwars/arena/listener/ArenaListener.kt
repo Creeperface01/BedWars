@@ -444,7 +444,6 @@ class ArenaListener(private val arena: Arena) : Listener {
     fun onSlotClick(e: InventoryClickEvent) {
         val p = e.player
 
-        val inv = p.inventory
         val inv2: Window
         if (e.inventory is Window) {
             inv2 = e.inventory as Window

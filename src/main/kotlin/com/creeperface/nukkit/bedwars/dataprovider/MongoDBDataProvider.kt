@@ -2,10 +2,10 @@ package com.creeperface.nukkit.bedwars.dataprovider
 
 import com.creeperface.nukkit.bedwars.api.arena.configuration.ArenaConfiguration
 import com.creeperface.nukkit.bedwars.api.arena.configuration.MapConfiguration
+import com.creeperface.nukkit.bedwars.api.arena.configuration.ModifiableConfiguration
 import com.creeperface.nukkit.bedwars.api.data.Stat
 import com.creeperface.nukkit.bedwars.api.data.Stats
 import com.creeperface.nukkit.bedwars.api.data.provider.DataProvider
-import com.creeperface.nukkit.bedwars.api.utils.Modifiable
 import com.creeperface.nukkit.bedwars.api.utils.set
 import com.creeperface.nukkit.bedwars.utils.Configuration
 import com.creeperface.nukkit.bedwars.utils.fromJson
@@ -96,7 +96,7 @@ internal class MongoDBDataProvider(private val configuration: Configuration) : D
         )
     }
 
-    private inline fun <reified T : Modifiable> sync(data: MutableMap<String, T>, collection: MongoCollection<Document>) {
+    private inline fun <reified T : ModifiableConfiguration> sync(data: MutableMap<String, T>, collection: MongoCollection<Document>) {
         collection.find().forEach {
             val name = it.getString("name")
             val local = data[name]

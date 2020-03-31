@@ -31,7 +31,7 @@ class Team(override val arena: Arena,
 
     val players = mutableMapOf<String, BedWarsData>()
 
-    lateinit var mapConfig: MapConfiguration.TeamData
+    var mapConfig: MapConfiguration.TeamData
 
     init {
         recalculateStatus()

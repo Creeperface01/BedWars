@@ -9,7 +9,8 @@
 -dontwarn
 -allowaccessmodification
 -repackageclasses 'bedwars'
--keep public class com.creeperface.nukkit.bedwars.BedWars
+-keep class com.creeperface.nukkit.bedwars.BedWars
+-keep class com.creeperface.nukkit.bedwars.api.**
 -keep class org.**
 -keep class mozilla.**
 -keep class com.fasterxml.**

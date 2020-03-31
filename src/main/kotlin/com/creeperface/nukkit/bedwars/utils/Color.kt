@@ -41,8 +41,8 @@ object Color {
         return builder.toString().toUpperCase()
     }
 
-    private fun hex2decimal(s: String): Int {
-        var s = s
+    private fun hex2decimal(sin: String): Int {
+        var s = sin
         val digits = "0123456789ABCDEF"
         s = s.toUpperCase()
         var value = 0

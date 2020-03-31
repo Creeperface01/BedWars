@@ -14,7 +14,7 @@ import kotlin.reflect.typeOf
 /**
  * Created by CreeperFace on 2.7.2017.
  */
-@UseExperimental(ExperimentalStdlibApi::class)
+@OptIn(ExperimentalStdlibApi::class)
 object ConfigurationSerializer {
 
     private val typeReaders = mutableMapOf<KType, (ConfMap, String) -> Any?>()
