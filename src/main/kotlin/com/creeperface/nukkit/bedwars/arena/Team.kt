@@ -5,18 +5,23 @@ import com.creeperface.nukkit.bedwars.api.arena.Arena.ArenaState
 import com.creeperface.nukkit.bedwars.api.arena.Team
 import com.creeperface.nukkit.bedwars.api.arena.configuration.IArenaConfiguration
 import com.creeperface.nukkit.bedwars.api.arena.configuration.MapConfiguration
+import com.creeperface.nukkit.bedwars.api.placeholder.TeamScope
 import com.creeperface.nukkit.bedwars.api.shop.ShopMenuWindow
 import com.creeperface.nukkit.bedwars.api.shop.ShopWindow
 import com.creeperface.nukkit.bedwars.obj.BedWarsData
 import com.creeperface.nukkit.bedwars.shop.inventory.MenuWindow
 import com.creeperface.nukkit.bedwars.utils.EnderChestInventory
+import com.creeperface.nukkit.bedwars.utils.configuration
+import com.creeperface.nukkit.placeholderapi.api.scope.Message
+import com.creeperface.nukkit.placeholderapi.api.scope.MessageScope
+import com.creeperface.nukkit.placeholderapi.api.util.translatePlaceholders
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
 import java.util.*
 
 class Team(override val arena: Arena,
            override val id: Int,
-           config: IArenaConfiguration.TeamConfiguration
-) : Team, IArenaConfiguration.ITeamConfiguration by config {
+           config: MapConfiguration.TeamData
+) : Team, MapConfiguration.ITeamData by config {
 
     private var bed = true
 
@@ -25,13 +30,13 @@ class Team(override val arena: Arena,
 
     override val enderChest = EnderChestInventory()
 
-    override val shop: MenuWindow = TODO()
+    override val shop: MenuWindow = arena.plugin.shop.load(arena, this)
 
     val windowMap = Int2ObjectOpenHashMap<ShopWindow>()
 
     val players = mutableMapOf<String, BedWarsData>()
 
-    var mapConfig: MapConfiguration.TeamData
+    override val context = TeamScope.getContext(this)
 
     init {
         recalculateStatus()
@@ -63,7 +68,7 @@ class Team(override val arena: Arena,
     fun messagePlayers(message: String, data: BedWarsData) {
         val player = data.player
 
-        val msg = TextFormat.GRAY.toString() + "[" + chatColor + "Team" + TextFormat.GRAY + "]   " + player.displayName /*+ data.baseData.chatColor*/ + ": " + message //TODO: chat color
+        val msg = configuration.teamFormat.translatePlaceholders(player, context, MessageScope.getContext(Message(player, message)))
 
         for (p in ArrayList(this.players.values)) {
             p.player.sendMessage(msg)
@@ -75,7 +80,6 @@ class Team(override val arena: Arena,
         this.players[p.player.name.toLowerCase()] = p
         p.team = this
         p.player.nameTag = chatColor.toString() + p.player.name
-        p.player.displayName = TextFormat.GRAY.toString() /*+ "[" + TextFormat.GREEN + p.baseData.level + TextFormat.GRAY + "]" + p.baseData.prefix*/ + " " + p.team.chatColor + p.player.name + TextFormat.RESET //TODO: chat color
         recalculateStatus()
     }
 
@@ -84,7 +88,7 @@ class Team(override val arena: Arena,
         data.player.nameTag = data.player.name
         recalculateStatus()
 
-        if (arena.gameState == ArenaState.GAME) {
+        if (arena.arenaState == ArenaState.GAME) {
             arena.scoreboardManager.updateTeam(this.id)
         }
     }

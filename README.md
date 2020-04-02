@@ -1,7 +1,7 @@
 ##TODO list
-- [ ] plugin API
+- [x] plugin API
   - [ ] tested
-- [ ] API events
+- [x] API events
   - [ ] tested
 - [x] configuration
   - [ ] tested
@@ -20,22 +20,24 @@
     - [ ] tested
 - [x] economy providers
   - [ ] tested
-- [ ] shop
+- [x] shop
   - [x] inventory
     - [ ] tested
   - [x] forms
     - [ ] tested
 - [ ] shop per map
   - [ ] tested
-- [ ] select specific maps per arena
+- [x] select specific maps per arena
   - [ ] tested
-- [ ] reward system
+- [x] reward system
   - [ ] tested
 - [x] configuration tool
-  - [ ] tested
+  - [x] tested
 - [ ] customizable game currencies (drops)
   - [ ] tested
 - [ ] kill streaks
   - [ ] tested
 - [ ] multilingual translation
+  - [ ] tested
+- [x] chat format
   - [ ] tested

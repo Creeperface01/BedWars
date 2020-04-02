@@ -28,7 +28,7 @@ class DeathManager(var plugin: Arena) {
                 if (arrow is EntityProjectile && killer is Player) {
                     dColor = "" + this.plugin.getPlayerTeam(killer)!!.chatColor
                     this.plugin.messageAllPlayers(Lang.SHOT, pColor + p.name, dColor + killer.getName())
-                    plugin.getPlayerData(killer)!!.add(Stat.KILLS)
+                    plugin.getPlayerData(killer)!!.addStat(Stat.KILLS)
                     return
                 }
             } else if (lastDmg is EntityDamageByEntityEvent) {
@@ -36,7 +36,7 @@ class DeathManager(var plugin: Arena) {
                 if (killer is Player) {
                     dColor = "" + this.plugin.getPlayerTeam(killer)!!.chatColor
                     this.plugin.messageAllPlayers(Lang.CONTACT_PLAYER, pColor + p.name, dColor + killer.getName())
-                    plugin.getPlayerData(killer)!!.add(Stat.KILLS)
+                    plugin.getPlayerData(killer)!!.addStat(Stat.KILLS)
                     return
                 }
             }
@@ -53,7 +53,7 @@ class DeathManager(var plugin: Arena) {
 
                 val kData = plugin.playerData[killer!!.toLowerCase()]
 
-                kData?.add(Stat.KILLS)
+                kData?.addStat(Stat.KILLS)
             }
 
 

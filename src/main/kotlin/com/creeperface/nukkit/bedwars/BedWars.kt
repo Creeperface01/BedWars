@@ -2,28 +2,30 @@ package com.creeperface.nukkit.bedwars
 
 import cn.nukkit.Player
 import cn.nukkit.blockentity.BlockEntity
-import cn.nukkit.command.Command
-import cn.nukkit.command.CommandSender
 import cn.nukkit.entity.Entity
 import cn.nukkit.plugin.PluginBase
 import cn.nukkit.utils.Config
+import cn.nukkit.utils.ConfigSection
 import cn.nukkit.utils.MainLogger
-import cn.nukkit.utils.TextFormat
 import com.creeperface.nukkit.bedwars.api.BedWarsAPI
 import com.creeperface.nukkit.bedwars.api.arena.Arena.ArenaState
 import com.creeperface.nukkit.bedwars.api.arena.configuration.ArenaConfiguration
 import com.creeperface.nukkit.bedwars.api.arena.configuration.MapConfiguration
+import com.creeperface.nukkit.bedwars.api.data.Stat
 import com.creeperface.nukkit.bedwars.api.data.provider.DataProvider
 import com.creeperface.nukkit.bedwars.api.economy.EconomyProvider
+import com.creeperface.nukkit.bedwars.api.event.ArenaStopEvent
 import com.creeperface.nukkit.bedwars.api.utils.Lang
 import com.creeperface.nukkit.bedwars.arena.Arena
 import com.creeperface.nukkit.bedwars.arena.config.ConfigurationSerializer
 import com.creeperface.nukkit.bedwars.blockentity.BlockEntityMine
+import com.creeperface.nukkit.bedwars.command.BedWarsCommand
 import com.creeperface.nukkit.bedwars.command.ReloadCommand
 import com.creeperface.nukkit.bedwars.dataprovider.MongoDBDataProvider
 import com.creeperface.nukkit.bedwars.dataprovider.MySQLDataProvider
 import com.creeperface.nukkit.bedwars.dataprovider.NoneDataProvider
 import com.creeperface.nukkit.bedwars.economy.EconomyAPIProvider
+import com.creeperface.nukkit.bedwars.economy.EconomyReward
 import com.creeperface.nukkit.bedwars.economy.NoneEconomyProvider
 import com.creeperface.nukkit.bedwars.entity.SpecialItem
 import com.creeperface.nukkit.bedwars.entity.Villager
@@ -34,12 +36,11 @@ import com.creeperface.nukkit.bedwars.obj.GlobalData
 import com.creeperface.nukkit.bedwars.placeholder.Placeholders
 import com.creeperface.nukkit.bedwars.shop.Shop
 import com.creeperface.nukkit.bedwars.shop.form.FormShopManager
+import com.creeperface.nukkit.bedwars.utils.*
 import com.creeperface.nukkit.bedwars.utils.Configuration
-import com.creeperface.nukkit.bedwars.utils.FireworkUtils
-import com.creeperface.nukkit.bedwars.utils.identifier
-import com.creeperface.nukkit.bedwars.utils.initClass
 import kotlinx.coroutines.runBlocking
 import org.apache.commons.io.FileUtils
+import org.joor.Reflect
 import java.io.File
 import java.io.FileFilter
 import java.io.IOException
@@ -60,8 +61,6 @@ class BedWars : PluginBase(), BedWarsAPI {
     var players: MutableMap<Long, GlobalData> = HashMap()
     internal val commandListener = CommandEventListener(this)
 
-    var shuttingDown = false
-
     internal lateinit var configuration: Configuration
 
     private val economyProviders = mutableMapOf<String, KClass<out EconomyProvider>>()
@@ -71,6 +70,9 @@ class BedWars : PluginBase(), BedWarsAPI {
     override lateinit var dataProvider: DataProvider
 
     override lateinit var shop: Shop
+
+    lateinit var economyRewards: Map<Stat, Collection<EconomyReward>>
+
     val formManager = FormShopManager(this)
 
     init {
@@ -79,6 +81,13 @@ class BedWars : PluginBase(), BedWarsAPI {
 
     override fun onLoad() {
         instance = this
+
+        if (DEMO) {
+            Reflect.on(this).alert("---------------------------------------")
+            Reflect.on(this).alert("-   Running demo version of BedWars   -")
+            Reflect.on(this).alert("-     plugin features are limited     -")
+            Reflect.on(this).alert("---------------------------------------")
+        }
 
         Entity.registerEntity("SpecialItem", SpecialItem::class.java)
         Entity.registerEntity("BedWarsVillager", Villager::class.java)
@@ -120,11 +129,9 @@ class BedWars : PluginBase(), BedWarsAPI {
     }
 
     override fun onDisable() {
-        shuttingDown = true
-
         for (arena in this.ins.values) {
-            if (arena.gameState == ArenaState.GAME) {
-                arena.stopGame()
+            if (arena.arenaState == ArenaState.GAME) {
+                arena.stopGame(ArenaStopEvent.Cause.SHUTDOWN)
             }
         }
 
@@ -163,45 +170,18 @@ class BedWars : PluginBase(), BedWarsAPI {
         }
 
         files.forEach { file ->
-            val cfg = Config(file)
-            val arenaConf = ConfigurationSerializer.loadClass(cfg.rootSection, ArenaConfiguration::class)
+            val data = configuration.arena.toMutableMap()
+            data.putAll(Config(file).rootSection)
+
+            val arenaConf = ConfigurationSerializer.loadClass(data, ArenaConfiguration::class)
 
             arenas[arenaConf.name] = arenaConf
-        }
-    }
 
-    override fun onCommand(sender: CommandSender, cmd: Command, label: String, args: Array<String>): Boolean {
-        if (sender is Player) {
-            val arena = this.getPlayerArena(sender)
-
-            arena?.let {
-                when (cmd.name.toLowerCase()) {
-                    "stats" -> {
-
-                    }
-                    "vote" -> {
-                        if (args.size != 1) {
-                            sender.sendMessage(prefix + TextFormat.GRAY + "use " + TextFormat.YELLOW + "/vote " + TextFormat.GRAY + "[" + TextFormat.YELLOW + "map" + TextFormat.GRAY + "]")
-                            return@let
-                        }
-
-                        arena.votingManager.onVote(sender, args[0].toLowerCase())
-                    }
-                }
-
-                return true
-            }
-
-
-            when (cmd.name.toLowerCase()) {
-                "lobby" -> {
-                    sender.teleport(this.server.defaultLevel.spawnLocation)
-                    sender.inventory.clearAll()
-                }
+            if (DEMO) {
+                Reflect.on(this).alert("Arena limit is reduced to 1 in demo mode")
+                return
             }
         }
-
-        return true
     }
 
     override fun getPlayerArena(p: Player): Arena? {
@@ -243,7 +223,7 @@ class BedWars : PluginBase(), BedWarsAPI {
                 return@FileFilter false
             }
 
-            pathname.name.matches(bedwarsPattern)
+            pathname.name.matches(mapPattern)
         })
 
         if (worlds != null && worlds.isNotEmpty()) {
@@ -277,7 +257,7 @@ class BedWars : PluginBase(), BedWarsAPI {
         var players = -1
 
         for (a in ins.values) {
-            if (a.gameState == ArenaState.GAME)
+            if (a.arenaState == ArenaState.GAME)
                 continue
 
             val count = a.playerData.size
@@ -297,12 +277,50 @@ class BedWars : PluginBase(), BedWarsAPI {
 
     private fun loadConfiguration() {
         saveDefaultConfig()
-        this.configuration = Configuration(this, File(dataFolder, "config.yml"))
+        saveResource("game.yml")
+        saveResource("shop.yml")
+        this.configuration = Configuration(this, File(dataFolder, "config.yml"), File(dataFolder, "game.yml"))
     }
 
     private fun loadEconomy() {
         this.economyProvider = this.economyProviders[this.configuration.economyProvider]?.initClass(configuration, this)
                 ?: throw RuntimeException("Undefined economy provider '${this.configuration.economyProvider}'")
+
+        val rewards = mutableMapOf<Stat, Collection<EconomyReward>>()
+        configuration.rewards.forEach { (stat, data) ->
+            when (data) {
+                is ConfigSection -> {
+                    val currencyRewards = mutableListOf<EconomyReward>()
+                    data.forEach currency@{ currencyName, amount ->
+                        val currency = economyProvider.getCurrency(currencyName)
+
+                        if (currency == null) {
+                            logger.warning("Unknown reward currency $currencyName")
+                            return@currency
+                        }
+
+                        val count = amount.toString().toDoubleOrNull()
+
+                        if (count == null) {
+                            logger.warning("Invalid reward amount value ($amount) for stat($stat) and currency($currencyName)")
+                            return@currency
+                        }
+
+                        currencyRewards.add(EconomyReward(stat, currency, count))
+                    }
+
+                    if(currencyRewards.isNotEmpty()) {
+                        rewards[stat] = currencyRewards
+                    }
+                }
+                is Number -> {
+                    rewards[stat] = listOf(EconomyReward(stat, economyProvider.defaultCurrency, data.toDouble()))
+                }
+                else -> logger.warning("Invalid reward configured for stat($stat)")
+            }
+        }
+
+        economyRewards = rewards.toMap()
     }
 
     private fun loadData() {
@@ -330,8 +348,10 @@ class BedWars : PluginBase(), BedWarsAPI {
     }
 
     private fun registerCommands() {
-        val map = server.commandMap
-        map.register("reload", ReloadCommand(this))
+        with(server.commandMap) {
+            register("reload", ReloadCommand(this@BedWars))
+            register("bedwars", BedWarsCommand(this@BedWars))
+        }
     }
 
     private fun initLanguage() {
@@ -361,8 +381,9 @@ class BedWars : PluginBase(), BedWarsAPI {
         lateinit var instance: BedWars
             private set
 
-        const val prefix = "§l§7[§cBed§fWars§7]§r§f "
+        val prefix: String
+            get() = configuration.prefix
 
-        private val bedwarsPattern = Regex("""^.*_bw-[0-9]+$""")
+        private val mapPattern = Regex("""^.*_bw-[0-9]+$""")
     }
 }

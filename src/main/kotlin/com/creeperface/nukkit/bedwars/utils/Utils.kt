@@ -20,11 +20,15 @@ import com.creeperface.nukkit.bedwars.shop.inventory.Window
 import com.fasterxml.jackson.databind.json.JsonMapper
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.google.common.base.CaseFormat
+import org.joor.Reflect
 import java.sql.ResultSet
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
 import kotlin.reflect.KClass
 import kotlin.reflect.full.isSubclassOf
+
+const val DEMO = false
 
 typealias TF = TextFormat
 
@@ -201,5 +205,12 @@ fun <T : Any> KClass<T>.fromMap(data: Map<String, *>): T = jacksonMapper.convert
 
 fun Any.toJson(): String = jacksonMapper.writeValueAsString(this)
 
-@Suppress("UNCHECKED_CAST")
-fun Any.toMap(): Map<String, *> = jacksonMapper.convertValue(this, Map::class.java) as Map<String, *>
+@Suppress("NOTHING_TO_INLINE")
+inline fun Reflect.alert(message: String) = call("getLogger").call("alert", message)
+
+internal val configuration: Configuration
+    get() = BedWars.instance.configuration
+
+fun String.snakeToCamelCase() = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, this)
+
+fun String.camelToSnakeCase() = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, this)

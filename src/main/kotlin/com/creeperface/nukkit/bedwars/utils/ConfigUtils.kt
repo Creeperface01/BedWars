@@ -3,13 +3,19 @@ package com.creeperface.nukkit.bedwars.utils
 import cn.nukkit.item.Item
 import cn.nukkit.item.enchantment.Enchantment
 import cn.nukkit.math.Vector3
+import cn.nukkit.utils.Config
+import com.creeperface.nukkit.bedwars.api.utils.InventoryItem
 import com.creeperface.nukkit.placeholderapi.api.PlaceholderAPI
+import com.creeperface.nukkit.placeholderapi.api.scope.GlobalScope
 import com.creeperface.nukkit.placeholderapi.api.util.AnyContext
 import kotlin.reflect.KClass
 
 typealias ConfMap = Map<String, *>
 typealias MutableConfMap = MutableMap<String, in Any?>
 typealias InsConfMap = HashMap<String, Any?>
+
+val Config.confMap: ConfMap
+    get() = rootSection as ConfMap
 
 @Suppress("UNCHECKED_CAST")
 fun <T> ConfMap.read(key: String, defaultValue: T) = this[key] as? T ?: defaultValue
@@ -24,7 +30,7 @@ fun ConfMap.readString(key: String, defaultValue: String = "") = read(key, defau
 
 fun ConfMap.readBoolean(key: String, defaultValue: Boolean = false) = read(key, defaultValue)
 
-fun ConfMap.readSection(key: String, defaultValue: ConfMap = mutableMapOf<String, Any?>()) = read(key, defaultValue)
+fun ConfMap.readSection(key: String, defaultValue: ConfMap = mutableMapOf<String, Any?>()): ConfMap = read(key, defaultValue)
 
 fun ConfMap.readIntList(key: String, defaultValue: List<Int> = emptyList()) = read(key, defaultValue)
 
@@ -62,8 +68,14 @@ fun MutableConfMap.writeVector3(key: String, value: Vector3) {
     this[key] = confMap
 }
 
+fun ConfMap.readInventoryItem(key: String? = null, context: AnyContext = GlobalScope.defaultContext): InventoryItem {
+    val sec = if (key != null) this.readSection(key) else this
+
+    return InventoryItem(sec.readInt("slot"), sec.readItem(context = context))
+}
+
 @Suppress("UNCHECKED_CAST")
-fun ConfMap.readItem(key: String? = null, context: AnyContext): Item {
+fun ConfMap.readItem(key: String? = null, context: AnyContext = GlobalScope.defaultContext): Item {
     val sec = if (key != null) this.readSection(key) else this
     val papi = PlaceholderAPI.getInstance()
 
@@ -74,11 +86,11 @@ fun ConfMap.readItem(key: String? = null, context: AnyContext): Item {
     )
 
     if (sec.containsKey("item_custom_name")) {
-        item.customName = papi.translateString(sec.readString("item_custom_name"), context = context)
+        item.customName = papi.translateString(sec.readString("item_custom_name"), null, context)
     }
 
     if (sec.containsKey("lore")) {
-        item.setLore(*sec.readStringList("lore").map { papi.translateString(it, context = context) }.toTypedArray())
+        item.setLore(*sec.readStringList("lore").map { papi.translateString(it, null, context) }.toTypedArray())
     }
 
     if (sec.containsKey("enchantments")) {

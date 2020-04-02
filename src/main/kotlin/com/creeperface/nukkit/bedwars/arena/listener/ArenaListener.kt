@@ -41,7 +41,10 @@ import com.creeperface.nukkit.bedwars.shop.inventory.MenuWindow
 import com.creeperface.nukkit.bedwars.shop.inventory.OfferWindow
 import com.creeperface.nukkit.bedwars.shop.inventory.Window
 import com.creeperface.nukkit.bedwars.utils.Items
+import com.creeperface.nukkit.bedwars.utils.configuration
 import com.creeperface.nukkit.bedwars.utils.openInventory
+import com.creeperface.nukkit.placeholderapi.api.scope.context
+import com.creeperface.nukkit.placeholderapi.api.util.translatePlaceholders
 import java.util.*
 
 class ArenaListener(private val arena: Arena) : Listener {
@@ -82,7 +85,7 @@ class ArenaListener(private val arena: Arena) : Listener {
 
         val data = arena.getPlayerData(p) ?: return
 
-        if (this.arena.gameState == ArenaState.LOBBY && e.action == PlayerInteractEvent.Action.RIGHT_CLICK_AIR && e.item.id == Item.CLOCK) {
+        if (this.arena.arenaState == ArenaState.LOBBY && e.action == PlayerInteractEvent.Action.RIGHT_CLICK_AIR && e.item.id == Item.CLOCK) {
             this.arena.leaveArena(p)
             return
         }
@@ -133,7 +136,7 @@ class ArenaListener(private val arena: Arena) : Listener {
     fun onDropItem(e: PlayerDropItemEvent) {
         val p = e.player
 
-        if (!p.isOp && this.arena.gameState == ArenaState.LOBBY) {
+        if (!p.isOp && this.arena.arenaState == ArenaState.LOBBY) {
             e.setCancelled()
         }
     }
@@ -142,9 +145,9 @@ class ArenaListener(private val arena: Arena) : Listener {
     fun onHit(e: EntityDamageEvent) {
         val victim = e.entity
 
-        if (arena.gameState == ArenaState.LOBBY || victim.level.id != this.arena.level.id) {
+        if (arena.arenaState == ArenaState.LOBBY || victim.level.id != this.arena.level.id) {
             if (victim is Player) {
-                if (this.arena.gameState == ArenaState.LOBBY && e.cause == EntityDamageEvent.DamageCause.VOID && arena.inArena(victim)) {
+                if (this.arena.arenaState == ArenaState.LOBBY && e.cause == EntityDamageEvent.DamageCause.VOID && arena.inArena(victim)) {
                     victim.teleport(this.arena.lobby)
                     e.setCancelled()
                 }
@@ -168,7 +171,7 @@ class ArenaListener(private val arena: Arena) : Listener {
                 return
             }
 
-            if (this.arena.gameState == ArenaState.LOBBY) {
+            if (this.arena.arenaState == ArenaState.LOBBY) {
                 e.setCancelled()
                 return
             }
@@ -203,7 +206,7 @@ class ArenaListener(private val arena: Arena) : Listener {
                     }
                     kData = arena.playerData[killer.name.toLowerCase()]!!
 
-                    if (this.arena.gameState == ArenaState.LOBBY || data!!.team.id == kData.team.id) {
+                    if (this.arena.arenaState == ArenaState.LOBBY || data!!.team.id == kData.team.id) {
                         e.setCancelled()
                         return
                     }
@@ -246,7 +249,7 @@ class ArenaListener(private val arena: Arena) : Listener {
 
             this.arena.deathManager.onDeath(event)
 
-            data!!.add(Stat.DEATHS)
+            data!!.addStat(Stat.DEATHS)
 
             p.inventory.clearAll()
 
@@ -285,7 +288,7 @@ class ArenaListener(private val arena: Arena) : Listener {
             return
         }
 
-        if (this.arena.gameState == ArenaState.LOBBY) {
+        if (this.arena.arenaState == ArenaState.LOBBY) {
             e.setCancelled()
             return
         }
@@ -333,7 +336,7 @@ class ArenaListener(private val arena: Arena) : Listener {
             return
         }
 
-        if (this.arena.gameState == ArenaState.LOBBY) {
+        if (this.arena.arenaState == ArenaState.LOBBY) {
             e.setCancelled()
             return
         }
@@ -388,7 +391,7 @@ class ArenaListener(private val arena: Arena) : Listener {
     fun onProjectileHit(e: ProjectileHitEvent) {
         val ent = e.entity
 
-        if (arena.gameState == ArenaState.LOBBY || ent.getLevel().id != arena.level.id) {
+        if (arena.arenaState == ArenaState.LOBBY || ent.getLevel().id != arena.level.id) {
             return
         }
 
@@ -405,7 +408,7 @@ class ArenaListener(private val arena: Arena) : Listener {
         val p = e.player
 
         if (arena.gameSpectators.containsKey(p.name.toLowerCase())) {
-            val msg = TextFormat.GRAY.toString() + "[" + TextFormat.BLUE + "SPECTATE" + TextFormat.GRAY + "] " + TextFormat.RESET + TextFormat.WHITE + p.displayName + TextFormat.GRAY + " > " /*+ data2.chatColor*/ + e.message //TODO: chat color
+            val msg = configuration.spectatorFormat.translatePlaceholders(p, arena.context, e.context)
 
             for (s in arena.gameSpectators.values) {
                 s.sendMessage(msg)
@@ -417,8 +420,8 @@ class ArenaListener(private val arena: Arena) : Listener {
 
         val data = arena.getPlayerData(p) ?: return
 
-        if (e.message.startsWith("!") && e.message.length > 1) {
-            this.arena.messageAllPlayers(e.message, p, data)
+        if (e.message.startsWith(configuration.allPrefix) && e.message.length > 1) {
+            this.arena.messageAllPlayers(e.message.substring(configuration.allPrefix.length), p, data)
         } else {
             data.team.messagePlayers(e.message, data)
         }
@@ -488,7 +491,7 @@ class ArenaListener(private val arena: Arena) : Listener {
 
         val p = e.player
 
-        if (arena.inArena(p) && this.arena.gameState == ArenaState.LOBBY) {
+        if (arena.inArena(p) && this.arena.arenaState == ArenaState.LOBBY) {
             e.setCancelled()
         }
     }
@@ -531,7 +534,7 @@ class ArenaListener(private val arena: Arena) : Listener {
 
     @EventHandler
     fun onFormResponse(e: PlayerFormRespondedEvent) {
-        if (arena.gameState != ArenaState.GAME) {
+        if (arena.arenaState != ArenaState.GAME) {
             return
         }
 

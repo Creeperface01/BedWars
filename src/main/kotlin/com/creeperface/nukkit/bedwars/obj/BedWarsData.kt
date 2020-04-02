@@ -30,10 +30,13 @@ class BedWarsData(override val arena: Arena,
         return System.currentTimeMillis() - lastHit <= 10000
     }
 
-    fun add(stat: Stat) {
+    fun addStat(stat: Stat) {
         this.globalData.stats.add(stat)
 
-//        this.baseData.addMoney(stat.tokens) //TODO: money
-//        this.baseData.addExp(stat.xp)
+        arena.plugin.economyRewards[stat]?.let { rewards ->
+            rewards.forEach {
+                arena.plugin.economyProvider.addMoney(player, it.amount, it.currency)
+            }
+        }
     }
 }

@@ -4,14 +4,16 @@ general:
   prefix: "§l§7[§cBed§fWars§7]§r§f"
   #Try to automatically join to an arena after player login
   auto_join: false
-
-chat:
-  all_prefix: '!'
-  team_format: '§7[%team_color%TEAM§7] §f%player%§7:%team_color% %message%'
-  all_format: '§7[%team_color%ALL§7] §f%player%§7:%team_color% %message%'
-  spectator_format: '§7[§9SPECTATOR§7] §f%player%§7: %message%'
+  #If true, all commands (except the ingame ones) will be disabled for players
+  disable_command: true
+  #Commands available even in arena.
+  #Note that events like teleport (into different worlds) etc aren't handled by BedWars
+  enabled_commands: ["lobby"] #Assuming lobby commands cause player to leave the BedWars server
+  #Separate chat between players in game and the others playing on server
+  separate_chat: true
 
 data:
+  #if disabled, no player data will be saved
   enable: false
   data_provider: none
   use_db_lib: true
@@ -38,10 +40,9 @@ data:
 #      op2: val2
 
 economy:
-  enable_economy: false
   economy_provider: none
   rewards:
-    #    For economy systems with multiple currencies you can specif y the currency like that, else the default (or random) one will be chosen
+    #    For economy systems with multiple currencies you can specify the currency like that, else the default (or random) one will be chosen
     #    kills:
     #      coin: 10 #currency 'coin'
     #      token: 3 #currency 'token'
@@ -51,13 +52,6 @@ economy:
     beds: 0
     #per game played
     games: 0
-
-game:
-  #You can choose between form window shop (form) or chest inventory shop (inventory)
-  shop: inventory
-  #How many maps should be added into a voting
-  vote_table_size: 4
-  allow_spectators: true
 
 synapse:
   #If enabled, player will be transferred to the lobby server instead of kicked out of the game

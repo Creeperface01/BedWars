@@ -1,0 +1,61 @@
+#Name of the arena
+name: Arena
+#Lobby position
+lobby:
+  x: 0
+  y: 0
+  z: 0
+
+#Map filter
+map_filter:
+  #If true, filter specified below will be applied to this arena
+  enable: false
+  #Allow only maps with the following team count
+  #Empty array to disable
+  team_count: [2, 4, 8]
+  #If specified, only these maps will be used
+  include: ["Map1", "Map2", "Map3"]
+  #If specified, all maps except these will be used
+  exclude: ["Map4"]
+
+#Following options are optional.
+#If not specified, the default values configured in config.yml are applied
+
+
+#Max game time. After that time game will be force shutdown
+time_limit: 3600
+#Start countdown when sufficient amount of players join
+start_time: 30
+#Time between the end of game and arena shutdown intended for players to celebrate their victory
+ending_time: 30
+#Minimal amount of players required for the game start
+start_players: 8
+#Bronze spawning rate in seconds
+bronze_drop_interval: 1
+#Iron spawning rate in seconds
+iron_drop_interval: 7
+#Gold spawning rate in seconds
+gold_drop_interval: 30
+#Enables fast start
+fast_start: true
+#When certain amount of players joins, the fast start is activated and remaining time for the start is lowered to this value
+fast_start_time: 5
+#Minimal required amount of players to activate fast start
+fast_start_players: 16
+#Max players per team
+team_players: 4
+#Total amount of players in arena
+max_players: 16
+#When false, windows 10 players are not able to join the arena
+multi_platform: true
+#Enabled team selection command
+team_select_command: true
+#if specified, an item will be given to every player in lobby for team selection
+#if false, disables item team selection
+team_select_item:
+  #Item id or name
+  id: map
+  #Item meta (damage)
+  meta: 0
+  #Item count
+  count: 1

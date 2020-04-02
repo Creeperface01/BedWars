@@ -11,18 +11,20 @@ internal class EconomyAPIProvider(private val configuration: Configuration) : Ec
 
     val api: EconomyAPI = EconomyAPI.getInstance()
 
-    override fun addMoney(player: String, amount: Int, currency: EconomyProvider.Currency) {
-        api.addMoney(player, amount.toDouble())
+    override fun addMoney(player: String, amount: Double, currency: EconomyProvider.Currency) {
+        api.addMoney(player, amount)
     }
 
-    override fun getMoney(player: String, currency: EconomyProvider.Currency): CompletableFuture<Int> {
-        return CompletableFuture.completedFuture(api.myMoney(player).toInt())
+    override fun getMoney(player: String, currency: EconomyProvider.Currency): CompletableFuture<Double> {
+        return CompletableFuture.completedFuture(api.myMoney(player))
     }
 
-    override fun transferMoney(from: String, to: String, amount: Int, currency: EconomyProvider.Currency): CompletableFuture<Boolean> {
+    override fun transferMoney(from: String, to: String, amount: Double, currency: EconomyProvider.Currency): CompletableFuture<Boolean> {
         return CompletableFuture.completedFuture(
-                api.reduceMoney(from, amount.toDouble()) == 1 &&
-                        api.addMoney(to, amount.toDouble()) == 1
+                api.reduceMoney(from, amount) == 1 &&
+                        api.addMoney(to, amount) == 1
         )
     }
+
+    override fun getCurrency(name: String): EconomyProvider.Currency? = null
 }

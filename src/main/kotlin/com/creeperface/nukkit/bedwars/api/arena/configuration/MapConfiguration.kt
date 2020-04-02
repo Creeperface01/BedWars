@@ -14,13 +14,23 @@ class MapConfiguration(
         val teams: List<TeamData>
 ) : ModifiableConfiguration {
 
+    interface ITeamData {
+        val name: String
+        val color: DyeColor
+        val chatColor: TextFormat
+        val spawn: Vector3
+        val villager: Vector3
+        val bed1: Vector3
+        val bed2: Vector3
+    }
+
     data class TeamData(
-            val name: String,
-            val color: DyeColor,
-            val chatColor: TextFormat,
-            val spawn: Vector3,
-            val villager: Vector3,
-            val bed1: Vector3,
-            val bed2: Vector3
-    )
+            override val name: String,
+            override val color: DyeColor,
+            override val chatColor: TextFormat,
+            override val spawn: Vector3,
+            override val villager: Vector3,
+            override val bed1: Vector3,
+            override val bed2: Vector3
+    ) : ITeamData
 }

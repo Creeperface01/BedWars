@@ -51,7 +51,11 @@ enum class Lang {
     CONTACT,
     CACTUS_ESCAPE,
     DROWNING_ESCAPE,
-    EXPLOSION;
+    EXPLOSION,
+    COMMAND_IN_GAME,
+    GAME_IN_PROGRESS,
+    NOT_GAME_COMMAND
+    ;
 
     private lateinit var translation: String
 

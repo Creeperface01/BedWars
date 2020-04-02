@@ -3,8 +3,10 @@ package com.creeperface.nukkit.bedwars.arena.manager
 import cn.nukkit.Player
 import com.creeperface.nukkit.bedwars.BedWars
 import com.creeperface.nukkit.bedwars.api.arena.Arena.ArenaState
+import com.creeperface.nukkit.bedwars.api.arena.configuration.MapConfiguration
 import com.creeperface.nukkit.bedwars.api.utils.Lang
 import com.creeperface.nukkit.bedwars.arena.Arena
+import com.creeperface.nukkit.bedwars.utils.configuration
 
 class VotingManager(val plugin: Arena) {
 
@@ -13,12 +15,35 @@ class VotingManager(val plugin: Arena) {
     lateinit var stats: Array<Int>
 
     fun createVoteTable() {
-        val all = BedWars.instance.maps.keys.toMutableList()
-        all.shuffle()
+        var maps: List<MapConfiguration> = BedWars.instance.maps.values.toMutableList()
+
+        with(plugin.mapFilter) {
+            if (enable) {
+                maps = maps.filter {
+                    var accepted = true
+
+                    if (this.teamCount.isNotEmpty() && it.teams.size !in this.teamCount) {
+                        accepted = false
+                    }
+
+                    if (this.include.isNotEmpty() && !this.include.contains(it.name)) {
+                        accepted = false
+                    }
+
+                    if (this.exclude.isNotEmpty() && this.exclude.contains(it.name)) {
+                        accepted = false
+                    }
+
+                    accepted
+                }
+            }
+        }
+
+        val all = maps.map { it.name }.shuffled()
 
         val table = mutableListOf<String>()
 
-        for (i in 0..all.size.coerceAtMost(4)) {
+        for (i in 0..all.size.coerceAtMost(configuration.votesSize)) {
             table.add(all[i])
         }
 
@@ -29,7 +54,7 @@ class VotingManager(val plugin: Arena) {
     }
 
     fun onVote(p: Player, vote: String) {
-        if (this.plugin.gameState == ArenaState.GAME || !this.plugin.inArena(p)) {
+        if (!this.plugin.voting || this.plugin.arenaState == ArenaState.GAME || !this.plugin.inArena(p)) {
             p.sendMessage(BedWars.prefix + (Lang.CAN_NOT_VOTE.translate()))
             return
         }

@@ -1,12 +1,15 @@
 package com.creeperface.nukkit.bedwars.api.arena.configuration
 
+import cn.nukkit.item.Item
 import cn.nukkit.math.Vector3
 import cn.nukkit.utils.DyeColor
 import cn.nukkit.utils.TextFormat
+import com.creeperface.nukkit.bedwars.api.utils.InventoryItem
 import java.time.Instant
 
 class ArenaConfiguration(
         override val name: String,
+        override val lobby: Vector3,
         override val timeLimit: Int,
         override val startTime: Int,
         override val endingTime: Int,
@@ -14,14 +17,19 @@ class ArenaConfiguration(
         override val bronzeDropInterval: Int,
         override val ironDropInterval: Int,
         override val goldDropInterval: Int,
+        override val fastStart: Boolean,
         override val fastStartTime: Int,
         override val fastStartPlayers: Int,
         override val teamPlayers: Int,
         override val maxPlayers: Int,
         override val multiPlatform: Boolean,
-        override val lobby: Vector3,
         override val lastModification: Instant,
-        override val teamData: List<IArenaConfiguration.TeamConfiguration>
+        override val teamSelectCommand: Boolean,
+        override val teamSelectItem: InventoryItem?,
+        override val voteItem: InventoryItem?,
+        override val votePlayers: Int,
+        override val voteCountdown: Int,
+        override val mapFilter: MapFilter
 ) : IArenaConfiguration
 
 interface IArenaConfiguration : ModifiableConfiguration {
@@ -33,23 +41,24 @@ interface IArenaConfiguration : ModifiableConfiguration {
     val bronzeDropInterval: Int
     val ironDropInterval: Int
     val goldDropInterval: Int
+    val fastStart: Boolean
     val fastStartTime: Int
     val fastStartPlayers: Int
     val teamPlayers: Int
     val maxPlayers: Int
     val multiPlatform: Boolean
     val lobby: Vector3
-    val teamData: List<TeamConfiguration>
-
-    class TeamConfiguration(
-            override val name: String,
-            override val color: DyeColor,
-            override val chatColor: TextFormat
-    ) : ITeamConfiguration
-
-    interface ITeamConfiguration {
-        val name: String
-        val color: DyeColor
-        val chatColor: TextFormat
-    }
+    val teamSelectCommand: Boolean
+    val teamSelectItem: InventoryItem?
+    val voteItem: InventoryItem?
+    val votePlayers: Int
+    val voteCountdown: Int
+    val mapFilter: MapFilter
 }
+
+class MapFilter(
+        val enable: Boolean,
+        val teamCount: Set<Int> = emptySet(),
+        val include: List<String> = emptyList(),
+        val exclude: List<String> = emptyList()
+)

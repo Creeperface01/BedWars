@@ -7,15 +7,17 @@ object NoneEconomyProvider : EconomyProvider {
 
     override val defaultCurrency = EconomyProvider.NullCurrency
 
-    override fun addMoney(player: String, amount: Int, currency: EconomyProvider.Currency) {
+    override fun addMoney(player: String, amount: Double, currency: EconomyProvider.Currency) {
 
     }
 
-    override fun getMoney(player: String, currency: EconomyProvider.Currency): CompletableFuture<Int> {
-        return CompletableFuture.completedFuture(0)
+    override fun getMoney(player: String, currency: EconomyProvider.Currency): CompletableFuture<Double> {
+        return CompletableFuture.completedFuture(0.0)
     }
 
-    override fun transferMoney(from: String, to: String, amount: Int, currency: EconomyProvider.Currency): CompletableFuture<Boolean> {
+    override fun transferMoney(from: String, to: String, amount: Double, currency: EconomyProvider.Currency): CompletableFuture<Boolean> {
         return CompletableFuture.completedFuture(true)
     }
+
+    override fun getCurrency(name: String): EconomyProvider.Currency? = null
 }

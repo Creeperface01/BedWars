@@ -10,6 +10,7 @@ import cn.nukkit.nbt.tag.FloatTag
 import cn.nukkit.nbt.tag.ListTag
 import cn.nukkit.scheduler.Task
 import com.creeperface.nukkit.bedwars.api.arena.Arena.ArenaState
+import com.creeperface.nukkit.bedwars.api.event.ArenaStopEvent
 import com.creeperface.nukkit.bedwars.api.utils.Lang
 import com.creeperface.nukkit.bedwars.utils.FireworkUtils
 import java.util.*
@@ -23,10 +24,10 @@ class PopupTask(var plugin: Arena) : Task() {
         /*if (this.plugin.game == 1 && !this.plugin.ending) {
             this.sendStatus();
         }*/
-        if (this.plugin.ending && this.plugin.gameState == ArenaState.GAME) {
+        if (this.plugin.ending && this.plugin.arenaState == ArenaState.GAME) {
             if (this.ending <= 0) {
                 this.plugin.ending = false
-                this.plugin.stopGame()
+                this.plugin.stopGame(ArenaStopEvent.Cause.ELIMINATION)
                 this.ending = 20
                 return
             }
@@ -34,7 +35,7 @@ class PopupTask(var plugin: Arena) : Task() {
             spawnFireworks()
             this.ending--
         }
-        if (this.plugin.gameState == ArenaState.LOBBY) {
+        if (this.plugin.arenaState == ArenaState.LOBBY) {
             sendPlayerCount()
         }
     }
@@ -46,6 +47,8 @@ class PopupTask(var plugin: Arena) : Task() {
     }
 
     private fun spawnFireworks() {
+        val winnerTeam = plugin.winnerTeam ?: return
+
         val positions = ArrayList<Vector3>()
 
         for (team in plugin.teams) {
@@ -56,7 +59,7 @@ class PopupTask(var plugin: Arena) : Task() {
             fireworkIndex = 0
         }
 
-        val firework = FireworkUtils.of(plugin.getTeam(plugin.winnerTeam))[fireworkIndex++]
+        val firework = FireworkUtils.of(winnerTeam)[fireworkIndex++]
         val itemTag = NBTIO.putItemHelper(firework)
 
         for (pos in positions) {

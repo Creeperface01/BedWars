@@ -39,7 +39,7 @@ object Placeholders {
 
         api.build<Arena.ArenaState>("${PREFIX}arena_state") {
             scopedLoader(ArenaScope) {
-                contextVal.gameState
+                contextVal.arenaState
             }
         }
 

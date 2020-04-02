@@ -2,24 +2,39 @@ package com.creeperface.nukkit.bedwars.arena
 
 import cn.nukkit.scheduler.Task
 import com.creeperface.nukkit.bedwars.api.arena.Arena.ArenaState
+import com.creeperface.nukkit.bedwars.api.event.ArenaStopEvent
 
 
-class ArenaSchedule(var plugin: Arena) : Task() {
+class ArenaTask(var plugin: Arena) : Task() {
 
     var gameTime = 0
     var startTime = plugin.startTime
     var drop = 0
+    var voteTime = 0
+
+    fun reset() {
+        gameTime = 0
+        startTime = plugin.startTime
+        drop = 0
+        voteTime = 0
+    }
 
     override fun onRun(tick: Int) {
-        if (this.plugin.starting) {
+        if(voteTime > 0) {
+            if(--voteTime == 0) {
+                plugin.voting = false
+                plugin.teamSelect = true
+                plugin.selectMap()
+            }
+        } else if (this.plugin.starting) {
             this.starting()
-        } else if (this.plugin.gameState == ArenaState.GAME && !this.plugin.ending) {
+        } else if (this.plugin.arenaState == ArenaState.GAME && !plugin.ending) {
             this.game()
         }
     }
 
     private fun starting() {
-        if (this.startTime == 5) {
+        if (this.startTime == 5 && plugin.map == null) {
             this.plugin.selectMap()
         }
 
@@ -46,14 +61,10 @@ class ArenaSchedule(var plugin: Arena) : Task() {
             this.plugin.dropGold()
         }
 
-        if (gameTime > 3600) {
-            plugin.stopGame()
+        if (gameTime > plugin.timeLimit) {
+            plugin.stopGame(ArenaStopEvent.Cause.TIME_LIMIT)
         }
 
         this.drop++
-    }
-
-    fun ending() {
-
     }
 }

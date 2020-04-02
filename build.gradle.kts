@@ -42,6 +42,7 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:$jacksonVersion")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
+    implementation("org.jooq:joor-java-8:0.9.12")
 
 
     compileOnly(files("lib/actaeon.jar", "lib/ScoreboardAPI.jar", "lib/EconomyAPI.jar"))

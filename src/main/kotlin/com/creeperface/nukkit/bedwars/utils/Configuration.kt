@@ -2,6 +2,7 @@ package com.creeperface.nukkit.bedwars.utils
 
 import cn.nukkit.Player
 import cn.nukkit.utils.Config
+import cn.nukkit.utils.ConfigSection
 import com.creeperface.nukkit.bedwars.BedWars
 import com.creeperface.nukkit.bedwars.api.data.Stat
 import com.creeperface.nukkit.bedwars.api.economy.EconomyProvider
@@ -9,17 +10,23 @@ import com.creeperface.nukkit.bedwars.api.shop.ShopType
 import java.io.File
 import java.util.*
 
-internal class Configuration(plugin: BedWars, file: File) {
+internal class Configuration(plugin: BedWars, global: File, game: File) {
 
+    //general
     val language: String
     val prefix: String
     val autoJoin: Boolean
+    val disableCommands: Boolean
+    val enabledCommands: List<String>
+    val separateChat: Boolean
 
+    //chat
     val allPrefix: String
     val teamFormat: String
     val allFormat: String
     val spectatorFormat: String
 
+    //data
     val savePlayerData: Boolean
     val dataProvider: String
     val useDbLib: Boolean
@@ -28,35 +35,36 @@ internal class Configuration(plugin: BedWars, file: File) {
     val mysql: DB
     val mongo: Mongo
 
-    val enableEconomy: Boolean
+    //economy
     val economyProvider: String
     val rewards = EnumMap<Stat, Any>(Stat::class.java)
 
+    //game
     val shopType: ShopType
     val votesSize: Int
     val allowSpectators: Boolean
 
+    //random
     val synapseTransfer: Boolean
 
     val playerIdentifier: PlayerIdentifier
 
-    init {
-        val conf = Config(file)
+    val arena: ConfMap
 
-        with(conf.getSection("general")) {
+    init {
+        val globalConf = Config(global)
+        val gameConf = Config(game).confMap
+
+        with(globalConf.getSection("general")) {
             language = getString("language", "english")
             prefix = getString("prefix")
             autoJoin = getBoolean("auto_join")
+            disableCommands = getBoolean("disable_commands")
+            enabledCommands = getStringList("enabled_commands")
+            separateChat = getBoolean("separate_chat")
         }
 
-        with(conf.getSection("chat")) {
-            allPrefix = getString("all_prefix")
-            teamFormat = getString("team_format")
-            allFormat = getString("all_format")
-            spectatorFormat = getString("spectator_format")
-        }
-
-        with(conf.getSection("data")) {
+        with(globalConf.getSection("data")) {
             savePlayerData = getBoolean("enable")
             dataProvider = getString("data_provider")
             useDbLib = getBoolean("use_db_lib")
@@ -89,8 +97,7 @@ internal class Configuration(plugin: BedWars, file: File) {
             }
         }
 
-        with(conf.getSection("economy")) {
-            enableEconomy = getBoolean("enable_economy")
+        with(globalConf.getSection("economy")) {
             economyProvider = getString("economy_provider")
 
             with(getSection("rewards")) {
@@ -115,21 +122,30 @@ internal class Configuration(plugin: BedWars, file: File) {
             }
         }
 
-        with(conf.getSection("game")) {
+        with(globalConf.getSection("synapse")) {
+            synapseTransfer = getBoolean("transfer")
+        }
+
+        with(gameConf.readSection("general")) {
             shopType = try {
-                ShopType.valueOf(getString("shop").toUpperCase())
+                ShopType.valueOf(readString("shop").toUpperCase())
             } catch (e: IllegalArgumentException) {
-                plugin.logger.error("Invalid shop type ${getString("shop")} using default 'inventory'")
+                plugin.logger.error("Invalid shop type ${readString("shop")} using default 'inventory'")
                 ShopType.INVENTORY
             }
 
-            votesSize = getInt("vote_table_size", 4)
-            allowSpectators = getBoolean("allow_spectators")
+            votesSize = readInt("vote_table_size", 4)
+            allowSpectators = readBoolean("allow_spectators")
         }
 
-        with(conf.getSection("synapse")) {
-            synapseTransfer = getBoolean("transfer")
+        with(gameConf.readSection("chat")) {
+            allPrefix = readString("all_prefix")
+            teamFormat = readString("team_format")
+            allFormat = readString("all_format")
+            spectatorFormat = readString("spectator_format")
         }
+
+        arena = gameConf.readSection("arena")
     }
 
     internal class Mongo(host: String, port: Int, user: String, password: String, database: String, val options: Map<String, Any>) : DB(
@@ -143,21 +159,4 @@ internal class Configuration(plugin: BedWars, file: File) {
             val password: String,
             val database: String
     )
-
-    internal class EconomyReward(
-            val stat: Stat,
-            val currency: EconomyProvider.Currency,
-            val amount: Int
-    )
-
-    enum class PlayerIdentifier {
-        NAME {
-            override fun get(player: Player): String = player.name
-        },
-        UUID {
-            override fun get(player: Player): java.util.UUID = player.uniqueId
-        };
-
-        abstract fun get(player: Player): Any
-    }
 }

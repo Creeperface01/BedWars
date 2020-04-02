@@ -13,6 +13,7 @@ import com.creeperface.nukkit.bedwars.listener.CommandEventListener
 class BedWarsCommand(plugin: BedWars) : BaseCommand("bedwars", plugin) {
 
     init {
+        this.aliases = arrayOf("bw")
         this.permission = "bedwars.command"
         this.usageMessage = "Use /bw help"
 
@@ -29,7 +30,7 @@ class BedWarsCommand(plugin: BedWars) : BaseCommand("bedwars", plugin) {
             this.commandParameters["teamsign" + arena.name] = arrayOf(
                     CommandParameter("action", arrayOf("sign")),
                     CommandParameter("arena", arena.name),
-                    CommandParameter("team", arena.teamData.map { it.name }.toTypedArray())
+                    CommandParameter("team", CommandParamType.INT, false)
             )
         }
     }
@@ -102,11 +103,10 @@ class BedWarsCommand(plugin: BedWars) : BaseCommand("bedwars", plugin) {
                         val arena = plugin.getPlayerArena(sender)
 
                         if (arena == null) {
-                            //TODO: message
+                            sender.sendMessage(Lang.COMMAND_IN_GAME.translate())
                             return true
                         }
 
-                        arena.votingManager.onVote(sender, args[0].toLowerCase())
 
                         when (args[0]) {
                             "start" -> {
@@ -128,6 +128,7 @@ class BedWarsCommand(plugin: BedWars) : BaseCommand("bedwars", plugin) {
                                     return false
                                 }
 
+                                arena.votingManager.onVote(sender, args[0].toLowerCase())
                                 return true
                             }
                         }

@@ -1,0 +1,70 @@
+general:
+  #You can choose between form window shop (form) or chest inventory shop (inventory)
+  shop: inventory
+  #How many maps should be added into a vote table
+  vote_table_size: 4
+  allow_spectators: true
+
+chat:
+  all_prefix: '!'
+  team_format: '§7[%team_color%TEAM§7] §f%player%§7:%team_color% %message%'
+  all_format: '§7[%team_color%ALL§7] §f%player%§7:%team_color% %message%'
+  spectator_format: '§7[§9SPECTATOR§7] §f%player%§7: %message%'
+
+#Following settings are applied by default if not overridden in arena configuration file
+arena:
+  #Max game time. After that time game will be force shutdown
+  time_limit: 3600
+  #Start countdown when sufficient amount of players join
+  start_time: 30
+  #Time between the end of game and arena shutdown intended for players to celebrate their victory
+  ending_time: 30
+  #Minimal amount of players required for the game start
+  start_players: 8
+  #Bronze spawning rate in seconds
+  bronze_drop_interval: 1
+  #Iron spawning rate in seconds
+  iron_drop_interval: 7
+  #Gold spawning rate in seconds
+  gold_drop_interval: 30
+  #Enables fast start
+  fast_start: true
+  #When certain amount of players joins, the fast start is activated and remaining time for the start is lowered to this value
+  fast_start_time: 5
+  #Minimal required amount of players to activate fast start
+  fast_start_players: 16
+  #Max players per team
+  team_players: 4
+  #Total amount of players in arena
+  max_players: 16
+  #When false, windows 10 players are not able to join the arena
+  multi_platform: true
+  #Enabled team selection command
+  team_select_command: true
+  #Player count required for vote countdown to start
+  #Should be lower or equals to start_players property
+  vote_players: 8
+  #Countdown for voting in seconds
+  vote_countdown: 20
+  #If specified, an item will be given to every player in lobby for team selection
+  #If removed, disables item team selection
+  team_select_item:
+    #Inventory slot
+    slot: 5
+    #Item id or name
+    id: skull
+    #Item meta (damage)
+    meta: 3
+    #Item count
+    count: 1
+  #If specified, an item will be given to every player in lobby for voting
+  #If removed, disables item voting
+  vote_item:
+    #Inventory slot
+    slot: 4
+    #Item id or name
+    id: map
+    #Item meta (damage)
+    meta: 0
+    #Item count
+    count: 1
