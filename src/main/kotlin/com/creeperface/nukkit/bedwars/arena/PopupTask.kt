@@ -52,7 +52,7 @@ class PopupTask(var plugin: Arena) : Task() {
         val positions = ArrayList<Vector3>()
 
         for (team in plugin.teams) {
-            positions.add(team.mapConfig.spawn)
+            positions.add(team.spawn)
         }
 
         if (fireworkIndex > 3) {

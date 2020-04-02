@@ -262,7 +262,7 @@ class ArenaListener(private val arena: Arena) : Listener {
 
                 arena.checkAlive()
             } else {
-                p.teleport(data.team.mapConfig.spawn)
+                p.teleport(data.team.spawn)
             }
         }
     }
