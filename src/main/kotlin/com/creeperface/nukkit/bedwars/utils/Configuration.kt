@@ -105,16 +105,6 @@ internal class Configuration(plugin: BedWars, global: File, game: File) {
                     } catch (e: IllegalArgumentException) {
                         logError("Invalid reward action $key, skipping")
                     }
-
-//                    stat?.let {
-//                        val entry = this.get(key)
-//
-//                        if(entry is Number) {
-//
-//                        } else if(entry is ConfigSection) {
-//
-//                        }
-//                    }
                 }
             }
         }

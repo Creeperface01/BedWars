@@ -309,8 +309,6 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaC
                 winnerTeam = team
 
                 for (pl in team.players.values) {
-                    val p = pl.player
-                    //TODO: reward
                     pl.addStat(Stat.WINS)
                 }
 
