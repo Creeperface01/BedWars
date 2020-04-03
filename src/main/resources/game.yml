@@ -51,20 +51,22 @@ arena:
   team_select_item:
     #Inventory slot
     slot: 5
-    #Item id or name
-    id: skull
-    #Item meta (damage)
-    meta: 3
-    #Item count
-    count: 1
+    item:
+      #Item id or name
+      item_id: skull
+      #Item meta (damage)
+      item_damage: 3
+      #Item count
+      item_count: 1
   #If specified, an item will be given to every player in lobby for voting
   #If removed, disables item voting
   vote_item:
     #Inventory slot
     slot: 4
-    #Item id or name
-    id: map
-    #Item meta (damage)
-    meta: 0
-    #Item count
-    count: 1
+    item:
+      #Item id or name
+      item_id: map
+      #Item meta (damage)
+      item_damage: 0
+      #Item count
+      item_count: 1

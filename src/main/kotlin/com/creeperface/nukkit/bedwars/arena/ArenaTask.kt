@@ -20,8 +20,8 @@ class ArenaTask(var plugin: Arena) : Task() {
     }
 
     override fun onRun(tick: Int) {
-        if(voteTime > 0) {
-            if(--voteTime == 0) {
+        if (voteTime > 0) {
+            if (--voteTime == 0) {
                 plugin.voting = false
                 plugin.teamSelect = true
                 plugin.selectMap()

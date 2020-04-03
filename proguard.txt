@@ -8,7 +8,7 @@
 
 -dontwarn
 -allowaccessmodification
--repackageclasses 'bedwars'
+-repackageclasses 'com.creeperface.nukkit.bedwars'
 -keep class com.creeperface.nukkit.bedwars.BedWars
 -keep class com.creeperface.nukkit.bedwars.api.**
 -keep class org.**

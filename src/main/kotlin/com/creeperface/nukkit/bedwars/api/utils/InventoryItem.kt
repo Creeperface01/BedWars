@@ -4,8 +4,8 @@ import cn.nukkit.inventory.Inventory
 import cn.nukkit.item.Item
 
 data class InventoryItem(
-     val slot: Int,
-     val item: Item
+        val slot: Int,
+        val item: Item
 ) {
 
     fun set(inventory: Inventory) {

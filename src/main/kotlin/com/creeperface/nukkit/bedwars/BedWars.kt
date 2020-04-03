@@ -37,7 +37,6 @@ import com.creeperface.nukkit.bedwars.placeholder.Placeholders
 import com.creeperface.nukkit.bedwars.shop.Shop
 import com.creeperface.nukkit.bedwars.shop.form.FormShopManager
 import com.creeperface.nukkit.bedwars.utils.*
-import com.creeperface.nukkit.bedwars.utils.Configuration
 import kotlinx.coroutines.runBlocking
 import org.apache.commons.io.FileUtils
 import org.joor.Reflect
@@ -75,18 +74,19 @@ class BedWars : PluginBase(), BedWarsAPI {
 
     val formManager = FormShopManager(this)
 
-    init {
-        initInstance()
-    }
+//    init {
+//        initInstance()
+//    }
 
     override fun onLoad() {
         instance = this
+        Reflect.on(logger).set("pluginName", consolePrefix)
 
         if (DEMO) {
-            Reflect.on(this).alert("---------------------------------------")
-            Reflect.on(this).alert("-   Running demo version of BedWars   -")
-            Reflect.on(this).alert("-     plugin features are limited     -")
-            Reflect.on(this).alert("---------------------------------------")
+            logAlert("---------------------------------------")
+            logAlert("|   Running demo version of BedWars   |")
+            logAlert("|     plugin features are limited     |")
+            logAlert("---------------------------------------")
         }
 
         Entity.registerEntity("SpecialItem", SpecialItem::class.java)
@@ -97,18 +97,18 @@ class BedWars : PluginBase(), BedWarsAPI {
 
         FireworkUtils.init()
 
-        logger.info("Loading configuration")
+        logInfo("Loading configuration")
         loadConfiguration()
         initDataProviders()
         initEconomyProviders()
     }
 
     override fun onEnable() {
-        initInstance()
-        logger.info("Deleting old worlds...")
+        instance = this
+        logInfo("Deleting old worlds...")
         deleteOldMaps()
 
-        logger.info("Applying configuration")
+        logInfo("Applying configuration")
         initLanguage()
 
         loadData()
@@ -119,7 +119,7 @@ class BedWars : PluginBase(), BedWarsAPI {
         this.registerCommands()
         Placeholders.init(this)
 
-        logger.info("Loading arena configurations")
+        logInfo("Loading arena configurations")
         this.loadMaps()
         this.loadArenas()
         this.registerArenas()
@@ -173,12 +173,16 @@ class BedWars : PluginBase(), BedWarsAPI {
             val data = configuration.arena.toMutableMap()
             data.putAll(Config(file).rootSection)
 
-            val arenaConf = ConfigurationSerializer.loadClass(data, ArenaConfiguration::class)
+            if ("lobby" !in data) {
+                data.writeVector3("lobby", this.server.defaultLevel.spawnLocation)
+            }
 
+            val arenaConf = ConfigurationSerializer.loadClass<ArenaConfiguration>(data)
+            
             arenas[arenaConf.name] = arenaConf
 
             if (DEMO) {
-                Reflect.on(this).alert("Arena limit is reduced to 1 in demo mode")
+                logAlert("Arena limit is reduced to 1 in demo mode")
                 return
             }
         }
@@ -209,7 +213,7 @@ class BedWars : PluginBase(), BedWarsAPI {
                 val config = Config(target, Config.YAML)
                 val name = target.name.substring(0, target.name.length - 4)
 
-                this.maps[name] = ConfigurationSerializer.loadClass(config.rootSection, MapConfiguration::class)
+                this.maps[name] = ConfigurationSerializer.loadClass(config.rootSection)
             }
         } catch (e: Exception) {
             MainLogger.getLogger().logException(e)
@@ -295,28 +299,28 @@ class BedWars : PluginBase(), BedWarsAPI {
                         val currency = economyProvider.getCurrency(currencyName)
 
                         if (currency == null) {
-                            logger.warning("Unknown reward currency $currencyName")
+                            logWarning("Unknown reward currency $currencyName")
                             return@currency
                         }
 
                         val count = amount.toString().toDoubleOrNull()
 
                         if (count == null) {
-                            logger.warning("Invalid reward amount value ($amount) for stat($stat) and currency($currencyName)")
+                            logWarning("Invalid reward amount value ($amount) for stat($stat) and currency($currencyName)")
                             return@currency
                         }
 
                         currencyRewards.add(EconomyReward(stat, currency, count))
                     }
 
-                    if(currencyRewards.isNotEmpty()) {
+                    if (currencyRewards.isNotEmpty()) {
                         rewards[stat] = currencyRewards
                     }
                 }
                 is Number -> {
                     rewards[stat] = listOf(EconomyReward(stat, economyProvider.defaultCurrency, data.toDouble()))
                 }
-                else -> logger.warning("Invalid reward configured for stat($stat)")
+                else -> logWarning("Invalid reward configured for stat($stat)")
             }
         }
 
@@ -369,7 +373,7 @@ class BedWars : PluginBase(), BedWarsAPI {
 
         var file = File(dataFolder, "lang/" + configuration.language.toLowerCase() + ".yml")
         if (!file.exists()) {
-            logger.error("Language file " + configuration.language.toLowerCase() + ".yml not found, switching to english")
+            logError("Language file " + configuration.language.toLowerCase() + ".yml not found, switching to english")
             file = File(dataFolder, "lang/english.yml")
         }
 
@@ -383,6 +387,8 @@ class BedWars : PluginBase(), BedWarsAPI {
 
         val prefix: String
             get() = configuration.prefix
+
+        const val consolePrefix = "§l§7[§cBed§fWars§7]§r§f "
 
         private val mapPattern = Regex("""^.*_bw-[0-9]+$""")
     }

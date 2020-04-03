@@ -50,12 +50,32 @@ max_players: 16
 multi_platform: true
 #Enabled team selection command
 team_select_command: true
-#if specified, an item will be given to every player in lobby for team selection
-#if false, disables item team selection
+#Player count required for vote countdown to start
+#Should be lower or equals to start_players property
+vote_players: 8
+#Countdown for voting in seconds
+vote_countdown: 20
+#If specified, an item will be given to every player in lobby for team selection
+#If removed, disables item team selection
 team_select_item:
-  #Item id or name
-  id: map
-  #Item meta (damage)
-  meta: 0
-  #Item count
-  count: 1
+  #Inventory slot
+  slot: 5
+  item:
+    #Item id or name
+    id: skull
+    #Item meta (damage)
+    meta: 3
+    #Item count
+    count: 1
+#If specified, an item will be given to every player in lobby for voting
+#If removed, disables item voting
+vote_item:
+  #Inventory slot
+  slot: 4
+  item:
+    #Item id or name
+    id: map
+    #Item meta (damage)
+    meta: 0
+    #Item count
+    count: 1

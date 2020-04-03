@@ -5,6 +5,7 @@ import cn.nukkit.scheduler.AsyncTask
 import cn.nukkit.utils.LevelException
 import com.creeperface.nukkit.bedwars.BedWars
 import com.creeperface.nukkit.bedwars.arena.manager.WorldManager
+import com.creeperface.nukkit.bedwars.utils.logError
 
 class WorldCopyTask constructor(private val plugin: BedWars, private val map: String, private val id: String, private val force: Boolean = false) : AsyncTask() {
 
@@ -20,8 +21,7 @@ class WorldCopyTask constructor(private val plugin: BedWars, private val map: St
         try {
             server.loadLevel(this.map + "_" + this.id)
         } catch (e: LevelException) {
-            e.printStackTrace()
-            server.logger.error("Error while loading level: " + this.map)
+            logError("Error while loading level: " + this.map, e)
             return
         }
 

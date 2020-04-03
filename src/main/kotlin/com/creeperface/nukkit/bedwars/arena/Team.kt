@@ -3,7 +3,6 @@ package com.creeperface.nukkit.bedwars.arena
 import cn.nukkit.utils.TextFormat
 import com.creeperface.nukkit.bedwars.api.arena.Arena.ArenaState
 import com.creeperface.nukkit.bedwars.api.arena.Team
-import com.creeperface.nukkit.bedwars.api.arena.configuration.IArenaConfiguration
 import com.creeperface.nukkit.bedwars.api.arena.configuration.MapConfiguration
 import com.creeperface.nukkit.bedwars.api.placeholder.TeamScope
 import com.creeperface.nukkit.bedwars.api.shop.ShopMenuWindow

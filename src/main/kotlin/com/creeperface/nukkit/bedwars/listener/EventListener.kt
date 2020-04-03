@@ -11,8 +11,10 @@ import com.creeperface.nukkit.bedwars.api.data.Stats
 import com.creeperface.nukkit.bedwars.api.utils.Lang
 import com.creeperface.nukkit.bedwars.blockentity.BlockEntityArenaSign
 import com.creeperface.nukkit.bedwars.obj.GlobalData
-import com.creeperface.nukkit.bedwars.utils.*
+import com.creeperface.nukkit.bedwars.utils.PlayerIdentifier
+import com.creeperface.nukkit.bedwars.utils.blockEntity
 import com.creeperface.nukkit.bedwars.utils.configuration
+import com.creeperface.nukkit.bedwars.utils.identifier
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -131,13 +133,13 @@ class EventListener(private val plugin: BedWars) : Listener {
 
     @EventHandler
     fun onChat(e: PlayerChatEvent) {
-        if(!configuration.separateChat) {
+        if (!configuration.separateChat) {
             return
         }
 
         val p = e.player
 
-        if(plugin.getPlayerArena(p) != null) {
+        if (plugin.getPlayerArena(p) != null) {
             return
         }
 

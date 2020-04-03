@@ -1,11 +1,8 @@
 package com.creeperface.nukkit.bedwars.utils
 
-import cn.nukkit.Player
 import cn.nukkit.utils.Config
-import cn.nukkit.utils.ConfigSection
 import com.creeperface.nukkit.bedwars.BedWars
 import com.creeperface.nukkit.bedwars.api.data.Stat
-import com.creeperface.nukkit.bedwars.api.economy.EconomyProvider
 import com.creeperface.nukkit.bedwars.api.shop.ShopType
 import java.io.File
 import java.util.*
@@ -103,10 +100,10 @@ internal class Configuration(plugin: BedWars, global: File, game: File) {
             with(getSection("rewards")) {
                 this.keys.forEach { key ->
                     try {
-                        val stat = Stat.valueOf(key)
+                        val stat = Stat.valueOf(key.toUpperCase())
                         rewards[stat] = get(key)
                     } catch (e: IllegalArgumentException) {
-                        plugin.logger.error("Invalid reward action $key, skipping")
+                        logError("Invalid reward action $key, skipping")
                     }
 
 //                    stat?.let {
@@ -130,7 +127,7 @@ internal class Configuration(plugin: BedWars, global: File, game: File) {
             shopType = try {
                 ShopType.valueOf(readString("shop").toUpperCase())
             } catch (e: IllegalArgumentException) {
-                plugin.logger.error("Invalid shop type ${readString("shop")} using default 'inventory'")
+                logError("Invalid shop type ${readString("shop")} using default 'inventory'")
                 ShopType.INVENTORY
             }
 

@@ -50,13 +50,10 @@ import com.creeperface.nukkit.bedwars.entity.SpecialItem
 import com.creeperface.nukkit.bedwars.obj.BedWarsData
 import com.creeperface.nukkit.bedwars.task.WorldCopyTask
 import com.creeperface.nukkit.bedwars.utils.*
-import com.creeperface.nukkit.bedwars.utils.configuration
 import com.creeperface.nukkit.placeholderapi.api.scope.MessageScope
 import com.creeperface.nukkit.placeholderapi.api.util.translatePlaceholders
-import org.joor.Reflect
 import java.util.*
 import kotlin.collections.ArrayList
-import kotlin.collections.toMap
 
 class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaConfiguration by config, Arena {
 
@@ -341,7 +338,7 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaC
         scoreboardManager.initVotes()
 
         if (DEMO) {
-            Reflect.on(plugin).alert("Continuous game count is limited to 1 in demo mode. Restart the server to start the game")
+            logAlert("Continuous game count is limited to 1 in demo mode. Restart the server to start the game")
             HandlerList.unregisterAll(this)
         }
 

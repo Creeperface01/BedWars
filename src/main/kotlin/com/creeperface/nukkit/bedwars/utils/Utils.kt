@@ -28,7 +28,7 @@ import kotlin.contracts.contract
 import kotlin.reflect.KClass
 import kotlin.reflect.full.isSubclassOf
 
-const val DEMO = false
+const val DEMO = true
 
 typealias TF = TextFormat
 
@@ -194,6 +194,21 @@ fun Player.openInventory(inv: Inventory) {
     }
 }
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun logAlert(message: String) = Reflect.on(BedWars.instance).call("getLogger").call("alert", TextFormat.YELLOW + message)
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun logInfo(message: String) = Reflect.on(BedWars.instance).call("getLogger").call("info", TextFormat.GRAY + message)
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun logWarning(message: String) = Reflect.on(BedWars.instance).call("getLogger").call("warning", TextFormat.YELLOW + message)
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun logError(message: String) = Reflect.on(BedWars.instance).call("getLogger").call("error", TextFormat.RED + message)
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun logError(message: String, t: Throwable) = Reflect.on(BedWars.instance).call("getLogger").call("error", TextFormat.RED + message, t)
+
 private val jacksonMapper = JsonMapper.builder()
         .addModule(Jdk8Module())
         .addModule(JavaTimeModule())
@@ -204,9 +219,6 @@ fun <T : Any> KClass<T>.fromJson(data: String): T = jacksonMapper.readValue(data
 fun <T : Any> KClass<T>.fromMap(data: Map<String, *>): T = jacksonMapper.convertValue(data, this.java)
 
 fun Any.toJson(): String = jacksonMapper.writeValueAsString(this)
-
-@Suppress("NOTHING_TO_INLINE")
-inline fun Reflect.alert(message: String) = call("getLogger").call("alert", message)
 
 internal val configuration: Configuration
     get() = BedWars.instance.configuration

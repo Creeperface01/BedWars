@@ -5,7 +5,7 @@ import cn.nukkit.utils.DyeColor
 import cn.nukkit.utils.TextFormat
 import java.time.Instant
 
-class MapConfiguration(
+data class MapConfiguration(
         val name: String,
         val bronze: List<Vector3>,
         val iron: List<Vector3>,

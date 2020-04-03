@@ -7,6 +7,7 @@ import com.creeperface.nukkit.bedwars.api.arena.configuration.MapConfiguration
 import com.creeperface.nukkit.bedwars.api.utils.Lang
 import com.creeperface.nukkit.bedwars.arena.Arena
 import com.creeperface.nukkit.bedwars.utils.configuration
+import com.creeperface.nukkit.bedwars.utils.logWarning
 
 class VotingManager(val plugin: Arena) {
 
@@ -43,8 +44,12 @@ class VotingManager(val plugin: Arena) {
 
         val table = mutableListOf<String>()
 
-        for (i in 0..all.size.coerceAtMost(configuration.votesSize)) {
+        for (i in 0 until all.size.coerceAtMost(configuration.votesSize)) {
             table.add(all[i])
+        }
+
+        if (table.isEmpty()) {
+            logWarning("Arena '${plugin.name}' has empty map selection")
         }
 
         this.currentTable = table.toTypedArray()

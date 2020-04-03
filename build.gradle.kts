@@ -40,6 +40,11 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-core:$jacksonVersion")
     implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
     implementation("com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion")
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jacksonVersion")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:$jacksonVersion")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
+    implementation("com.fasterxml.jackson.module:jackson-module-parameter-names:$jacksonVersion")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:$jacksonVersion")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
     implementation("org.jooq:joor-java-8:0.9.12")
@@ -63,7 +68,10 @@ tasks {
         archiveClassifier.set("core")
 
         from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
-        exclude("com/creeperface/nukkit/placeholderapi/**")
+        exclude(
+                "com/creeperface/nukkit/placeholderapi/**",
+                "kotlin/**"
+        )
     }
 
     val apiJar by creating(Jar::class) {
@@ -93,8 +101,8 @@ tasks {
     artifacts {
         archives(apiJar)
         archives(libJar)
-        archives(proguardTask.outputs.files.singleFile) {
-            builtBy(proguardTask)
-        }
+//        archives(proguardTask.outputs.files.singleFile) {
+//            builtBy(proguardTask)
+//        }
     }
 }

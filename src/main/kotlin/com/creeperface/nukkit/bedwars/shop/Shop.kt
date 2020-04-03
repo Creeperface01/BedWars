@@ -31,8 +31,7 @@ class Shop(private val plugin: BedWars) : Shop {
 
         config = Config(File(plugin.dataFolder, "shop.yml"), Config.YAML)
                 .rootSection
-                .getSection("section")
-                .getList("children")
+                .getList("windows")
                 .filterIsInstance<ConfigSection>()
 
         if (config.size > 255) {

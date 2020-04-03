@@ -1,15 +1,14 @@
 package com.creeperface.nukkit.bedwars.api.arena.configuration
 
-import cn.nukkit.item.Item
 import cn.nukkit.math.Vector3
-import cn.nukkit.utils.DyeColor
-import cn.nukkit.utils.TextFormat
 import com.creeperface.nukkit.bedwars.api.utils.InventoryItem
 import java.time.Instant
 
-class ArenaConfiguration(
+data class ArenaConfiguration(
         override val name: String,
         override val lobby: Vector3,
+        override val lastModification: Instant = Instant.now(),
+
         override val timeLimit: Int,
         override val startTime: Int,
         override val endingTime: Int,
@@ -23,7 +22,6 @@ class ArenaConfiguration(
         override val teamPlayers: Int,
         override val maxPlayers: Int,
         override val multiPlatform: Boolean,
-        override val lastModification: Instant,
         override val teamSelectCommand: Boolean,
         override val teamSelectItem: InventoryItem?,
         override val voteItem: InventoryItem?,
@@ -56,7 +54,7 @@ interface IArenaConfiguration : ModifiableConfiguration {
     val mapFilter: MapFilter
 }
 
-class MapFilter(
+data class MapFilter(
         val enable: Boolean,
         val teamCount: Set<Int> = emptySet(),
         val include: List<String> = emptyList(),

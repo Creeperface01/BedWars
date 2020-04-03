@@ -8,6 +8,15 @@ import com.creeperface.nukkit.bedwars.api.utils.InventoryItem
 import com.creeperface.nukkit.placeholderapi.api.PlaceholderAPI
 import com.creeperface.nukkit.placeholderapi.api.scope.GlobalScope
 import com.creeperface.nukkit.placeholderapi.api.util.AnyContext
+import com.fasterxml.jackson.core.JsonGenerator
+import com.fasterxml.jackson.core.JsonParser
+import com.fasterxml.jackson.databind.DeserializationContext
+import com.fasterxml.jackson.databind.PropertyNamingStrategy
+import com.fasterxml.jackson.databind.SerializerProvider
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer
+import com.fasterxml.jackson.databind.module.SimpleModule
+import com.fasterxml.jackson.databind.ser.std.StdSerializer
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotlin.reflect.KClass
 
 typealias ConfMap = Map<String, *>
@@ -16,6 +25,70 @@ typealias InsConfMap = HashMap<String, Any?>
 
 val Config.confMap: ConfMap
     get() = rootSection as ConfMap
+
+val mapper = jacksonObjectMapper()
+        .registerModule(
+                SimpleModule()
+                        .addSerializer(object : StdSerializer<Item>(Item::class.java) {
+
+                            override fun serialize(item: Item, gen: JsonGenerator, serializers: SerializerProvider) {
+                                gen.writeNumberField("item_id", item.id)
+                                gen.writeNumberField("item_damage", item.damage)
+                                gen.writeNumberField("item_count", item.count)
+
+                                if (item.hasCustomName()) {
+                                    gen.writeStringField("item_custon_name", item.customName)
+                                }
+
+                                if (item.lore.isNotEmpty()) {
+                                    gen.writeObjectField("lore", item.lore)
+                                }
+
+                                if (item.hasEnchantments()) {
+                                    gen.writeObjectField("enchantments", item.enchantments.map {
+                                        mapOf(
+                                                "id" to it.id,
+                                                "level" to it.level
+                                        )
+                                    })
+                                }
+                            }
+                        })
+                        .addDeserializer(Item::class.java, object : StdDeserializer<Item>(Item::class.java) {
+
+                            override fun deserialize(p: JsonParser, ctxt: DeserializationContext): Item {
+                                val node = ctxt.readTree(p)
+
+                                val itemId = node.get("item_id")
+
+                                val item = when {
+                                    itemId.isTextual -> Item.fromString(itemId.asText())
+                                    itemId.isInt -> Item.get(itemId.asInt())
+                                    else -> error("Invalid item id ${itemId.asText()}")
+                                }
+
+                                item.damage = node.get("item_damage").asInt()
+                                item.count = node.get("item_count").asInt()
+
+                                node.get("item_custom_name")?.let { name ->
+                                    item.customName = name.asText()
+                                }
+
+                                node.get("lore")?.let { lore ->
+                                    item.setLore(*lore.map { it.asText() }.toTypedArray())
+                                }
+
+                                node.get("enchantments")?.let { enchants ->
+                                    item.addEnchantment(*enchants.map {
+                                        Enchantment.get(it.get("id").asInt()).setLevel(it.get("level").asInt())
+                                    }.toTypedArray())
+                                }
+
+                                return item
+                            }
+                        })
+        )
+        .setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE)
 
 @Suppress("UNCHECKED_CAST")
 fun <T> ConfMap.read(key: String, defaultValue: T) = this[key] as? T ?: defaultValue
