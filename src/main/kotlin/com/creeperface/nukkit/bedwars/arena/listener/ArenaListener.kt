@@ -148,7 +148,7 @@ class ArenaListener(private val arena: Arena) : Listener {
         if (arena.arenaState == ArenaState.LOBBY || victim.level.id != this.arena.level.id) {
             if (victim is Player) {
                 if (this.arena.arenaState == ArenaState.LOBBY && e.cause == EntityDamageEvent.DamageCause.VOID && arena.inArena(victim)) {
-                    victim.teleport(this.arena.lobby)
+                    victim.teleport(this.arena.arenaLobby)
                     e.setCancelled()
                 }
             }

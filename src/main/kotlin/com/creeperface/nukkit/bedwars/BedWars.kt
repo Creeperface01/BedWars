@@ -173,12 +173,8 @@ class BedWars : PluginBase(), BedWarsAPI {
             val data = configuration.arena.toMutableMap()
             data.putAll(Config(file).rootSection)
 
-            if ("lobby" !in data) {
-                data.writeVector3("lobby", this.server.defaultLevel.spawnLocation)
-            }
-
             val arenaConf = ConfigurationSerializer.loadClass<ArenaConfiguration>(data)
-            
+
             arenas[arenaConf.name] = arenaConf
 
             if (DEMO) {

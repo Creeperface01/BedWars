@@ -6,7 +6,7 @@ import java.time.Instant
 
 data class ArenaConfiguration(
         override val name: String,
-        override val lobby: Vector3,
+        override val lobby: Vector3? = null,
         override val lastModification: Instant = Instant.now(),
 
         override val timeLimit: Int,
@@ -23,8 +23,8 @@ data class ArenaConfiguration(
         override val maxPlayers: Int,
         override val multiPlatform: Boolean,
         override val teamSelectCommand: Boolean,
-        override val teamSelectItem: InventoryItem?,
-        override val voteItem: InventoryItem?,
+        override val teamSelectItem: InventoryItem? = null,
+        override val voteItem: InventoryItem? = null,
         override val votePlayers: Int,
         override val voteCountdown: Int,
         override val mapFilter: MapFilter
@@ -45,7 +45,7 @@ interface IArenaConfiguration : ModifiableConfiguration {
     val teamPlayers: Int
     val maxPlayers: Int
     val multiPlatform: Boolean
-    val lobby: Vector3
+    val lobby: Vector3?
     val teamSelectCommand: Boolean
     val teamSelectItem: InventoryItem?
     val voteItem: InventoryItem?

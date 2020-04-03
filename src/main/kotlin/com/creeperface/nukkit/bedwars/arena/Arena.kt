@@ -107,6 +107,9 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaC
             return teams
         }
 
+    val arenaLobby: Vector3
+        get() = lobby ?: plugin.server.defaultLevel.spawnLocation
+
     init {
         this.enableScheduler()
         this.votingManager = VotingManager(this)
@@ -160,9 +163,9 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaC
 
         p.nameTag = p.name
         p.sendMessage(BedWars.prefix + (Lang.JOIN.translate(this.name)))
-        p.teleport(this.lobby)
+        p.teleport(this.arenaLobby)
         scoreboardManager.addPlayer(p)
-        p.setSpawn(this.lobby)
+        p.setSpawn(this.arenaLobby)
 
         val inv = p.inventory
         inv.clearAll()
