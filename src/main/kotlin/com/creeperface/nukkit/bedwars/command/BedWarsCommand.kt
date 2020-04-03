@@ -4,9 +4,9 @@ import cn.nukkit.Player
 import cn.nukkit.command.CommandSender
 import cn.nukkit.command.data.CommandParamType
 import cn.nukkit.command.data.CommandParameter
-import cn.nukkit.utils.TextFormat
 import com.creeperface.nukkit.bedwars.BedWars
 import com.creeperface.nukkit.bedwars.api.data.Stat
+import com.creeperface.nukkit.bedwars.api.event.ArenaStopEvent
 import com.creeperface.nukkit.bedwars.api.utils.Lang
 import com.creeperface.nukkit.bedwars.listener.CommandEventListener
 
@@ -18,8 +18,8 @@ class BedWarsCommand(plugin: BedWars) : BaseCommand("bedwars", plugin) {
         this.usageMessage = "Use /bw help"
 
         this.commandParameters.clear()
-        this.commandParameters["randomjoin"] = arrayOf(
-                CommandParameter("action", arrayOf("randomjoin")),
+        this.commandParameters["quickjoin"] = arrayOf(
+                CommandParameter("action", arrayOf("quickjoin")),
                 CommandParameter("player", CommandParamType.TARGET, true)
         )
         this.commandParameters["sign"] = arrayOf(
@@ -36,14 +36,25 @@ class BedWarsCommand(plugin: BedWars) : BaseCommand("bedwars", plugin) {
     }
 
     override fun execute(sender: CommandSender, label: String, args: Array<out String>): Boolean {
-        if (args.isEmpty()) return false
+        if (args.isEmpty()) {
+            sender.sendMessage(Lang.CMD_HELP.translate())
+            return true
+        }
 
         when (args[0]) {
             "quickjoin" -> {
                 val p = when {
-                    args.size == 2 -> plugin.server.getPlayerExact(args[1])
+                    args.size >= 2 -> plugin.server.getPlayerExact(args[1])
                     sender is Player -> sender
-                    else -> return false
+                    else -> {
+                        sender.sendMessage(Lang.COMMAND_IN_GAME.translate())
+                        return true
+                    }
+                }
+
+                if (p == null) {
+                    sender.sendMessage(Lang.PLAYER_NOT_FOUND.translate(args[1]))
+                    return true
                 }
 
                 if (!testPermission(p, "bedwars.command.quickjoin")) {
@@ -56,7 +67,15 @@ class BedWarsCommand(plugin: BedWars) : BaseCommand("bedwars", plugin) {
                 val p = when {
                     args.size == 2 -> plugin.server.getPlayerExact(args[1])
                     sender is Player -> sender
-                    else -> return false
+                    else -> {
+                        sender.sendMessage(Lang.COMMAND_IN_GAME.translate())
+                        return true
+                    }
+                }
+
+                if (p == null) {
+                    sender.sendMessage(Lang.PLAYER_NOT_FOUND.translate(args[1]))
+                    return true
                 }
 
                 if (p === sender && !testPermission(sender, "bedwars.command.stats")) {
@@ -74,11 +93,36 @@ class BedWarsCommand(plugin: BedWars) : BaseCommand("bedwars", plugin) {
                 sender.sendMessage(Lang.STATS.translate(stats[Stat.KILLS].toString(), stats[Stat.DEATHS].toString(), stats[Stat.WINS].toString(), stats[Stat.LOSSES].toString(), stats[Stat.BEDS].toString()))
             }
             "help" -> {
+                var msg = Lang.AVAILABLE_COMMANDS.translate() + ":\n"
 
+                if (sender.hasPermission("bedwars.command.quickjoin")) {
+                    msg += Lang.CMD_QUICKJOIN_HELP.translate() + "\n"
+                }
+
+                if (sender.hasPermission("bedwars.command.stats")) {
+                    msg += Lang.CMD_STATS_HELP.translate() + "\n"
+                }
+
+                if (sender.hasPermission("bedwars.command.sign")) {
+                    msg += Lang.CMD_SIGN_HELP.translate() + "\n"
+                    msg += Lang.CMD_TEAMSIGN_HELP.translate() + "\n"
+                }
+
+                if (sender.hasPermission("bedwars.command.start")) {
+                    msg += Lang.CMD_START_HELP.translate() + "\n"
+                }
+
+                if (sender.hasPermission("bedwars.command.stop")) {
+                    msg += Lang.CMD_STOP_HELP.translate() + "\n"
+                }
+
+                if (sender.hasPermission("bedwars.command.vote")) {
+                    msg += Lang.CMD_VOTE_HELP.translate() + "\n"
+                }
             }
             else -> {
                 if (sender !is Player) {
-                    sender.sendMessage(BedWars.prefix + TextFormat.RED + "You can run this command only in-game")
+                    sender.sendMessage(BedWars.prefix + Lang.COMMAND_IN_GAME.translate())
                     return false
                 }
 
@@ -89,7 +133,7 @@ class BedWarsCommand(plugin: BedWars) : BaseCommand("bedwars", plugin) {
                         }
 
                         plugin.commandListener.actionPlayers[sender.uniqueId] = CommandEventListener.Action.SET_SIGN
-                        sender.sendMessage(BedWars.prefix + TextFormat.YELLOW + "Click on the sign to set")
+                        sender.sendMessage(BedWars.prefix + Lang.CMD_SIGN_ACTION.translate())
                     }
                     "teamsign" -> {
                         if (!testPermission(sender, "bedwars.command.sign")) {
@@ -97,7 +141,7 @@ class BedWarsCommand(plugin: BedWars) : BaseCommand("bedwars", plugin) {
                         }
 
                         plugin.commandListener.actionPlayers[sender.uniqueId] = CommandEventListener.Action.SET_TEAM_SIGN
-                        sender.sendMessage(BedWars.prefix + TextFormat.YELLOW + "Click on the sign to set")
+                        sender.sendMessage(BedWars.prefix + Lang.CMD_SIGN_ACTION.translate())
                     }
                     else -> {
                         val arena = plugin.getPlayerArena(sender)
@@ -113,11 +157,15 @@ class BedWarsCommand(plugin: BedWars) : BaseCommand("bedwars", plugin) {
                                 if (!testPermission(sender, "bedwars.command.start")) {
                                     return true
                                 }
+
+                                arena.selectMap(true)
                             }
                             "stop" -> {
                                 if (!testPermission(sender, "bedwars.command.stop")) {
                                     return true
                                 }
+
+                                arena.stopGame(ArenaStopEvent.Cause.COMMAND)
                             }
                             "vote" -> {
                                 if (!testPermission(sender, "bedwars.command.vote")) {
@@ -125,6 +173,7 @@ class BedWarsCommand(plugin: BedWars) : BaseCommand("bedwars", plugin) {
                                 }
 
                                 if (args.size != 1) {
+                                    sender.sendMessage(Lang.USE_PREFIX.translate() + " " + Lang.CMD_VOTE_HELP.translate())
                                     return false
                                 }
 

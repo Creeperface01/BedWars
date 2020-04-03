@@ -27,6 +27,7 @@ class ArenaStopEvent(
         NO_PLAYERS,
         TIME_LIMIT,
         SHUTDOWN,
+        COMMAND,
         CUSTOM
     }
 }

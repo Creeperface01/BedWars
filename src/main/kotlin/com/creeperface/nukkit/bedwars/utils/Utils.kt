@@ -7,6 +7,7 @@ import cn.nukkit.command.CommandSender
 import cn.nukkit.inventory.Inventory
 import cn.nukkit.item.Item
 import cn.nukkit.item.enchantment.Enchantment
+import cn.nukkit.lang.TranslationContainer
 import cn.nukkit.level.format.FullChunk
 import cn.nukkit.utils.DyeColor
 import cn.nukkit.utils.TextFormat
@@ -226,3 +227,8 @@ internal val configuration: Configuration
 fun String.snakeToCamelCase() = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, this)
 
 fun String.camelToSnakeCase() = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, this)
+
+fun Player.sendPermissionMessage() {
+    val msg = this.server.language.translate(TranslationContainer("commands.generic.permission"))
+    this.sendMessage(TextFormat.RED + msg)
+}

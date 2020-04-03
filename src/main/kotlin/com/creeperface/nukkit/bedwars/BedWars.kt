@@ -115,14 +115,16 @@ class BedWars : PluginBase(), BedWarsAPI {
         loadEconomy()
 
         this.shop = Shop(this)
-
-        this.registerCommands()
         Placeholders.init(this)
 
-        logInfo("Loading arena configurations")
+        logInfo("Loading maps")
         this.loadMaps()
+
+        logInfo("Loading arena configurations")
         this.loadArenas()
         this.registerArenas()
+
+        this.registerCommands()
 
         this.server.pluginManager.registerEvents(commandListener, this)
         this.server.pluginManager.registerEvents(EventListener(this), this)
@@ -177,6 +179,8 @@ class BedWars : PluginBase(), BedWarsAPI {
 
             arenas[arenaConf.name] = arenaConf
 
+            logInfo("Loaded ${arenaConf.name}")
+
             if (DEMO) {
                 logAlert("Arena limit is reduced to 1 in demo mode")
                 return
@@ -210,6 +214,7 @@ class BedWars : PluginBase(), BedWarsAPI {
                 val name = target.name.substring(0, target.name.length - 4)
 
                 this.maps[name] = ConfigurationSerializer.loadClass(config.rootSection)
+                logInfo("Loaded $name")
             }
         } catch (e: Exception) {
             MainLogger.getLogger().logException(e)
@@ -355,7 +360,7 @@ class BedWars : PluginBase(), BedWarsAPI {
     }
 
     private fun initLanguage() {
-        val uri = BedWars::class.java.classLoader.getResource("/lang")?.toURI() ?: return
+        val uri = BedWars::class.java.classLoader.getResource("lang")?.toURI() ?: error("Could not load language files")
 
         val path = if (uri.scheme == "jar") {
             FileSystems.newFileSystem(uri, Collections.emptyMap<String, Any>()).getPath("/lang")
@@ -363,7 +368,8 @@ class BedWars : PluginBase(), BedWarsAPI {
             Paths.get(uri)
         }
 
-        Files.walk(path, 1).forEach {
+        Files.walk(path, 2).forEach {
+            logInfo("walk: $it")
             saveResource("lang/" + path.fileName)
         }
 

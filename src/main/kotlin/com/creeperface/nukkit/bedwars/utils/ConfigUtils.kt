@@ -12,6 +12,7 @@ import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.PropertyNamingStrategy
+import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import com.fasterxml.jackson.databind.module.SimpleModule
@@ -89,6 +90,7 @@ val mapper = jacksonObjectMapper()
                         })
         )
         .setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE)
+        .enable(SerializationFeature.WRITE_ENUMS_USING_INDEX)
 
 @Suppress("UNCHECKED_CAST")
 fun <T> ConfMap.read(key: String, defaultValue: T) = this[key] as? T ?: defaultValue

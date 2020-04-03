@@ -1,60 +1,79 @@
 package com.creeperface.nukkit.bedwars.api.utils
 
 import cn.nukkit.utils.Config
+import com.creeperface.nukkit.bedwars.utils.logError
+import com.creeperface.nukkit.bedwars.utils.logInfo
 
-enum class Lang {
-    USE_VOTE,
-    PLAYER_LEAVE,
-    BED_BREAK,
-    PERMS,
-    FALL,
-    UPDATE_MSG,
-    FIRE_TICK,
-    TEAM_JOIN,
-    END_GAME,
-    VOTE,
-    SHOT,
-    CACTUS,
-    FIRE_ESCAPE,
-    LEGEND_FOUND,
-    JOIN_SPECTATOR,
-    STATS,
-    PE_ONLY,
-    UNKNOWN,
-    LAVA,
-    FULL_INVENTORY,
-    SUFFOCATE,
-    FULL_TEAM,
-    ALREADY_IN_TEAM,
-    CAN_NOT_VOTE,
-    GAME_FULL,
-    BREAK_OWN_BED,
-    FIRE_TICK_ESCAPE,
-    BUY,
-    SHOP_ITEM,
-    SHOP_COST,
-    FIRE,
-    VOID,
-    MIN_PLAYERS,
-    SELECT_MAP,
-    TOKENS,
-    HIGH_COST,
-    NO_ARENA_FOUND,
-    LAVA_ESCAPE,
-    DROWNING,
-    PLAYER_COUNT,
-    JOIN,
-    START_GAME,
-    FALL_ESCAPE,
-    CONTACT_PLAYER,
-    LEAVE,
-    CONTACT,
-    CACTUS_ESCAPE,
-    DROWNING_ESCAPE,
-    EXPLOSION,
-    COMMAND_IN_GAME,
-    GAME_IN_PROGRESS,
-    NOT_GAME_COMMAND
+enum class Lang(
+        private val prefix: String? = null,
+        private val full: Boolean = false
+) {
+    STATS("general"),
+    COMMAND_IN_GAME("general"),
+    NOT_GAME_COMMAND("general"),
+    AVAILABLE_COMMANDS("general"),
+    PLAYER_NOT_FOUND("general"),
+    USE_PREFIX("general"),
+
+    USE_VOTE("arena"),
+    PLAYER_LEAVE("arena"),
+    FULL_INVENTORY("arena"),
+    BED_BREAK("arena"),
+    TEAM_JOIN("arena"),
+    END_GAME("arena"),
+    VOTE("arena"),
+    PE_ONLY("arena"),
+    SUFFOCATE("arena"),
+    FULL_TEAM("arena"),
+    ALREADY_IN_TEAM("arena"),
+    CAN_NOT_VOTE("arena"),
+    GAME_FULL("arena"),
+    BREAK_OWN_BED("arena"),
+    JOIN_SPECTATOR("arena"),
+    LEGEND_FOUND("arena"),
+    MIN_PLAYERS("arena"),
+    SELECT_MAP("arena"),
+    NO_ARENA_FOUND("arena"),
+    PLAYER_COUNT("arena"),
+    JOIN("arena"),
+    START_GAME("arena"),
+    LEAVE("arena"),
+    GAME_IN_PROGRESS("arena"),
+
+    CMD_HELP("command.bedwars.help", true),
+    CMD_QUICKJOIN_HELP("command.quickjoin.help", true),
+    CMD_STATS_HELP("command.stats.help", true),
+    CMD_SIGN_HELP("command.sign.help", true),
+    CMD_SIGN_ACTION("command.sign.action", true),
+    CMD_TEAMSIGN_HELP("command.teamsign.help", true),
+    CMD_START_HELP("command.start.help", true),
+    CMD_STOP_HELP("command.stop.help", true),
+    CMD_VOTE_HELP("command.vote.help", true),
+    CMD_TEAM_HELP("command.team.help", true),
+
+    BUY("shop"),
+    SHOP_ITEM("shop"),
+    SHOP_COST("shop"),
+    HIGH_COST("shop"),
+
+    FALL("death"),
+    FIRE_TICK("death"),
+    SHOT("death"),
+    CACTUS("death"),
+    FIRE_ESCAPE("death"),
+    UNKNOWN("death"),
+    LAVA("death"),
+    FIRE_TICK_ESCAPE("death"),
+    FIRE("death"),
+    VOID("death"),
+    LAVA_ESCAPE("death"),
+    DROWNING("death"),
+    FALL_ESCAPE("death"),
+    CONTACT_PLAYER("death"),
+    CONTACT("death"),
+    CACTUS_ESCAPE("death"),
+    DROWNING_ESCAPE("death"),
+    EXPLOSION("death"),
     ;
 
     private lateinit var translation: String
@@ -84,8 +103,21 @@ enum class Lang {
     companion object {
 
         fun init(data: Config) {
-            for ((key, value) in data.all) {
-                valueOf(key.toUpperCase()).translation = value.toString()
+            logInfo(data.rootSection.toString())
+            logInfo("test: " + data.get("general.stats"))
+
+            for (value in values()) {
+                val key = (value.prefix?.let { "$it." } ?: "") + if (value.full) "" else value.name.toLowerCase()
+
+                val cfgValue = data.get(key)
+
+                if (cfgValue == null) {
+                    logError("Unknown language translation $key")
+                    continue
+                }
+
+                value.translation = cfgValue.toString()
+                logInfo(value.translation)
             }
         }
     }

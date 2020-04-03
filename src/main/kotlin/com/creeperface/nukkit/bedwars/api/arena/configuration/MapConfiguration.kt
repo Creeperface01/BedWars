@@ -10,7 +10,7 @@ data class MapConfiguration(
         val bronze: List<Vector3>,
         val iron: List<Vector3>,
         val gold: List<Vector3>,
-        override val lastModification: Instant,
+        override val lastModification: Instant = Instant.now(),
         val teams: List<TeamData>
 ) : ModifiableConfiguration {
 
