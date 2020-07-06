@@ -70,3 +70,16 @@ arena:
       item_damage: 0
       #Item count
       item_count: 1
+  #If specified, an item will be given to every player in lobby to leave an arena
+  lobby_item:
+    #Inventory slot
+    slot: 8
+    item:
+      #Item id or name
+      item_id: clock
+      #Item meta (damage)
+      item_damage: 0
+      #Item count
+      item_count: 1
+      #custom name
+      item_custom_name: "&o&bLobby"

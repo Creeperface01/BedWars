@@ -1,6 +1,8 @@
 package com.creeperface.nukkit.bedwars.api.utils
 
 import cn.nukkit.utils.Config
+import cn.nukkit.utils.TextFormat
+import com.creeperface.nukkit.bedwars.BedWars
 import com.creeperface.nukkit.bedwars.utils.logError
 import com.creeperface.nukkit.bedwars.utils.logInfo
 
@@ -14,16 +16,15 @@ enum class Lang(
     AVAILABLE_COMMANDS("general"),
     PLAYER_NOT_FOUND("general"),
     USE_PREFIX("general"),
+    ARENA_NOT_FOUND("general"),
 
     USE_VOTE("arena"),
     PLAYER_LEAVE("arena"),
-    FULL_INVENTORY("arena"),
     BED_BREAK("arena"),
     TEAM_JOIN("arena"),
     END_GAME("arena"),
     VOTE("arena"),
     PE_ONLY("arena"),
-    SUFFOCATE("arena"),
     FULL_TEAM("arena"),
     ALREADY_IN_TEAM("arena"),
     CAN_NOT_VOTE("arena"),
@@ -55,10 +56,12 @@ enum class Lang(
     SHOP_ITEM("shop"),
     SHOP_COST("shop"),
     HIGH_COST("shop"),
+    FULL_INVENTORY("shop"),
 
     FALL("death"),
     FIRE_TICK("death"),
     SHOT("death"),
+    SUFFOCATE("death"),
     CACTUS("death"),
     FIRE_ESCAPE("death"),
     UNKNOWN("death"),
@@ -78,13 +81,21 @@ enum class Lang(
 
     private lateinit var translation: String
 
-    fun translate(vararg args: Any): String {
-        if (args.isEmpty()) return this.translation
+    fun translate(vararg args: Any) = translate0(false, *args)
+
+    fun translatePrefix(vararg args: Any) = translate0(true, *args)
+
+    private fun translate0(prefix: Boolean, vararg args: Any): String {
+        if (args.isEmpty()) return (if(prefix) BedWars.chatPrefix else "") + this.translation
 
         val base = StringBuilder(this.translation)
 
         for (i in args.indices) {
             base.replaceAll("%$i", args[i].toString())
+        }
+
+        if (prefix) {
+            base.insert(0, BedWars.chatPrefix)
         }
 
         return base.toString()
@@ -103,11 +114,12 @@ enum class Lang(
     companion object {
 
         fun init(data: Config) {
-            logInfo(data.rootSection.toString())
-            logInfo("test: " + data.get("general.stats"))
-
             for (value in values()) {
-                val key = (value.prefix?.let { "$it." } ?: "") + if (value.full) "" else value.name.toLowerCase()
+                var key = (value.prefix?.let { "$it." } ?: "") + if (value.full) "" else value.name.toLowerCase()
+
+                if (key.endsWith(".")) {
+                    key = key.substring(0, key.length - 1)
+                }
 
                 val cfgValue = data.get(key)
 
@@ -116,8 +128,7 @@ enum class Lang(
                     continue
                 }
 
-                value.translation = cfgValue.toString()
-                logInfo(value.translation)
+                value.translation = cfgValue.toString().replace('&', TextFormat.ESCAPE)
             }
         }
     }

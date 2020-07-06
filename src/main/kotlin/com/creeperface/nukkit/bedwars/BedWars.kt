@@ -7,6 +7,7 @@ import cn.nukkit.plugin.PluginBase
 import cn.nukkit.utils.Config
 import cn.nukkit.utils.ConfigSection
 import cn.nukkit.utils.MainLogger
+import cn.nukkit.utils.TextFormat
 import com.creeperface.nukkit.bedwars.api.BedWarsAPI
 import com.creeperface.nukkit.bedwars.api.arena.Arena.ArenaState
 import com.creeperface.nukkit.bedwars.api.arena.configuration.ArenaConfiguration
@@ -18,7 +19,9 @@ import com.creeperface.nukkit.bedwars.api.event.ArenaStopEvent
 import com.creeperface.nukkit.bedwars.api.utils.Lang
 import com.creeperface.nukkit.bedwars.arena.Arena
 import com.creeperface.nukkit.bedwars.arena.config.ConfigurationSerializer
+import com.creeperface.nukkit.bedwars.blockentity.BlockEntityArenaSign
 import com.creeperface.nukkit.bedwars.blockentity.BlockEntityMine
+import com.creeperface.nukkit.bedwars.blockentity.BlockEntityTeamSign
 import com.creeperface.nukkit.bedwars.command.BedWarsCommand
 import com.creeperface.nukkit.bedwars.command.ReloadCommand
 import com.creeperface.nukkit.bedwars.dataprovider.MongoDBDataProvider
@@ -37,15 +40,15 @@ import com.creeperface.nukkit.bedwars.placeholder.Placeholders
 import com.creeperface.nukkit.bedwars.shop.Shop
 import com.creeperface.nukkit.bedwars.shop.form.FormShopManager
 import com.creeperface.nukkit.bedwars.utils.*
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap
+import it.unimi.dsi.fastutil.longs.Long2ObjectMap
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap
 import kotlinx.coroutines.runBlocking
 import org.apache.commons.io.FileUtils
 import org.joor.Reflect
 import java.io.File
 import java.io.FileFilter
 import java.io.IOException
-import java.nio.file.FileSystems
-import java.nio.file.Files
-import java.nio.file.Paths
 import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.jvm.javaField
@@ -57,7 +60,7 @@ class BedWars : PluginBase(), BedWarsAPI {
 
     var ins = HashMap<String, Arena>()
 
-    var players: MutableMap<Long, GlobalData> = HashMap()
+    val players = Long2ObjectOpenHashMap<GlobalData>()
     internal val commandListener = CommandEventListener(this)
 
     internal lateinit var configuration: Configuration
@@ -82,7 +85,7 @@ class BedWars : PluginBase(), BedWarsAPI {
         instance = this
         Reflect.on(logger).set("pluginName", consolePrefix)
 
-        if (DEMO) {
+        demo {
             logAlert("---------------------------------------")
             logAlert("|   Running demo version of BedWars   |")
             logAlert("|     plugin features are limited     |")
@@ -94,6 +97,8 @@ class BedWars : PluginBase(), BedWarsAPI {
         Entity.registerEntity("WinParticle", WinParticle::class.java)
 
         BlockEntity.registerBlockEntity("BedWarsMine", BlockEntityMine::class.java)
+        BlockEntity.registerBlockEntity("BedWarsArenaSign", BlockEntityArenaSign::class.java)
+        BlockEntity.registerBlockEntity("BedWarsTeamSign", BlockEntityTeamSign::class.java)
 
         FireworkUtils.init()
 
@@ -126,8 +131,8 @@ class BedWars : PluginBase(), BedWarsAPI {
 
         this.registerCommands()
 
-        this.server.pluginManager.registerEvents(commandListener, this)
-        this.server.pluginManager.registerEvents(EventListener(this), this)
+        commandListener.register()
+        EventListener(this).register()
     }
 
     override fun onDisable() {
@@ -181,7 +186,7 @@ class BedWars : PluginBase(), BedWarsAPI {
 
             logInfo("Loaded ${arenaConf.name}")
 
-            if (DEMO) {
+            demo {
                 logAlert("Arena limit is reduced to 1 in demo mode")
                 return
             }
@@ -360,23 +365,33 @@ class BedWars : PluginBase(), BedWarsAPI {
     }
 
     private fun initLanguage() {
-        val uri = BedWars::class.java.classLoader.getResource("lang")?.toURI() ?: error("Could not load language files")
+//        val uri = BedWars::class.java.classLoader.getResource("lang")?.toURI() ?: error("Could not load language files")
+//
+//        val path = if (uri.scheme == "jar") {
+//            FileSystems.newFileSystem(uri, Collections.emptyMap<String, Any>()).getPath("/lang")
+//        } else {
+//            Paths.get(uri)
+//        }
+//
+//        Files.walk(path, 2).forEach {
+//            logInfo("walk: $it")
+//            saveResource("lang/" + path.fileName)
+//        }
+        val files = arrayOf("czech", "english")
 
-        val path = if (uri.scheme == "jar") {
-            FileSystems.newFileSystem(uri, Collections.emptyMap<String, Any>()).getPath("/lang")
-        } else {
-            Paths.get(uri)
+        for (file in files) {
+            saveResource("lang/$file.yml")
         }
 
-        Files.walk(path, 2).forEach {
-            logInfo("walk: $it")
-            saveResource("lang/" + path.fileName)
-        }
+        val file = with(configuration.language.toLowerCase()) {
+            val file = File(dataFolder, "lang/$this.yml")
 
-        var file = File(dataFolder, "lang/" + configuration.language.toLowerCase() + ".yml")
-        if (!file.exists()) {
-            logError("Language file " + configuration.language.toLowerCase() + ".yml not found, switching to english")
-            file = File(dataFolder, "lang/english.yml")
+            if (!file.exists()) {
+                logError("Language file $this.yml not found, switching to english")
+                File(dataFolder, "lang/english.yml")
+            } else {
+                file
+            }
         }
 
         Lang.init(Config(file, Config.YAML))
@@ -389,6 +404,9 @@ class BedWars : PluginBase(), BedWarsAPI {
 
         val prefix: String
             get() = configuration.prefix
+
+        val chatPrefix: String
+            get() = configuration.prefix + " "
 
         const val consolePrefix = "§l§7[§cBed§fWars§7]§r§f "
 

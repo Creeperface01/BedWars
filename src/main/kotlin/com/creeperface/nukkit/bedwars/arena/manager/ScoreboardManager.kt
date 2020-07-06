@@ -25,7 +25,7 @@ class ScoreboardManager(private val arena: Arena) {
         val votes = vm.currentTable
 
         for (i in votes.indices) {
-            scoreboard.setScore(i.toLong(), "${TF.AQUA}[${i + 1}] ${TF.DARK_GRAY}${votes[i]} ${TF.RED}»${TF.GREEN}${vm.stats[i]} votes", i)
+            scoreboard.setScore(i.toLong(), "${TF.AQUA}[${i + 1}] ${TF.DARK_GRAY}${votes[i]} ${TF.RED}» ${TF.GREEN}${vm.stats[i]} votes", i)
         }
 
         scoreboard.update()

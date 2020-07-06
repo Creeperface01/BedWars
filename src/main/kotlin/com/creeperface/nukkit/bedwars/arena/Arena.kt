@@ -9,7 +9,6 @@ import cn.nukkit.blockentity.BlockEntity
 import cn.nukkit.blockentity.BlockEntityBed
 import cn.nukkit.entity.item.EntityItem
 import cn.nukkit.event.HandlerList
-import cn.nukkit.event.Listener
 import cn.nukkit.event.player.PlayerInteractEvent
 import cn.nukkit.event.player.PlayerInteractEvent.Action
 import cn.nukkit.event.player.PlayerTeleportEvent
@@ -40,6 +39,7 @@ import com.creeperface.nukkit.bedwars.api.event.ArenaStopEvent
 import com.creeperface.nukkit.bedwars.api.placeholder.ArenaScope
 import com.creeperface.nukkit.bedwars.api.utils.BedWarsExplosion
 import com.creeperface.nukkit.bedwars.api.utils.Lang
+import com.creeperface.nukkit.bedwars.arena.listener.ArenaListener
 import com.creeperface.nukkit.bedwars.arena.manager.DeathManager
 import com.creeperface.nukkit.bedwars.arena.manager.ScoreboardManager
 import com.creeperface.nukkit.bedwars.arena.manager.SignManager
@@ -52,10 +52,11 @@ import com.creeperface.nukkit.bedwars.task.WorldCopyTask
 import com.creeperface.nukkit.bedwars.utils.*
 import com.creeperface.nukkit.placeholderapi.api.scope.MessageScope
 import com.creeperface.nukkit.placeholderapi.api.util.translatePlaceholders
+import org.joor.Reflect
 import java.util.*
 import kotlin.collections.ArrayList
 
-class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaConfiguration by config, Arena {
+class Arena(var plugin: BedWars, config: ArenaConfiguration) : IArenaConfiguration by config, Arena {
 
     val playerData = mutableMapOf<String, BedWarsData>()
     val gameSpectators = mutableMapOf<String, Player>()
@@ -75,6 +76,7 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaC
     internal val scoreboardManager = ScoreboardManager(this)
     internal val signManager = SignManager(this)
     internal val deathManager: DeathManager
+    internal val listener: ArenaListener
 
     override var map: String? = null
     var winnerTeam: Team? = null
@@ -122,7 +124,8 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaC
             initTeams()
         }
 
-        plugin.server.pluginManager.registerEvents(this, plugin)
+        listener = ArenaListener(this)
+        listener.register()
     }
 
     private fun initTeams() {
@@ -178,7 +181,10 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaC
             voteItem?.set(inv)
         }
 
-        inv.setItem(5, ItemClock().setCustomName("" + TextFormat.ITALIC + TextFormat.AQUA + "Lobby"))
+        lobbyItem?.set(inv)
+
+        //TODO: lobby item?
+        inv.setItem(8, ItemClock().setCustomName("" + TextFormat.ITALIC + TextFormat.AQUA + "Lobby"))
 
         inv.sendContents(p)
 
@@ -235,7 +241,7 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaC
         this.starting = false
         isLevelLoaded = false
 
-        if (DEMO) {
+        demo {
             if (gamesCount > 0) {
                 return
             }
@@ -338,9 +344,10 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaC
         this.votingManager.createVoteTable()
         scoreboardManager.initVotes()
 
-        if (DEMO) {
-            logAlert("Continuous game count is limited to 1 in demo mode. Restart the server to start the game")
-            HandlerList.unregisterAll(this)
+        demo {
+            logAlert("Continuous game count is limited to 1 in demo mode. Restart the server to start a new game")
+            Reflect.onClass("cn.nukkit.event.HandlerList").call("unregisterAll", listener)
+            HandlerList.unregisterAll(listener)
         }
 
         this.winnerTeam = null
@@ -357,7 +364,7 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : Listener, IArenaC
             teams = emptyList()
         }
 
-        if (DEMO) {
+        demo {
             task.cancel()
             popupTask.cancel()
         }

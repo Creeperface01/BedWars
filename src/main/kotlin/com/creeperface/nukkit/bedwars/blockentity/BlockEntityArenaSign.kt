@@ -5,6 +5,7 @@ import cn.nukkit.level.format.FullChunk
 import cn.nukkit.nbt.tag.CompoundTag
 import com.creeperface.nukkit.bedwars.BedWars
 import com.creeperface.nukkit.bedwars.arena.Arena
+import com.creeperface.nukkit.bedwars.utils.logInfo
 
 class BlockEntityArenaSign(chunk: FullChunk, nbt: CompoundTag) : BlockEntitySign(chunk, nbt) {
 
@@ -18,11 +19,11 @@ class BlockEntityArenaSign(chunk: FullChunk, nbt: CompoundTag) : BlockEntitySign
 
         if (arena == null) {
             close()
+            logInfo("close arena sign")
         } else {
             this.arena = arena
+            scheduleUpdate()
         }
-
-        scheduleUpdate()
     }
 
     override fun onUpdate(): Boolean {

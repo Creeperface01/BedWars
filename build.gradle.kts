@@ -65,24 +65,31 @@ compileKotlin.kotlinOptions.apply {
 
 tasks {
     withType<Jar> {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
         archiveClassifier.set("core")
 
         from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
         exclude(
                 "com/creeperface/nukkit/placeholderapi/**",
-                "kotlin/**"
+                "kotlin/**",
+                "org/yaml/snakeyaml/**"
         )
     }
 
     val apiJar by creating(Jar::class) {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
         archiveClassifier.set("api")
 
         from(sourceSets["main"].output) {
             include("com/creeperface/nukkit/bedwars/api/**")
+            exclude(
+                    "org/**"
+            )
         }
     }
 
     val libJar by creating(Jar::class) {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
         archiveClassifier.set("libs")
 
         from(configurations.compileOnly.get().map { if (it.isDirectory) it else zipTree(it) })

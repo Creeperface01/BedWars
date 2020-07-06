@@ -4,7 +4,7 @@
     <annotationProcessing>
       <profile default="true" name="Default" enabled="true" />
     </annotationProcessing>
-    <bytecodeTargetLevel>
+    <bytecodeTargetLevel target="1.8">
       <module name="api" target="1.8" />
       <module name="BedWars-public" target="1.8" />
       <module name="BedWars-public.main" target="1.8" />

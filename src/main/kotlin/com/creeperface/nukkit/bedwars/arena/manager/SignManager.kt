@@ -7,7 +7,8 @@ import com.creeperface.nukkit.bedwars.utils.plus
 
 class SignManager(private val arena: Arena) {
 
-    val teamSigns = ArrayList<Array<String>>(arena.teams.size)
+    private val teamSigns = ArrayList<Array<String>>(arena.teams.size)
+
     var lastTeamSignsUpdate = 0L
         private set
 
@@ -16,7 +17,7 @@ class SignManager(private val arena: Arena) {
         private set
 
     internal fun init() {
-        for (i in 0 until arena.teams.size) {
+        for (i in arena.teams.indices) {
             teamSigns[i] = Array(4) { "" }
         }
 
@@ -24,12 +25,14 @@ class SignManager(private val arena: Arena) {
         updateTeamSigns()
     }
 
+    fun getData(team: Int) = teamSigns[team]
+
     internal fun updateMainSign() {
         val mapname = arena.map ?: "Voting"
         val map: String
 
-        map = when {
-            arena.arenaState == ArenaState.LOBBY -> if (arena.multiPlatform) "---" else "" + TextFormat.BOLD + TextFormat.LIGHT_PURPLE + "PE ONLY"
+        map = when (arena.arenaState) {
+            ArenaState.LOBBY -> if (arena.multiPlatform) "---" else "" + TextFormat.BOLD + TextFormat.LIGHT_PURPLE + "PE ONLY"
             else -> mapname
         }
 

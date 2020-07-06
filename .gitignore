@@ -211,3 +211,4 @@ local.properties
 # Ignore Gradle build output directory
 build
 *.iml
+src/main/resources/rebel.xml

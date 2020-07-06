@@ -25,6 +25,7 @@ data class ArenaConfiguration(
         override val teamSelectCommand: Boolean,
         override val teamSelectItem: InventoryItem? = null,
         override val voteItem: InventoryItem? = null,
+        override val lobbyItem: InventoryItem?,
         override val votePlayers: Int,
         override val voteCountdown: Int,
         override val mapFilter: MapFilter
@@ -49,6 +50,7 @@ interface IArenaConfiguration : ModifiableConfiguration {
     val teamSelectCommand: Boolean
     val teamSelectItem: InventoryItem?
     val voteItem: InventoryItem?
+    val lobbyItem: InventoryItem?
     val votePlayers: Int
     val voteCountdown: Int
     val mapFilter: MapFilter

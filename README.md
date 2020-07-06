@@ -1,6 +1,7 @@
 ## TODO list
 - [x] plugin API
   - [ ] tested
+- [ ] plugin API documentation
 - [x] API events
   - [ ] tested
 - [x] configuration
@@ -41,3 +42,5 @@
   - [ ] tested
 - [x] chat format
   - [ ] tested
+- [x] placeholders
+  - [ ] testes

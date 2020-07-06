@@ -5,8 +5,9 @@ general:
   use_prefix: "&7Pouzij"
   command_in_game: "&cPro pouziti tohot prikazu musis byt v arene"
   not_game_command: "&cTento prikaz nelze ve hre pouzit"
-  available_command: "&7Dostupne prikazy"
+  available_commands: "&7Dostupne prikazy"
   player_not_found: "&cHrac &e%0 &cnebyl nalezen"
+  arena_not_found: "&cArena &e%0 &cnebyla nalezena"
 
 arena:
   join: "&aPripojuji do %0..."

@@ -64,14 +64,11 @@ class VotingManager(val plugin: Arena) {
             return
         }
 
-        val index = try {
-            vote.toInt()
-        } catch (e: NumberFormatException) {
-            this.currentTable.withIndex().firstOrNull { it.value.equals(vote, true) }?.index ?: -1
-        }
+        val index = vote.toIntOrNull() ?: this.currentTable
+                .withIndex().firstOrNull { it.value.equals(vote, true) }?.index ?: -1
 
         if (index < 0 || index >= currentTable.size) {
-            p.sendMessage(BedWars.prefix + (Lang.USE_VOTE.translate()))
+            p.sendMessage(Lang.USE_PREFIX.translatePrefix() + " " + Lang.CMD_VOTE_HELP.translate())
             return
         }
 

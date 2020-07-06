@@ -3,15 +3,9 @@
 -libraryjars  build/libs/BedWars-libs.jar
 -libraryjars  lib/PlaceholderAPI.jar
 
-# Output a source map file
--printmapping proguard.map
-
 -dontwarn
--allowaccessmodification
--repackageclasses 'com.creeperface.nukkit.bedwars'
--keep class com.creeperface.nukkit.bedwars.BedWars
--keep class com.creeperface.nukkit.bedwars.api.**
--keep class org.**
--keep class mozilla.**
--keep class com.fasterxml.**
--keep class com.mongodb.**
+-ignorewarnings
+-dontpreverify
+-dontoptimize
+
+-keep class com.creeperface.nukkit.bedwars.** { *; }

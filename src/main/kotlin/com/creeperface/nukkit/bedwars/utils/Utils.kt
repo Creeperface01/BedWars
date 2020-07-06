@@ -1,14 +1,22 @@
+@file:Suppress("HasPlatformType")
+
 package com.creeperface.nukkit.bedwars.utils
 
 import cn.nukkit.Player
 import cn.nukkit.block.Block
 import cn.nukkit.blockentity.BlockEntity
 import cn.nukkit.command.CommandSender
+import cn.nukkit.event.Event
+import cn.nukkit.event.EventPriority
+import cn.nukkit.event.Listener
 import cn.nukkit.inventory.Inventory
 import cn.nukkit.item.Item
 import cn.nukkit.item.enchantment.Enchantment
 import cn.nukkit.lang.TranslationContainer
 import cn.nukkit.level.format.FullChunk
+import cn.nukkit.plugin.MethodEventExecutor
+import cn.nukkit.plugin.Plugin
+import cn.nukkit.plugin.PluginManager
 import cn.nukkit.utils.DyeColor
 import cn.nukkit.utils.TextFormat
 import com.creeperface.nukkit.bedwars.BedWars
@@ -27,9 +35,26 @@ import java.sql.ResultSet
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
 import kotlin.reflect.KClass
+import kotlin.reflect.KFunction
+import kotlin.reflect.cast
+import kotlin.reflect.full.createType
+import kotlin.reflect.full.declaredFunctions
 import kotlin.reflect.full.isSubclassOf
+import kotlin.reflect.jvm.javaMethod
 
 const val DEMO = true
+
+inline fun demo(action: () -> Unit) {
+    if(DEMO) {
+        action()
+    }
+}
+
+inline fun production(action: () -> Unit) {
+    if(!DEMO) {
+        action()
+    }
+}
 
 typealias TF = TextFormat
 
@@ -57,7 +82,7 @@ val DyeColor.rgb: Int
 
 operator fun TextFormat.plus(any: Any) = this.toString() + any
 
-val Block.blockEntity: BlockEntity
+val Block.blockEntity: BlockEntity?
     get() = this.level.getBlockEntity(this)
 
 val Block.fullChunk: FullChunk
@@ -174,7 +199,7 @@ operator fun Appendable.plusAssign(str: String) {
     this.append(str)
 }
 
-operator fun TextFormat.plus(str: String) = str + this.toString()
+operator fun TextFormat.plus(str: String) = this.toString() + str
 
 fun ShopWindow.toInventory(): Window {
     return when (this) {
@@ -231,4 +256,32 @@ fun String.camelToSnakeCase() = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDER
 fun Player.sendPermissionMessage() {
     val msg = this.server.language.translate(TranslationContainer("commands.generic.permission"))
     this.sendMessage(TextFormat.RED + msg)
+}
+
+fun Listener.register(plugin: Plugin) {
+    val pm = plugin.server.pluginManager
+    this::class.declaredFunctions.forEach {
+        try {
+            val paramClazz = it.parameters.single().type.classifier as? KClass<*> ?: return@forEach
+
+            paramClazz.java.let { clazz ->
+                val event = clazz.asSubclass(Event::class.java)
+
+                pm.registerEvent(event, this, EventPriority.NORMAL, MethodEventExecutor(it.javaMethod), plugin)
+            }
+        } catch (ignore: Exception) {
+
+        }
+    }
+}
+
+fun Listener.register(plugin: Plugin, func: KFunction<*>, priority: EventPriority = EventPriority.NORMAL, ignoreCancelled: Boolean = false) {
+    val pm = plugin.server.pluginManager
+    val paramClazz = func.parameters.single().type.classifier as KClass<*>
+
+    paramClazz.java.let { clazz ->
+        val event = clazz.asSubclass(Event::class.java)
+
+        pm.registerEvent(event, this, priority, MethodEventExecutor(func.javaMethod), plugin, ignoreCancelled)
+    }
 }

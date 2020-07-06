@@ -5,8 +5,9 @@ general:
   use_prefix: "&7Use"
   command_in_game: "&cYou must be in the arena to be able to execute this command"
   not_game_command: "&cThis command is not available in game"
-  available_command: "&7Available commands"
+  available_commands: "&7Available commands"
   player_not_found: "&cPlayer &e%0 &cnot found"
+  arena_not_found: "&cArena &e%0 &cnot found"
 
 arena:
   join: "&aJoining to %0..."
@@ -40,10 +41,10 @@ command:
   stats:
     help: "&e/bw stats [player]"
   sign:
-    help: "&e/bw sign"
+    help: "&e/bw sign <arena>"
     action: "&eClick on the sign to set"
   teamsign:
-    help: "&e/bw teamsign"
+    help: "&e/bw teamsign <team>"
   start:
     help: "&e/bw start"
   stop:
@@ -57,19 +58,19 @@ death:
   contact: "%0 &7was killed by %1"
   contact_player: "%0 &7was killed by %1"
   shot: "%0 &7was shot by %1"
-  cactus_escape: "%0&7 vrazil do kaktusu pri pokusu o utek hraci %1"
+  cactus_escape: "%0&7 walked into a cactus whilst trying to escape %1"
   cactus: "%0&7 pricked to death"
   suffocate: "%0&7 suffocated in a wall"
   fall_escape: "%0&7 was doomed to fall by %1"
   fall: "%0&7 fell from high place"
-  fire_escape: "%0&7 slapl do ohne v divokem souboji s hracem %1"
-  fire: "%0&7 byl upalen"
-  fire_tick_escape: "%0&7 byl spalen na skvarek v divokem souboji s hracem %1"
-  fire_tick: "%0&7 uhorel"
-  lava_escape: "%0&7 se pokusil plavat v lave pri divokem souboji s hracem %1"
+  fire_escape: "%0&7 walked into fire whilst fighting %1"
+  fire: "%0&7 went up in flames"
+  fire_tick_escape: "%0&7 was burnt to a crisp whilst fighting %1"
+  fire_tick: "%0&7 burned to death"
+  lava_escape: "%0&7 tried to swim in lava to escape %1"
   lava: "%0&7 tried to swim in lava"
-  drowning_escape: "%0&7 si v zapalu boje s hracem %1 &7neuvedomil ze je pod vodou"
-  drowning: "%0&7 se utopil"
+  drowning_escape: "%0&7 drowned whilst trying to escape %1"
+  drowning: "%0&7 drowned"
   explosion: "%0&7 blew up"
   void: "%0&7 fell out of the world"
   unknown: "%0&7 died"

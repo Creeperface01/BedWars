@@ -9,6 +9,9 @@ import com.creeperface.nukkit.bedwars.api.data.Stat
 import com.creeperface.nukkit.bedwars.api.event.ArenaStopEvent
 import com.creeperface.nukkit.bedwars.api.utils.Lang
 import com.creeperface.nukkit.bedwars.listener.CommandEventListener
+import com.creeperface.nukkit.bedwars.listener.CommandEventListener.Action
+import com.creeperface.nukkit.bedwars.listener.CommandEventListener.ActionData
+import com.creeperface.nukkit.bedwars.utils.logInfo
 
 class BedWarsCommand(plugin: BedWars) : BaseCommand("bedwars", plugin) {
 
@@ -26,6 +29,13 @@ class BedWarsCommand(plugin: BedWars) : BaseCommand("bedwars", plugin) {
                 CommandParameter("action", arrayOf("sign")),
                 CommandParameter("arena", plugin.arenas.keys.toTypedArray())
         )
+        this.commandParameters["stats"] = arrayOf(
+                CommandParameter("action", arrayOf("stats")),
+                CommandParameter("player", CommandParamType.TARGET, true)
+        )
+        this.commandParameters["help"] = arrayOf(
+                CommandParameter("action", arrayOf("help"))
+        )
         plugin.arenas.values.forEach { arena ->
             this.commandParameters["teamsign" + arena.name] = arrayOf(
                     CommandParameter("action", arrayOf("sign")),
@@ -37,7 +47,7 @@ class BedWarsCommand(plugin: BedWars) : BaseCommand("bedwars", plugin) {
 
     override fun execute(sender: CommandSender, label: String, args: Array<out String>): Boolean {
         if (args.isEmpty()) {
-            sender.sendMessage(Lang.CMD_HELP.translate())
+            sender.sendMessage(Lang.CMD_HELP.translatePrefix())
             return true
         }
 
@@ -93,7 +103,7 @@ class BedWarsCommand(plugin: BedWars) : BaseCommand("bedwars", plugin) {
                 sender.sendMessage(Lang.STATS.translate(stats[Stat.KILLS].toString(), stats[Stat.DEATHS].toString(), stats[Stat.WINS].toString(), stats[Stat.LOSSES].toString(), stats[Stat.BEDS].toString()))
             }
             "help" -> {
-                var msg = Lang.AVAILABLE_COMMANDS.translate() + ":\n"
+                var msg = BedWars.chatPrefix + Lang.AVAILABLE_COMMANDS.translate() + ":\n"
 
                 if (sender.hasPermission("bedwars.command.quickjoin")) {
                     msg += Lang.CMD_QUICKJOIN_HELP.translate() + "\n"
@@ -119,6 +129,8 @@ class BedWarsCommand(plugin: BedWars) : BaseCommand("bedwars", plugin) {
                 if (sender.hasPermission("bedwars.command.vote")) {
                     msg += Lang.CMD_VOTE_HELP.translate() + "\n"
                 }
+
+                sender.sendMessage(msg)
             }
             else -> {
                 if (sender !is Player) {
@@ -132,22 +144,52 @@ class BedWarsCommand(plugin: BedWars) : BaseCommand("bedwars", plugin) {
                             return true
                         }
 
-                        plugin.commandListener.actionPlayers[sender.uniqueId] = CommandEventListener.Action.SET_SIGN
-                        sender.sendMessage(BedWars.prefix + Lang.CMD_SIGN_ACTION.translate())
+                        if (args.size != 2) {
+                            sender.sendMessage(Lang.CMD_SIGN_HELP.translatePrefix())
+                            return true
+                        }
+
+                        val arena = plugin.getArena(args[1])
+                        if(arena == null) {
+                            sender.sendMessage(Lang.ARENA_NOT_FOUND.translatePrefix(args[1]))
+                            return true
+                        }
+
+                        plugin.commandListener.actionPlayers[sender.uniqueId] = ActionData(Action.SET_SIGN, arena)
+                        sender.sendMessage(Lang.CMD_SIGN_ACTION.translatePrefix())
                     }
                     "teamsign" -> {
                         if (!testPermission(sender, "bedwars.command.sign")) {
                             return true
                         }
 
-                        plugin.commandListener.actionPlayers[sender.uniqueId] = CommandEventListener.Action.SET_TEAM_SIGN
-                        sender.sendMessage(BedWars.prefix + Lang.CMD_SIGN_ACTION.translate())
+                        if (args.size != 3) {
+                            sender.sendMessage(Lang.CMD_TEAMSIGN_HELP.translatePrefix())
+                            return true
+                        }
+
+                        val arena = plugin.getArena(args[1])
+                        if(arena == null) {
+                            sender.sendMessage(Lang.ARENA_NOT_FOUND.translatePrefix(args[1]))
+                            return true
+                        }
+
+                        val team = args[2].toIntOrNull()?.let {
+                            arena.getTeam(it)
+                        }
+                        if(team == null) {
+                            sender.sendMessage(Lang.ARENA_NOT_FOUND.translatePrefix(args[1]))
+                            return true
+                        }
+
+                        plugin.commandListener.actionPlayers[sender.uniqueId] = ActionData(Action.SET_TEAM_SIGN, team)
+                        sender.sendMessage(Lang.CMD_SIGN_ACTION.translatePrefix())
                     }
                     else -> {
                         val arena = plugin.getPlayerArena(sender)
 
                         if (arena == null) {
-                            sender.sendMessage(Lang.COMMAND_IN_GAME.translate())
+                            sender.sendMessage(Lang.COMMAND_IN_GAME.translatePrefix())
                             return true
                         }
 
@@ -172,12 +214,12 @@ class BedWarsCommand(plugin: BedWars) : BaseCommand("bedwars", plugin) {
                                     return true
                                 }
 
-                                if (args.size != 1) {
-                                    sender.sendMessage(Lang.USE_PREFIX.translate() + " " + Lang.CMD_VOTE_HELP.translate())
-                                    return false
+                                if (args.size != 2) {
+                                    sender.sendMessage(Lang.USE_PREFIX.translatePrefix() + " " + Lang.CMD_VOTE_HELP.translate())
+                                    return true
                                 }
 
-                                arena.votingManager.onVote(sender, args[0].toLowerCase())
+                                arena.votingManager.onVote(sender, args[1].toLowerCase())
                                 return true
                             }
                         }

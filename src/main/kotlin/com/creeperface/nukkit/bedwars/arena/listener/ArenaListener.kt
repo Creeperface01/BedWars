@@ -43,11 +43,30 @@ import com.creeperface.nukkit.bedwars.shop.inventory.Window
 import com.creeperface.nukkit.bedwars.utils.Items
 import com.creeperface.nukkit.bedwars.utils.configuration
 import com.creeperface.nukkit.bedwars.utils.openInventory
+import com.creeperface.nukkit.bedwars.utils.register
 import com.creeperface.nukkit.placeholderapi.api.scope.context
 import com.creeperface.nukkit.placeholderapi.api.util.translatePlaceholders
 import java.util.*
 
 class ArenaListener(private val arena: Arena) : Listener {
+
+    fun register() {
+        val plugin = arena.plugin
+
+        register(plugin, this::onBlockTouch2)
+        register(plugin, this::onBlockTouch, EventPriority.HIGHEST, true)
+        register(plugin, this::onQuit)
+        register(plugin, this::onDeath)
+        register(plugin, this::onDropItem)
+        register(plugin, this::onHit, ignoreCancelled = true)
+        register(plugin, this::onBlockBreak, ignoreCancelled = true)
+        register(plugin, this::onBlockPlace)
+        register(plugin, this::onProjectileHit, EventPriority.LOWEST, true)
+        register(plugin, this::onChat, ignoreCancelled = true)
+        register(plugin, this::onFireSpread)
+        register(plugin, this::onBowShot, ignoreCancelled = true)
+        register(plugin, this::onFormResponse)
+    }
 
     @EventHandler
     fun onBlockTouch2(e: PlayerInteractEvent) {
@@ -65,7 +84,7 @@ class ArenaListener(private val arena: Arena) : Listener {
         if (e.action == PlayerInteractEvent.Action.RIGHT_CLICK_BLOCK && arena.inArena(p)) {
             val team = arena.isJoinSign(e.block)
 
-            if (team != 0) {
+            if (team != -1) {
                 arena.addToTeam(p, team)
                 return
             }
@@ -85,8 +104,11 @@ class ArenaListener(private val arena: Arena) : Listener {
 
         val data = arena.getPlayerData(p) ?: return
 
-        if (this.arena.arenaState == ArenaState.LOBBY && e.action == PlayerInteractEvent.Action.RIGHT_CLICK_AIR && e.item.id == Item.CLOCK) {
-            this.arena.leaveArena(p)
+        if (this.arena.arenaState == ArenaState.LOBBY && e.action == PlayerInteractEvent.Action.RIGHT_CLICK_AIR) {
+            when(p.inventory.heldItemIndex) {
+                arena.lobbyItem?.slot -> this.arena.leaveArena(p)
+            }
+
             return
         }
 
@@ -324,12 +346,12 @@ class ArenaListener(private val arena: Arena) : Listener {
         val b = e.block
         val p = e.player
 
+        val data = arena.getPlayerData(p) ?: return
+
         if (e.isCancelled || !Arena.allowedBlocks.contains(b.id)) {
             e.setCancelled()
             return
         }
-
-        val data = arena.getPlayerData(p) ?: return
 
         if (this.arena.isSpectator(p)) {
             e.setCancelled()
@@ -354,37 +376,6 @@ class ArenaListener(private val arena: Arena) : Listener {
         }
 
 //        data.baseData.addExp(1)
-    }
-
-    @EventHandler
-    fun onArrowPickup(e: InventoryPickupArrowEvent) {
-        e.setCancelled()
-    }
-
-    @EventHandler
-    fun onBucketFill(e: PlayerBucketFillEvent) {
-        val p = e.player
-        if (!p.isOp || this.arena.inArena(p)) {
-            e.setCancelled()
-        }
-    }
-
-    @EventHandler
-    fun onBucketEmpty(e: PlayerBucketEmptyEvent) {
-        val p = e.player
-        if (!p.isOp || this.arena.inArena(p)) {
-            e.setCancelled()
-        }
-    }
-
-    @EventHandler
-    fun onCraft(e: CraftItemEvent) {
-        e.setCancelled()
-    }
-
-    @EventHandler
-    fun onBedEnter(e: PlayerBedEnterEvent) {
-        e.setCancelled()
     }
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
@@ -427,78 +418,11 @@ class ArenaListener(private val arena: Arena) : Listener {
         }
     }
 
-    @EventHandler
-    fun onTransaction(e: InventoryTransactionEvent) {
-        val transaction = e.transaction
-
-        for (action in transaction.actions) {
-            if (action !is SlotChangeAction) {
-                continue
-            }
-
-            if (action.inventory is Window) {
-                e.setCancelled()
-                return
-            }
-        }
-    }
-
-    @EventHandler
-    fun onSlotClick(e: InventoryClickEvent) {
-        val p = e.player
-
-        val inv2: Window
-        if (e.inventory is Window) {
-            inv2 = e.inventory as Window
-        } else {
-            return
-        }
-
-        e.setCancelled()
-        val slot = e.slot
-
-        if (!arena.inArena(p)) {
-            return
-        }
-
-        if (inv2 is OfferWindow) {
-            if (slot == 0) {
-                arena.plugin.shop.processTransaction(p, inv2.item, inv2.cost)
-            } else if (slot == inv2.size - 1) {
-                inv2.parent?.let {
-                    p.addWindow(it)
-                    it.onOpen(p)
-                }
-            }
-        } else if (inv2 is MenuWindow) {
-            val newWindow = inv2[slot]
-
-            if (newWindow != null) {
-                val id = p.addWindow(newWindow)
-
-                if (id >= 0) {
-                    newWindow.onOpen(p)
-                }
-            }
-        }
-    }
-
-    @EventHandler
-    fun onHungerChange(e: PlayerFoodLevelChangeEvent) {
-        if (e.isCancelled) {
-            return
-        }
-
-        val p = e.player
-
-        if (arena.inArena(p) && this.arena.arenaState == ArenaState.LOBBY) {
+    @EventHandler(ignoreCancelled = true)
+    fun onFireSpread(e: BlockBurnEvent) {
+        if(e.block.level === arena.level) {
             e.setCancelled()
         }
-    }
-
-    @EventHandler
-    fun onFireSpread(e: BlockBurnEvent) {
-        e.setCancelled()
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -520,15 +444,6 @@ class ArenaListener(private val arena: Arena) : Listener {
                 entityBow.namedTag.putBoolean("explode", true)
                 entityBow.namedTag.putInt("team", data.team.id)
             }
-        }
-    }
-
-    @EventHandler
-    fun launchProjectile(e: ProjectileLaunchEvent) {
-        val p = e.entity.shootingEntity
-
-        if (p is Player && p.gamemode > 1) {
-            e.setCancelled()
         }
     }
 
