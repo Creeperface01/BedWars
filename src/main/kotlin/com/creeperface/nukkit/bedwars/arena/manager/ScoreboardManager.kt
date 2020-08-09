@@ -2,6 +2,9 @@ package com.creeperface.nukkit.bedwars.arena.manager
 
 import cn.nukkit.Player
 import com.creeperface.nukkit.bedwars.arena.Arena
+import com.creeperface.nukkit.bedwars.arena.Team
+import com.creeperface.nukkit.bedwars.utils.plus
+import com.creeperface.nukkit.bedwars.utils.ucFirst
 import gt.creeperface.nukkit.scoreboardapi.ScoreboardAPI
 import cn.nukkit.utils.TextFormat as TF
 
@@ -28,6 +31,15 @@ class ScoreboardManager(private val arena: Arena) {
             scoreboard.setScore(i.toLong(), "${TF.AQUA}[${i + 1}] ${TF.DARK_GRAY}${votes[i]} ${TF.RED}» ${TF.GREEN}${vm.stats[i]} votes", i)
         }
 
+        scoreboard.setScore(votes.size.toLong(), "${TF.DARK_GRAY}Time: ${TF.GOLD} ${arena.voteCountdown} s", votes.size)
+
+        scoreboard.update()
+    }
+
+    fun updateVoteTime() {
+        val votes = arena.votingManager.currentTable
+        scoreboard.setScore(votes.size.toLong(), "${TF.DARK_GRAY}Time: ${TF.GOLD} ${arena.task.voteTime} s", votes.size)
+
         scoreboard.update()
     }
 
@@ -35,9 +47,39 @@ class ScoreboardManager(private val arena: Arena) {
         val vm = arena.votingManager
         val votes = vm.currentTable
 
-        scoreboard.setScore(index.toLong(), "${TF.AQUA}[${index + 1}] ${TF.DARK_GRAY}${votes[index]} ${TF.RED}»${TF.GREEN}${vm.stats[index]} votes", index)
+        scoreboard.setScore(index.toLong(), "${TF.AQUA}[${index + 1}] ${TF.DARK_GRAY}${votes[index]} ${TF.RED}» ${TF.GREEN}${vm.stats[index]} votes", index)
 
         scoreboard.update()
+    }
+
+    fun initTeamSelect() {
+        scoreboard.resetAllScores()
+
+        scoreboard.setDisplayName("${TF.DARK_GRAY}Map: ${TF.GOLD}${arena.map}")
+
+        val teams = arena.teams
+        teams.forEach {
+            scoreboard.setScore(it.id.toLong(), it.chatColor + it.name.ucFirst() + TF.DARK_GRAY + ": " + TF.GREEN + it.players.size, it.id)
+        }
+
+        scoreboard.setScore(teams.size.toLong(), "${TF.DARK_GRAY}Time: ${TF.GOLD} ${arena.startTime} s", teams.size)
+
+        scoreboard.update()
+    }
+
+    fun updateTeamPlayerCount(team: Team) {
+        scoreboard.setScore(
+                team.id.toLong(),
+                team.chatColor + team.name.ucFirst() + TF.DARK_GRAY + ": " + TF.GREEN + team.players.size,
+                team.id
+        )
+    }
+
+    fun updateStartTime() {
+        val teams = arena.teams
+
+//        scoreboard.setScore(teams.size.toLong(), "${TF.DARK_GRAY}Time: ${TF.GOLD} ${arena.task.startTime} s", teams.size)
+//        scoreboard.update()
     }
 
     fun initGame() {
@@ -60,6 +102,10 @@ class ScoreboardManager(private val arena: Arena) {
 
     fun reset() {
         scoreboard.resetAllScores()
+        scoreboard.update()
+    }
+
+    fun update() {
         scoreboard.update()
     }
 }

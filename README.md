@@ -43,4 +43,6 @@
 - [x] chat format
   - [ ] tested
 - [x] placeholders
-  - [ ] testes
+  - [ ] tested
+- [ ] respawn delay
+  - [ ] tested

@@ -19,6 +19,7 @@ internal class Configuration(plugin: BedWars, global: File, game: File) {
 
     //chat
     val allPrefix: String
+    val lobbyFormat: String
     val teamFormat: String
     val allFormat: String
     val spectatorFormat: String
@@ -127,9 +128,10 @@ internal class Configuration(plugin: BedWars, global: File, game: File) {
 
         with(gameConf.readSection("chat")) {
             allPrefix = readString("all_prefix")
-            teamFormat = readString("team_format")
-            allFormat = readString("all_format")
-            spectatorFormat = readString("spectator_format")
+            lobbyFormat = readString("lobby_format").replaceColors()
+            teamFormat = readString("team_format").replaceColors()
+            allFormat = readString("all_format").replaceColors()
+            spectatorFormat = readString("spectator_format").replaceColors()
         }
 
         arena = gameConf.readSection("arena")

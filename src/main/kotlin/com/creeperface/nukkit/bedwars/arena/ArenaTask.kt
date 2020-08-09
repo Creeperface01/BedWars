@@ -25,6 +25,8 @@ class ArenaTask(var plugin: Arena) : Task() {
                 plugin.voting = false
                 plugin.teamSelect = true
                 plugin.selectMap()
+            } else {
+                plugin.scoreboardManager.updateVoteTime()
             }
         } else if (this.plugin.starting) {
             this.starting()
@@ -42,6 +44,8 @@ class ArenaTask(var plugin: Arena) : Task() {
             this.plugin.startGame()
             return
         }
+
+        plugin.scoreboardManager.updateStartTime()
 
         this.startTime--
     }

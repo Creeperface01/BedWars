@@ -42,7 +42,7 @@ class Shop(private val plugin: BedWars) : Shop {
     override fun open(player: Player, window: ShopWindow, type: ShopType) {
         when (type) {
             ShopType.INVENTORY -> player.openInventory(window.toInventory())
-            ShopType.FORM -> plugin.formManager.addWindow(player, window)
+            ShopType.FORM -> plugin.shopFormManager.addWindow(player, window)
         }
     }
 
@@ -73,7 +73,7 @@ class Shop(private val plugin: BedWars) : Shop {
             val type = section.readEnum(ShopWindow.WindowType::class, "type")
 
             if (type == ShopWindow.WindowType.OFFER) {
-                val item = section.readItem("item", teamContext)
+                val item = section.readItem("purchase_item", teamContext)
 
                 val cost = section.getList("cost").filterIsInstance<ConfigSection>().map {
                     it.readItem(context = teamContext)
@@ -97,18 +97,18 @@ class Shop(private val plugin: BedWars) : Shop {
                 throw RuntimeException("The maximal window count per menu is 32")
             }
 
-            windows.putAll(children.mapIndexed { index, it ->
+            window.setWindows(children.mapIndexed { index, it ->
                 index to loadWindow(window, it, nextLevel, id or (index shl (level * 5)))
-            })
+            }.toMap())
 
             return window
         }
 
         val mainWindow = GenericMenuWindow.create(-1, "Shop").inventory
 
-        mainWindow.windows.putAll(config.mapIndexed { index, section ->
+        mainWindow.setWindows(config.mapIndexed { index, section ->
             index to loadWindow(mainWindow, section, 0, index)
-        })
+        }.toMap())
 
         return mainWindow
     }
@@ -134,6 +134,6 @@ class Shop(private val plugin: BedWars) : Shop {
 
         inv.addItem(item)
 
-        p.sendMessage(BedWars.prefix + (Lang.BUY.translate(if (item.hasCustomName()) item.customName else item.name)))
+        p.sendMessage(Lang.BUY.translatePrefix(if (item.hasCustomName()) item.customName else item.name))
     }
 }

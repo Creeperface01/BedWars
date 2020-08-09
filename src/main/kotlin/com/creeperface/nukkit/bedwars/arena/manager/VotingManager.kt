@@ -8,6 +8,8 @@ import com.creeperface.nukkit.bedwars.api.utils.Lang
 import com.creeperface.nukkit.bedwars.arena.Arena
 import com.creeperface.nukkit.bedwars.utils.configuration
 import com.creeperface.nukkit.bedwars.utils.logWarning
+import com.creeperface.nukkit.kformapi.KFormAPI
+import com.creeperface.nukkit.kformapi.form.util.showForm
 
 class VotingManager(val plugin: Arena) {
 
@@ -60,11 +62,11 @@ class VotingManager(val plugin: Arena) {
 
     fun onVote(p: Player, vote: String) {
         if (!this.plugin.voting || this.plugin.arenaState == ArenaState.GAME || !this.plugin.inArena(p)) {
-            p.sendMessage(BedWars.prefix + (Lang.CAN_NOT_VOTE.translate()))
+            p.sendMessage(Lang.CAN_NOT_VOTE.translatePrefix())
             return
         }
 
-        val index = vote.toIntOrNull() ?: this.currentTable
+        val index = vote.toIntOrNull()?.minus(1) ?: this.currentTable
                 .withIndex().firstOrNull { it.value.equals(vote, true) }?.index ?: -1
 
         if (index < 0 || index >= currentTable.size) {
@@ -82,11 +84,27 @@ class VotingManager(val plugin: Arena) {
         this.stats[index]++
 
         this.players[p.name.toLowerCase()] = index
-        p.sendMessage(BedWars.prefix + (Lang.VOTE.translate(this.currentTable[index])))
+        p.sendMessage(Lang.VOTE.translatePrefix(this.currentTable[index]))
 
         plugin.scoreboardManager.updateVote(index)
         if (oldIndex >= 0) {
             plugin.scoreboardManager.updateVote(oldIndex)
         }
+    }
+
+    fun showVotingSelection(p: Player) {
+        val maps = plugin.filterAvailableMaps()
+
+        val form = KFormAPI.simpleForm {
+            title(Lang.VOTING.translate())
+
+            maps.forEach {
+                button(it.name, it.icon) { p ->
+                    onVote(p, it.name)
+                }
+            }
+        }
+
+        p.showForm(form)
     }
 }

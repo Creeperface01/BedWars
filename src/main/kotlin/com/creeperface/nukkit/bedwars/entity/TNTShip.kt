@@ -7,7 +7,6 @@ import cn.nukkit.entity.passive.EntitySheep
 import cn.nukkit.event.entity.EntityDamageEvent
 import cn.nukkit.level.format.FullChunk
 import cn.nukkit.nbt.tag.CompoundTag
-import cn.nukkit.network.protocol.AddEntityPacket
 import com.creeperface.nukkit.bedwars.api.utils.BedWarsExplosion
 import com.creeperface.nukkit.bedwars.arena.Arena
 import com.creeperface.nukkit.bedwars.arena.Team
@@ -80,26 +79,6 @@ class TNTShip(chunk: FullChunk, nbt: CompoundTag, private val arena: Arena, priv
 
     override fun attack(source: EntityDamageEvent): Boolean {
         return false
-    }
-
-    override fun spawnTo(player: Player) {
-        val pk = AddEntityPacket()
-        pk.type = this.networkId
-        pk.entityUniqueId = this.getId()
-        pk.entityRuntimeId = this.getId()
-        pk.x = this.x.toFloat()
-        pk.y = this.y.toFloat()
-        pk.z = this.z.toFloat()
-        pk.speedX = this.motionX.toFloat()
-        pk.speedY = this.motionY.toFloat()
-        pk.speedZ = this.motionZ.toFloat()
-        pk.metadata = this.dataProperties
-        pk.yaw = 0f
-        pk.pitch = 0f
-
-        player.dataPacket(pk)
-
-        super.spawnTo(player)
     }
 
     override fun getRange(): Double {

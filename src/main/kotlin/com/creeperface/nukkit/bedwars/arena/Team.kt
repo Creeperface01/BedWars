@@ -11,6 +11,8 @@ import com.creeperface.nukkit.bedwars.obj.BedWarsData
 import com.creeperface.nukkit.bedwars.shop.inventory.MenuWindow
 import com.creeperface.nukkit.bedwars.utils.EnderChestInventory
 import com.creeperface.nukkit.bedwars.utils.configuration
+import com.creeperface.nukkit.bedwars.utils.logInfo
+import com.creeperface.nukkit.bedwars.utils.plus
 import com.creeperface.nukkit.placeholderapi.api.scope.Message
 import com.creeperface.nukkit.placeholderapi.api.scope.MessageScope
 import com.creeperface.nukkit.placeholderapi.api.util.translatePlaceholders
@@ -39,6 +41,8 @@ class Team(override val arena: Arena,
 
     init {
         recalculateStatus()
+
+        logInfo(shop.contents.toString())
 
         fun foreachWindows(window: ShopMenuWindow) {
             window.windows.values.forEach {
@@ -103,7 +107,7 @@ class Team(override val arena: Arena,
         val bed = hasBed()
 
         if (count >= 1 || bed) {
-            this.status = "                                          " + chatColor + name + ": " + (if (bed) TextFormat.GREEN.toString() + "✔" else TextFormat.RED.toString() + "✖") + TextFormat.GRAY + " " + this.players.size + "\n"
+            this.status = chatColor + name + ": " + (if (bed) TextFormat.GREEN.toString() + "✔" else TextFormat.RED.toString() + "✖") + TextFormat.GRAY + " " + this.players.size + "    "
         } else {
             this.status = ""
         }

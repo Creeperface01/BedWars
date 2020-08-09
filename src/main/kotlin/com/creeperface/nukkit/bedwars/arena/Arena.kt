@@ -5,10 +5,7 @@ import cn.nukkit.Player
 import cn.nukkit.Server
 import cn.nukkit.block.Block
 import cn.nukkit.block.BlockAir
-import cn.nukkit.blockentity.BlockEntity
-import cn.nukkit.blockentity.BlockEntityBed
 import cn.nukkit.entity.item.EntityItem
-import cn.nukkit.event.HandlerList
 import cn.nukkit.event.player.PlayerInteractEvent
 import cn.nukkit.event.player.PlayerInteractEvent.Action
 import cn.nukkit.event.player.PlayerTeleportEvent
@@ -40,16 +37,14 @@ import com.creeperface.nukkit.bedwars.api.placeholder.ArenaScope
 import com.creeperface.nukkit.bedwars.api.utils.BedWarsExplosion
 import com.creeperface.nukkit.bedwars.api.utils.Lang
 import com.creeperface.nukkit.bedwars.arena.listener.ArenaListener
-import com.creeperface.nukkit.bedwars.arena.manager.DeathManager
-import com.creeperface.nukkit.bedwars.arena.manager.ScoreboardManager
-import com.creeperface.nukkit.bedwars.arena.manager.SignManager
-import com.creeperface.nukkit.bedwars.arena.manager.VotingManager
+import com.creeperface.nukkit.bedwars.arena.manager.*
 import com.creeperface.nukkit.bedwars.blockentity.BlockEntityMine
 import com.creeperface.nukkit.bedwars.blockentity.BlockEntityTeamSign
 import com.creeperface.nukkit.bedwars.entity.SpecialItem
 import com.creeperface.nukkit.bedwars.obj.BedWarsData
 import com.creeperface.nukkit.bedwars.task.WorldCopyTask
 import com.creeperface.nukkit.bedwars.utils.*
+import com.creeperface.nukkit.placeholderapi.api.scope.Message
 import com.creeperface.nukkit.placeholderapi.api.scope.MessageScope
 import com.creeperface.nukkit.placeholderapi.api.util.translatePlaceholders
 import org.joor.Reflect
@@ -69,7 +64,7 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : IArenaConfigurati
 
     override var teams = emptyList<Team>()
 
-    private val task = ArenaTask(this)
+    internal val task = ArenaTask(this)
     private val popupTask = PopupTask(this)
 
     internal val votingManager: VotingManager
@@ -140,17 +135,17 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : IArenaConfigurati
     override fun joinToArena(p: Player) {
         if (this.arenaState == ArenaState.GAME) {
             if (configuration.allowSpectators) {
-                p.sendMessage(BedWars.prefix + (Lang.JOIN_SPECTATOR.translate()))
+                p.sendMessage(Lang.JOIN_SPECTATOR.translatePrefix())
                 this.setSpectator(p)
                 scoreboardManager.addPlayer(p)
             } else {
-                p.sendMessage(BedWars.prefix + Lang.GAME_IN_PROGRESS.translate())
+                p.sendMessage(Lang.GAME_IN_PROGRESS.translatePrefix())
             }
             return
         }
 
         if (this.playerData.size >= this.maxPlayers && !p.hasPermission("bedwars.joinfullarena")) {
-            p.sendMessage(BedWars.prefix + (Lang.GAME_FULL.translate()))
+            p.sendMessage(Lang.GAME_FULL.translatePrefix())
             return
         }
 
@@ -165,7 +160,7 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : IArenaConfigurati
         playerData[p.name.toLowerCase()] = pl
 
         p.nameTag = p.name
-        p.sendMessage(BedWars.prefix + (Lang.JOIN.translate(this.name)))
+        p.sendMessage(Lang.JOIN.translatePrefix(this.name))
         p.teleport(this.arenaLobby)
         scoreboardManager.addPlayer(p)
         p.setSpawn(this.arenaLobby)
@@ -173,18 +168,9 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : IArenaConfigurati
         val inv = p.inventory
         inv.clearAll()
 
-        if (teamSelect) {
-            teamSelectItem?.set(inv)
-        }
-
-        if (voting) {
-            voteItem?.set(inv)
-        }
-
+        teamSelectItem?.set(inv)
+        voteItem?.set(inv)
         lobbyItem?.set(inv)
-
-        //TODO: lobby item?
-        inv.setItem(8, ItemClock().setCustomName("" + TextFormat.ITALIC + TextFormat.AQUA + "Lobby"))
 
         inv.sendContents(p)
 
@@ -205,15 +191,14 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : IArenaConfigurati
         val data = getPlayerData(p)
 
         if (data != null) {
-            val pTeam = data.team
-
             if (this.arenaState == ArenaState.GAME) {
+                val pTeam = data.team
                 pTeam.messagePlayers(Lang.PLAYER_LEAVE.translate(pTeam.chatColor + p.name))
                 data.addStat(Stat.LOSSES)
             }
 
             if (p.isOnline) {
-                p.sendMessage(BedWars.prefix + (Lang.LEAVE.translate()))
+                p.sendMessage(Lang.LEAVE.translatePrefix())
             }
 
             signManager.updateTeamSigns()
@@ -254,16 +239,8 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : IArenaConfigurati
         this.level.isThundering = false
         gamesCount++
 
-        for (team in teams) {
-            val positions = arrayOf(team.bed1, team.bed2)
-
-            for (pos in positions) {
-                val nbt = BlockEntity.getDefaultCompound(pos, BlockEntity.BED)
-                nbt.putByte("color", team.color.woolData)
-
-                BlockEntityBed(this.level.getChunk(pos.chunkX, pos.chunkZ), nbt)
-            }
-        }
+        spawnBeds()
+        spawnVillagers()
 
         this.level.time = 0
         this.level.stopTime()
@@ -296,13 +273,14 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : IArenaConfigurati
         scoreboardManager.initGame()
     }
 
-    private fun selectTeam(data: BedWarsData) {
+    internal fun selectTeam(data: BedWarsData) {
         var teamm: Team? = null
         val p = data.player
 
         for (team in teams) {
-            if (!isTeamFull(team) || isTeamFree(team) || p.hasPermission("bedwars.joinfullteam")) {
+            if (team.canPlayerJoin(p)) {
                 teamm = team
+                break
             }
         }
 
@@ -347,7 +325,8 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : IArenaConfigurati
         demo {
             logAlert("Continuous game count is limited to 1 in demo mode. Restart the server to start a new game")
             Reflect.onClass("cn.nukkit.event.HandlerList").call("unregisterAll", listener)
-            HandlerList.unregisterAll(listener)
+            Reflect.onClass("cn.nukkit.event.HandlerList").call("unregisterAll", plugin.commandListener)
+            Reflect.onClass("cn.nukkit.event.HandlerList").call("unregisterAll", plugin.listener)
         }
 
         this.winnerTeam = null
@@ -397,7 +376,7 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : IArenaConfigurati
         val pTeam = data.team
 
         if (pTeam.id == bedteam.id) {
-            p.sendMessage(BedWars.prefix + (Lang.BREAK_OWN_BED.translate()))
+            p.sendMessage(Lang.BREAK_OWN_BED.translatePrefix())
             return false
         }
 
@@ -468,7 +447,8 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : IArenaConfigurati
     override fun getPlayerTeam(p: Player) = this.playerData[p.name.toLowerCase()]?.team
 
     fun isTeamFree(team: Team): Boolean {
-        val minPlayers = this.teams.filter { it !== team }.minBy { it.players.size }?.players?.size ?: team.players.size
+        val minPlayers = this.teams.filter { it !== team }.minByOrNull { it.players.size }?.players?.size
+                ?: team.players.size
 
         return team.players.size - minPlayers < 2
     }
@@ -476,28 +456,38 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : IArenaConfigurati
     override fun isTeamFree(team: com.creeperface.nukkit.bedwars.api.arena.Team) = isTeamFree(team as Team)
 
     fun addToTeam(p: Player, team: Int) {
+        if (arenaState != ArenaState.LOBBY) {
+            return
+        }
+
         val pTeam = teams[team]
         val data = playerData[p.name.toLowerCase()]!!
 
         if ((isTeamFull(pTeam) || !isTeamFree(pTeam)) && !p.hasPermission("bedwars.joinfullteam")) {
-            p.sendMessage(BedWars.prefix + (Lang.FULL_TEAM.translate()))
+            p.sendMessage(Lang.FULL_TEAM.translatePrefix())
             return
         }
+        if (data.hasTeam()) {
+            val currentTeam = data.team
 
-        val currentTeam = data.team
+            if (currentTeam.id == pTeam.id) {
+                p.sendMessage(Lang.ALREADY_IN_TEAM.translatePrefix(pTeam.chatColor.toString() + pTeam.name))
+                return
+            }
 
-        if (currentTeam.id == pTeam.id) {
-            p.sendMessage(BedWars.prefix + (Lang.ALREADY_IN_TEAM.translate(pTeam.chatColor.toString() + pTeam.name)))
-            return
-        }
+            if (currentTeam.id != 0) {
+                currentTeam.removePlayer(data)
+            }
 
-        if (currentTeam.id != 0) {
-            currentTeam.removePlayer(data)
+            scoreboardManager.updateTeamPlayerCount(currentTeam)
         }
 
         pTeam.addPlayer(data)
 
         signManager.updateTeamSigns()
+
+        scoreboardManager.updateTeamPlayerCount(pTeam)
+        scoreboardManager.update()
 
         p.sendMessage(Lang.TEAM_JOIN.translate(pTeam.chatColor.toString() + pTeam.name))
     }
@@ -516,6 +506,8 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : IArenaConfigurati
 
             data.team.removePlayer(data)
         }
+
+        p.inventory.clearAll()
     }
 
     fun dropBronze() {
@@ -567,7 +559,7 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : IArenaConfigurati
     override fun messageGamePlayers(lang: Lang, addPrefix: Boolean, vararg args: String) {
         val translation = lang.translate(*args)
 
-        playerData.values.forEach { it.player.sendMessage(if (addPrefix) BedWars.prefix else "" + translation) }
+        playerData.values.forEach { it.player.sendMessage(if (addPrefix) BedWars.chatPrefix else "" + translation) }
     }
 
     override fun messageAllPlayers(lang: Lang, vararg args: String) {
@@ -577,14 +569,18 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : IArenaConfigurati
     override fun messageAllPlayers(lang: Lang, addPrefix: Boolean, vararg args: String) {
         val translation = lang.translate(*args)
 
-        playerData.values.forEach { it.player.sendMessage(if (addPrefix) BedWars.prefix else "" + translation) }
-        gameSpectators.values.forEach { it.sendMessage(if (addPrefix) BedWars.prefix else "" + translation) }
+        playerData.values.forEach { it.player.sendMessage(if (addPrefix) BedWars.chatPrefix else "" + translation) }
+        gameSpectators.values.forEach { it.sendMessage(if (addPrefix) BedWars.chatPrefix else "" + translation) }
     }
 
     internal fun messageAllPlayers(message: String, player: Player, data: BedWarsData? = null) {
         val pData = data ?: getPlayerData(player) ?: return
 
-        val msg = configuration.allFormat.translatePlaceholders(player, context, pData.team.context, MessageScope.getContext(player, message))
+        val msg = if (pData.hasTeam()) {
+            configuration.allFormat.translatePlaceholders(player, context, pData.team.context, MessageScope.getContext(player, message))
+        } else {
+            configuration.lobbyFormat.translatePlaceholders(player, context, MessageScope.getContext(Message(player, message)))
+        }
 
         for (p in playerData.values) {
             p.player.sendMessage(msg)
@@ -621,6 +617,9 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : IArenaConfigurati
             this.initTeams()
         }
 
+        scoreboardManager.initTeamSelect()
+
+        checkLobby()
         messageAllPlayers(Lang.SELECT_MAP, map)
     }
 

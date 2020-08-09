@@ -72,7 +72,7 @@ val mapper = jacksonObjectMapper()
                                 item.count = node.get("item_count").asInt()
 
                                 node.get("item_custom_name")?.let { name ->
-                                    item.customName = name.asText()
+                                    item.customName = name.asText().replaceColors()
                                 }
 
                                 node.get("lore")?.let { lore ->
@@ -156,8 +156,8 @@ fun ConfMap.readItem(key: String? = null, context: AnyContext = GlobalScope.defa
 
     val item = Item.get(
             sec.readInt("item_id"),
-            sec.readInt("item_damage"),
-            sec.readInt("item_count")
+            sec.readInt("item_damage", 0),
+            sec.readInt("item_count", 1)
     )
 
     if (sec.containsKey("item_custom_name")) {

@@ -11,13 +11,8 @@ import cn.nukkit.event.block.BlockBreakEvent
 import cn.nukkit.event.block.BlockBurnEvent
 import cn.nukkit.event.block.BlockPlaceEvent
 import cn.nukkit.event.entity.*
-import cn.nukkit.event.inventory.CraftItemEvent
-import cn.nukkit.event.inventory.InventoryClickEvent
-import cn.nukkit.event.inventory.InventoryPickupArrowEvent
-import cn.nukkit.event.inventory.InventoryTransactionEvent
 import cn.nukkit.event.player.*
 import cn.nukkit.form.response.FormResponseSimple
-import cn.nukkit.inventory.transaction.action.SlotChangeAction
 import cn.nukkit.item.Item
 import cn.nukkit.math.Vector3
 import cn.nukkit.nbt.tag.CompoundTag
@@ -25,21 +20,17 @@ import cn.nukkit.nbt.tag.DoubleTag
 import cn.nukkit.nbt.tag.FloatTag
 import cn.nukkit.nbt.tag.ListTag
 import cn.nukkit.network.protocol.EntityEventPacket
-import cn.nukkit.utils.MainLogger
 import cn.nukkit.utils.TextFormat
-import com.creeperface.nukkit.bedwars.BedWars
 import com.creeperface.nukkit.bedwars.api.arena.Arena.ArenaState
 import com.creeperface.nukkit.bedwars.api.data.Stat
 import com.creeperface.nukkit.bedwars.api.utils.BedWarsExplosion
 import com.creeperface.nukkit.bedwars.api.utils.Lang
 import com.creeperface.nukkit.bedwars.arena.Arena
+import com.creeperface.nukkit.bedwars.arena.manager.showTeamSelection
 import com.creeperface.nukkit.bedwars.blockentity.BlockEntityMine
+import com.creeperface.nukkit.bedwars.entity.BWVillager
 import com.creeperface.nukkit.bedwars.entity.TNTShip
-import com.creeperface.nukkit.bedwars.entity.Villager
 import com.creeperface.nukkit.bedwars.obj.BedWarsData
-import com.creeperface.nukkit.bedwars.shop.inventory.MenuWindow
-import com.creeperface.nukkit.bedwars.shop.inventory.OfferWindow
-import com.creeperface.nukkit.bedwars.shop.inventory.Window
 import com.creeperface.nukkit.bedwars.utils.Items
 import com.creeperface.nukkit.bedwars.utils.configuration
 import com.creeperface.nukkit.bedwars.utils.openInventory
@@ -56,8 +47,6 @@ class ArenaListener(private val arena: Arena) : Listener {
         register(plugin, this::onBlockTouch2)
         register(plugin, this::onBlockTouch, EventPriority.HIGHEST, true)
         register(plugin, this::onQuit)
-        register(plugin, this::onDeath)
-        register(plugin, this::onDropItem)
         register(plugin, this::onHit, ignoreCancelled = true)
         register(plugin, this::onBlockBreak, ignoreCancelled = true)
         register(plugin, this::onBlockPlace)
@@ -105,8 +94,20 @@ class ArenaListener(private val arena: Arena) : Listener {
         val data = arena.getPlayerData(p) ?: return
 
         if (this.arena.arenaState == ArenaState.LOBBY && e.action == PlayerInteractEvent.Action.RIGHT_CLICK_AIR) {
-            when(p.inventory.heldItemIndex) {
-                arena.lobbyItem?.slot -> this.arena.leaveArena(p)
+            val slot = p.inventory.heldItemIndex
+            if (slot == arena.lobbyItem?.slot) {
+                this.arena.leaveArena(p)
+                return
+            }
+
+            if (arena.teamSelect && slot == arena.teamSelectItem?.slot) {
+                arena.showTeamSelection(p)
+                return
+            }
+
+            if (arena.voting && slot == arena.voteItem?.slot) {
+                arena.votingManager.showVotingSelection(p)
+                return
             }
 
             return
@@ -148,26 +149,11 @@ class ArenaListener(private val arena: Arena) : Listener {
         }
     }
 
-    @EventHandler
-    fun onDeath(e: PlayerDeathEvent) {
-        e.drops = arrayOfNulls(0)
-        MainLogger.getLogger().logException(NullPointerException("bedwars death"))
-    }
-
-    @EventHandler
-    fun onDropItem(e: PlayerDropItemEvent) {
-        val p = e.player
-
-        if (!p.isOp && this.arena.arenaState == ArenaState.LOBBY) {
-            e.setCancelled()
-        }
-    }
-
     @EventHandler(ignoreCancelled = true)
     fun onHit(e: EntityDamageEvent) {
         val victim = e.entity
 
-        if (arena.arenaState == ArenaState.LOBBY || victim.level.id != this.arena.level.id) {
+        if (arena.arenaState == ArenaState.LOBBY) {
             if (victim is Player) {
                 if (this.arena.arenaState == ArenaState.LOBBY && e.cause == EntityDamageEvent.DamageCause.VOID && arena.inArena(victim)) {
                     victim.teleport(this.arena.arenaLobby)
@@ -210,7 +196,7 @@ class ArenaListener(private val arena: Arena) : Listener {
                 kill = true
                 data = arena.playerData[victim.getName().toLowerCase()]
             }
-        } else if (victim.networkId == Villager.NETWORK_ID) {
+        } else if (victim is BWVillager) {
             e.setCancelled()
         }
 
@@ -240,7 +226,7 @@ class ArenaListener(private val arena: Arena) : Listener {
                     }
                 }
 
-                if (e !is EntityDamageByChildEntityEvent && victim.networkId == Villager.NETWORK_ID && killer.getGamemode() == 0) {
+                if (e !is EntityDamageByChildEntityEvent && victim is BWVillager && killer.getGamemode() == 0) {
                     kData = arena.playerData[killer.name.toLowerCase()]!!
                     val inv = kData.team.shop
 
@@ -277,7 +263,7 @@ class ArenaListener(private val arena: Arena) : Listener {
 
             if (!data.canRespawn()) {
                 this.arena.unsetPlayer(p)
-                p.sendMessage(BedWars.prefix + (Lang.JOIN_SPECTATOR.translate()))
+                p.sendMessage(Lang.JOIN_SPECTATOR.translatePrefix())
                 this.arena.setSpectator(p, true)
 
 //                data.baseData.addExp(200) //played
@@ -410,6 +396,12 @@ class ArenaListener(private val arena: Arena) : Listener {
         }
 
         val data = arena.getPlayerData(p) ?: return
+        e.setCancelled()
+
+        if (!data.hasTeam()) {
+            arena.messageAllPlayers(e.message, p, data)
+            return
+        }
 
         if (e.message.startsWith(configuration.allPrefix) && e.message.length > 1) {
             this.arena.messageAllPlayers(e.message.substring(configuration.allPrefix.length), p, data)
@@ -420,7 +412,7 @@ class ArenaListener(private val arena: Arena) : Listener {
 
     @EventHandler(ignoreCancelled = true)
     fun onFireSpread(e: BlockBurnEvent) {
-        if(e.block.level === arena.level) {
+        if (e.block.level === arena.level) {
             e.setCancelled()
         }
     }
@@ -458,6 +450,6 @@ class ArenaListener(private val arena: Arena) : Listener {
         val data = arena.getPlayerData(p) ?: return
         val response = e.response as? FormResponseSimple ?: return
 
-        this.arena.plugin.formManager.handleResponse(p, data, e.formID, response)
+        this.arena.plugin.shopFormManager.handleResponse(p, data, e.formID, response)
     }
 }

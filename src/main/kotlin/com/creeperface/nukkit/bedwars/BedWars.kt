@@ -7,7 +7,6 @@ import cn.nukkit.plugin.PluginBase
 import cn.nukkit.utils.Config
 import cn.nukkit.utils.ConfigSection
 import cn.nukkit.utils.MainLogger
-import cn.nukkit.utils.TextFormat
 import com.creeperface.nukkit.bedwars.api.BedWarsAPI
 import com.creeperface.nukkit.bedwars.api.arena.Arena.ArenaState
 import com.creeperface.nukkit.bedwars.api.arena.configuration.ArenaConfiguration
@@ -30,18 +29,17 @@ import com.creeperface.nukkit.bedwars.dataprovider.NoneDataProvider
 import com.creeperface.nukkit.bedwars.economy.EconomyAPIProvider
 import com.creeperface.nukkit.bedwars.economy.EconomyReward
 import com.creeperface.nukkit.bedwars.economy.NoneEconomyProvider
+import com.creeperface.nukkit.bedwars.entity.BWVillager
 import com.creeperface.nukkit.bedwars.entity.SpecialItem
-import com.creeperface.nukkit.bedwars.entity.Villager
 import com.creeperface.nukkit.bedwars.entity.WinParticle
 import com.creeperface.nukkit.bedwars.listener.CommandEventListener
 import com.creeperface.nukkit.bedwars.listener.EventListener
+import com.creeperface.nukkit.bedwars.manager.FormManager
 import com.creeperface.nukkit.bedwars.obj.GlobalData
 import com.creeperface.nukkit.bedwars.placeholder.Placeholders
 import com.creeperface.nukkit.bedwars.shop.Shop
 import com.creeperface.nukkit.bedwars.shop.form.FormShopManager
 import com.creeperface.nukkit.bedwars.utils.*
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap
-import it.unimi.dsi.fastutil.longs.Long2ObjectMap
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap
 import kotlinx.coroutines.runBlocking
 import org.apache.commons.io.FileUtils
@@ -62,6 +60,7 @@ class BedWars : PluginBase(), BedWarsAPI {
 
     val players = Long2ObjectOpenHashMap<GlobalData>()
     internal val commandListener = CommandEventListener(this)
+    internal val listener = EventListener(this)
 
     internal lateinit var configuration: Configuration
 
@@ -75,7 +74,8 @@ class BedWars : PluginBase(), BedWarsAPI {
 
     lateinit var economyRewards: Map<Stat, Collection<EconomyReward>>
 
-    val formManager = FormShopManager(this)
+    val shopFormManager = FormShopManager(this)
+    val formManager = FormManager(this)
 
 //    init {
 //        initInstance()
@@ -93,7 +93,7 @@ class BedWars : PluginBase(), BedWarsAPI {
         }
 
         Entity.registerEntity("SpecialItem", SpecialItem::class.java)
-        Entity.registerEntity("BedWarsVillager", Villager::class.java)
+        Entity.registerEntity("BedWarsVillager", BWVillager::class.java)
         Entity.registerEntity("WinParticle", WinParticle::class.java)
 
         BlockEntity.registerBlockEntity("BedWarsMine", BlockEntityMine::class.java)
@@ -132,7 +132,9 @@ class BedWars : PluginBase(), BedWarsAPI {
         this.registerCommands()
 
         commandListener.register()
-        EventListener(this).register()
+        listener.register()
+
+        printBWLogo()
     }
 
     override fun onDisable() {
@@ -193,9 +195,7 @@ class BedWars : PluginBase(), BedWarsAPI {
         }
     }
 
-    override fun getPlayerArena(p: Player): Arena? {
-        return players[p.id]?.arena
-    }
+    override fun getPlayerArena(p: Player) = players[p.id]?.arena
 
     override fun getArena(arena: String): Arena? {
         return if (this.ins.containsKey(arena)) {

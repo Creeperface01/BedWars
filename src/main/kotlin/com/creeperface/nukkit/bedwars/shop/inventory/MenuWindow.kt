@@ -1,22 +1,31 @@
 package com.creeperface.nukkit.bedwars.shop.inventory
 
-import cn.nukkit.item.Item
 import com.creeperface.nukkit.bedwars.api.shop.ShopMenuWindow
+import com.creeperface.nukkit.bedwars.api.shop.ShopWindow
 import com.creeperface.nukkit.bedwars.utils.toInventory
 
 class MenuWindow(window: ShopMenuWindow) : Window(window), ShopMenuWindow {
 
-    override val windows = window.windows.mapValues { it.value.toInventory() }.toMutableMap()
+    override val windows = mutableMapOf<Int, Window>()
 
     override fun get(index: Int) = windows[index]
 
-    fun setWindows(list: Map<Item, Window>) {
-        var i = 0
+    init {
+        setWindows(window.windows)
+    }
 
-        for ((item, win) in list) {
-            setItem(i, item)
-            windows[i] = win
-            i++
+    fun setWindows(windows: Map<Int, ShopWindow>) {
+//        logInfo("name $windowName")
+//        logInfo("windows: ${windows.size}")
+//        logInfo("size: ${this.size}")
+        windows.forEach { (index, win) ->
+//            logInfo("setting item $index ${win.icon.item}")
+            setItem(index, win.icon.item)
+//            logInfo("get item: " + getItem(index))
+
+            this.windows[index] = win.toInventory()
         }
+
+//        logInfo("contents: $contents")
     }
 }

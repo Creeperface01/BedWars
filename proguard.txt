@@ -9,3 +9,5 @@
 -dontoptimize
 
 -keep class com.creeperface.nukkit.bedwars.** { *; }
+-keep class com.creeperface.nukkit.kformapi.form.util.ImageData
+-keep class com.creeperface.nukkit.kformapi.form.util.ImageType

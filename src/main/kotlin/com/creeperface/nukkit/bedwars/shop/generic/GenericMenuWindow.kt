@@ -23,7 +23,8 @@ class GenericMenuWindow(
     companion object {
 
         fun create(
-                id: Int, name: String,
+                id: Int,
+                name: String,
                 windows: MutableMap<Int, ShopWindow> = mutableMapOf(),
                 icon: ShopWindow.WindowIcon = ShopWindow.WindowIcon.EMPTY
         ) = GenericMenuWindow(id, windows, name, icon)

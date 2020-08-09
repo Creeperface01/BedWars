@@ -7,9 +7,10 @@ general:
 
 chat:
   all_prefix: '!'
-  team_format: '§7[%team_color%TEAM§7] §f%player%§7:%team_color% %message%'
-  all_format: '§7[%team_color%ALL§7] §f%player%§7:%team_color% %message%'
-  spectator_format: '§7[§9SPECTATOR§7] §f%player%§7: %message%'
+  lobby_format: '&7[&9LOBBY&7] &f%player%&7: &f%message%'
+  team_format: '&7[%team_color%TEAM&7] &f%player%&7:%team_color% %message%'
+  all_format: '&7[%team_color%ALL&7] &f%player%&7:%team_color% %message%'
+  spectator_format: '&7[&9SPECTATOR&7] &f%player%&7: &f%message%'
 
 #Following settings are applied by default if not overridden in arena configuration file
 arena:
@@ -58,6 +59,8 @@ arena:
       item_damage: 3
       #Item count
       item_count: 1
+      #Item custom name
+      item_custom_name: "&eTeam select"
   #If specified, an item will be given to every player in lobby for voting
   #If removed, disables item voting
   vote_item:
@@ -65,11 +68,13 @@ arena:
     slot: 4
     item:
       #Item id or name
-      item_id: map
+      item_id: empty_map
       #Item meta (damage)
       item_damage: 0
       #Item count
       item_count: 1
+      #Item custom name
+      item_custom_name: "&eVoting"
   #If specified, an item will be given to every player in lobby to leave an arena
   lobby_item:
     #Inventory slot

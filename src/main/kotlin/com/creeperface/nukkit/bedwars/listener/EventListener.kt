@@ -2,7 +2,9 @@ package com.creeperface.nukkit.bedwars.listener
 
 import cn.nukkit.Player
 import cn.nukkit.event.EventHandler
+import cn.nukkit.event.EventPriority
 import cn.nukkit.event.Listener
+import cn.nukkit.event.entity.EntityDamageEvent
 import cn.nukkit.event.entity.ProjectileLaunchEvent
 import cn.nukkit.event.inventory.CraftItemEvent
 import cn.nukkit.event.inventory.InventoryClickEvent
@@ -47,6 +49,8 @@ class EventListener(private val plugin: BedWars) : Listener {
         register(plugin, this::onSlotClick)
         register(plugin, this::onHungerChange, ignoreCancelled = true)
         register(plugin, this::launchProjectile)
+        register(plugin, this::onDamage, ignoreCancelled = true, priority = EventPriority.LOW)
+        register(plugin, this::onDropItem)
     }
 
     @EventHandler
@@ -223,13 +227,9 @@ class EventListener(private val plugin: BedWars) : Listener {
     @EventHandler
     fun onSlotClick(e: InventoryClickEvent) {
         val p = e.player
+        logInfo("click inventory")
 
-        val inv2: Window
-        if (e.inventory is Window) {
-            inv2 = e.inventory as Window
-        } else {
-            return
-        }
+        val inv2 = e.inventory as? Window ?: return
 
         e.setCancelled()
         val slot = e.slot
@@ -276,6 +276,26 @@ class EventListener(private val plugin: BedWars) : Listener {
         plugin.getPlayerArena(p) ?: return
 
         if (p.gamemode > 1) {
+            e.setCancelled()
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOW)
+    fun onDamage(e: EntityDamageEvent) {
+        val entity = e.entity
+
+        if (entity is Player) {
+            plugin.getPlayerArena(entity)?.let {
+                if (it.arenaState == Arena.ArenaState.LOBBY) {
+                    e.setCancelled()
+                }
+            }
+        }
+    }
+
+    @EventHandler
+    fun onDropItem(e: PlayerDropItemEvent) {
+        plugin.getPlayerArena(e.player)?.let {
             e.setCancelled()
         }
     }

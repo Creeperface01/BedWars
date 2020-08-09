@@ -12,6 +12,7 @@ import cn.nukkit.math.Vector3
 import cn.nukkit.nbt.NBTIO
 import cn.nukkit.nbt.tag.CompoundTag
 import cn.nukkit.network.protocol.*
+import com.creeperface.nukkit.bedwars.utils.logError
 import java.io.IOException
 import java.nio.ByteOrder
 import java.util.*
@@ -45,9 +46,9 @@ open class ShopInventory : BaseInventory(FakeHolder(), InventoryType.CHEST) {
         bep.z = pos.z
 
         try {
-            bep.namedTag = NBTIO.write(getSpawnCompound(pos), ByteOrder.LITTLE_ENDIAN)
+            bep.namedTag = NBTIO.write(getSpawnCompound(pos), ByteOrder.LITTLE_ENDIAN, true)
         } catch (e: IOException) {
-            e.printStackTrace()
+            logError("Error while writing nametag", e)
         }
 
         who.dataPacket(bep)
@@ -85,7 +86,7 @@ open class ShopInventory : BaseInventory(FakeHolder(), InventoryType.CHEST) {
 
     private fun getSpawnCompound(v: BlockVector3): CompoundTag {
         val c = CompoundTag().putString("id", "Chest").putInt("x", v.x).putInt("y", v.y).putInt("z", v.z)
-        c.putString("CustomName", "shop") //name of the inventory
+        c.putString("CustomName", "Shop") //name of the inventory
 
         return c
     }
@@ -95,20 +96,15 @@ open class ShopInventory : BaseInventory(FakeHolder(), InventoryType.CHEST) {
 
         //MainLogger.getLogger().info("send empty slots  "+id);
         val pk = InventoryContentPacket()
-        pk.slots = arrayOfNulls(InventoryType.CHEST.defaultSize)
         pk.inventoryId = id
 
-        run {
-            var i = 0
-            while (i < getSize() && i < pk.slots.size) {
-                pk.slots[i] = getItem(i)
-                i++
-            }
-        }
-
         val air = ItemBlock(BlockAir())
-        for (i in getSize() until pk.slots.size) {
-            pk.slots[i] = air
+        pk.slots = Array(InventoryType.CHEST.defaultSize) {
+            if (it < getSize()) {
+                getItem(it)
+            } else {
+                air
+            }
         }
 
         p.dataPacket(pk)

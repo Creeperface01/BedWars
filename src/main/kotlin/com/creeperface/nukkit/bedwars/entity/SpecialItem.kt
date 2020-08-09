@@ -9,53 +9,6 @@ import cn.nukkit.network.protocol.TakeItemEntityPacket
 
 class SpecialItem(chunk: FullChunk, nbt: CompoundTag) : EntityItem(chunk, nbt) {
 
-    /*@Override
-    public void initEntity() {
-        super.initEntity();
-
-        for (entity item : this.level.getNearbyEntities(new AxisAlignedBB(x - 2, y - 1, z - 2, x + 2, y + 1, z + 2), this)) {
-            if (!(item instanceof EntityItem)) {
-                continue;
-            }
-
-            EntityItem itemm = (EntityItem) item;
-
-            if (!itemm.getItem().equals(this.item, true, false) || itemm.getItem().getCount() >= 64) {
-                continue;
-            }
-
-            this.item.count += ((EntityItem) item).getItem().getCount();
-
-            item.close();
-        }
-    }*/
-
-    /*@Override
-    public void spawnToAll() {
-        entity[] entities = this.level.getNearbyEntities(new AxisAlignedBB(x - 1, y - 1, z - 1, x + 1, y + 1, z + 1), this);
-
-        for (entity entity : entities) {
-            if (entity instanceof EntityItem) {
-                return;
-            }
-        }
-
-        super.spawnToAll();
-    }
-
-    @Override
-    public void spawnTo(Player p) {
-        entity[] entities = this.level.getNearbyEntities(new AxisAlignedBB(x - 1, y - 1, z - 1, x + 1, y + 1, z + 1), this);
-
-        for (entity entity : entities) {
-            if (entity instanceof EntityItem) {
-                return;
-            }
-        }
-
-        super.spawnTo(p);
-    }*/
-
     override fun onUpdate(diff: Int): Boolean {
         var result = super.onUpdate(diff)
 

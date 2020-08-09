@@ -3,10 +3,12 @@ package com.creeperface.nukkit.bedwars.api.arena.configuration
 import cn.nukkit.math.Vector3
 import cn.nukkit.utils.DyeColor
 import cn.nukkit.utils.TextFormat
+import com.creeperface.nukkit.kformapi.form.util.ImageData
 import java.time.Instant
 
 data class MapConfiguration(
         val name: String,
+        val icon: ImageData?,
         val bronze: List<Vector3>,
         val iron: List<Vector3>,
         val gold: List<Vector3>,

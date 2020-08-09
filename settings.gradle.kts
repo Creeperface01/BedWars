@@ -8,3 +8,11 @@
  */
 
 rootProject.name = "BedWars"
+
+pluginManagement {
+    repositories {
+        mavenCentral()
+        gradlePluginPortal()
+        maven("https://dl.bintray.com/kotlin/kotlin-eap")
+    }
+}

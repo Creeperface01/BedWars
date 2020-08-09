@@ -8,6 +8,7 @@ general:
   available_commands: "&7Available commands"
   player_not_found: "&cPlayer &e%0 &cnot found"
   arena_not_found: "&cArena &e%0 &cnot found"
+  error: "&cAn error has occurred"
 
 arena:
   join: "&aJoining to %0..."
@@ -19,19 +20,23 @@ arena:
   full_team: "&7This team is full."
   team_join: "&7You joined %0."
   start_game: "&bGame started!"
-  end_game: "&7================[ %0End game&7 ]================\n&7Team %0%1&7 won BedWars! restarting server...\n&7========================================="
+  end_game: "&7================[ %0End game&7 ]===============\n&7Team %0%1&7 won BedWars! restarting server...\n&7========================================="
   can_not_vote: "&cYou can not vote now."
   use_vote: "&7Use /vote <map>"
   vote: "&7You voted for &6%0."
   player_leave: "%0 &7has left."
   leave: "&7Leaving arena..."
-  break_own_bed: "&cYou can not break your own bed.. &7(facepalm)"
-  bed_break: "&7================[ %0Bed destroyed§7 ]================\n%1&7 from %2&7 team destroyed %3 &7team's bed\n&7=========================================="
+  break_own_bed: "&cYou cannot break your own bed.. &7(facepalm)"
+  bed_break: "&7==============[ %0Bed destroyed§7 ]==============\n%1&7 from %2&7 team destroyed %3 &7team's bed\n&7=========================================="
   no_arena_found: "&cCurrently there's no game available"
   legend_found: "%0&7 found a &a%1"
   player_count: "&e%0/%1 &7players"
   pe_only: "&cThis arena is only for pocket edition players"
   game_in_progress: "&cGame is already in progress"
+
+lobby:
+  team_select: "Team select"
+  voting: "Voting"
 
 command:
   bedwars:
@@ -41,7 +46,7 @@ command:
   stats:
     help: "&e/bw stats [player]"
   sign:
-    help: "&e/bw sign <arena>"
+    help: "&e/bw sign"
     action: "&eClick on the sign to set"
   teamsign:
     help: "&e/bw teamsign <team>"

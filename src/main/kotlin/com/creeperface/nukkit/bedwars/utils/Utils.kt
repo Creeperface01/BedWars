@@ -16,7 +16,6 @@ import cn.nukkit.lang.TranslationContainer
 import cn.nukkit.level.format.FullChunk
 import cn.nukkit.plugin.MethodEventExecutor
 import cn.nukkit.plugin.Plugin
-import cn.nukkit.plugin.PluginManager
 import cn.nukkit.utils.DyeColor
 import cn.nukkit.utils.TextFormat
 import com.creeperface.nukkit.bedwars.BedWars
@@ -36,8 +35,6 @@ import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
-import kotlin.reflect.cast
-import kotlin.reflect.full.createType
 import kotlin.reflect.full.declaredFunctions
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.jvm.javaMethod
@@ -284,4 +281,18 @@ fun Listener.register(plugin: Plugin, func: KFunction<*>, priority: EventPriorit
 
         pm.registerEvent(event, this, priority, MethodEventExecutor(func.javaMethod), plugin, ignoreCancelled)
     }
+}
+
+fun String.replaceColors() = this.replace('&', '§')
+
+fun printBWLogo() {
+    logInfo("")
+    logInfo("${TF.RED}██████╗ ███████╗██████╗ ${TF.WHITE}██╗    ██╗ █████╗ ██████╗ ███████╗")
+    logInfo("${TF.RED}██╔══██╗██╔════╝██╔══██╗${TF.WHITE}██║    ██║██╔══██╗██╔══██╗██╔════╝")
+    logInfo("${TF.RED}██████╔╝█████╗  ██║  ██║${TF.WHITE}██║ █╗ ██║███████║██████╔╝███████╗")
+    logInfo("${TF.RED}██╔══██╗██╔══╝  ██║  ██║${TF.WHITE}██║███╗██║██╔══██║██╔══██╗╚════██║")
+    logInfo("${TF.RED}██████╔╝███████╗██████╔╝${TF.WHITE}╚███╔███╔╝██║  ██║██║  ██║███████║")
+    logInfo("${TF.RED}╚═════╝ ╚══════╝╚═════╝ ${TF.WHITE} ╚══╝╚══╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝")
+    logInfo("")
+    logInfo("                     ${TF.RED}Bed${TF.WHITE}Wars enabled                      ")
 }

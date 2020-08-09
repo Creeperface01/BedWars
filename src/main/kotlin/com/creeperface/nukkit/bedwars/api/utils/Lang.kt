@@ -4,7 +4,6 @@ import cn.nukkit.utils.Config
 import cn.nukkit.utils.TextFormat
 import com.creeperface.nukkit.bedwars.BedWars
 import com.creeperface.nukkit.bedwars.utils.logError
-import com.creeperface.nukkit.bedwars.utils.logInfo
 
 enum class Lang(
         private val prefix: String? = null,
@@ -17,6 +16,7 @@ enum class Lang(
     PLAYER_NOT_FOUND("general"),
     USE_PREFIX("general"),
     ARENA_NOT_FOUND("general"),
+    ERROR("general"),
 
     USE_VOTE("arena"),
     PLAYER_LEAVE("arena"),
@@ -40,6 +40,9 @@ enum class Lang(
     START_GAME("arena"),
     LEAVE("arena"),
     GAME_IN_PROGRESS("arena"),
+
+    TEAM_SELECT("lobby"),
+    VOTING("lobby"),
 
     CMD_HELP("command.bedwars.help", true),
     CMD_QUICKJOIN_HELP("command.quickjoin.help", true),

@@ -8,10 +8,7 @@ import com.creeperface.nukkit.bedwars.BedWars
 import com.creeperface.nukkit.bedwars.api.data.Stat
 import com.creeperface.nukkit.bedwars.api.event.ArenaStopEvent
 import com.creeperface.nukkit.bedwars.api.utils.Lang
-import com.creeperface.nukkit.bedwars.listener.CommandEventListener
 import com.creeperface.nukkit.bedwars.listener.CommandEventListener.Action
-import com.creeperface.nukkit.bedwars.listener.CommandEventListener.ActionData
-import com.creeperface.nukkit.bedwars.utils.logInfo
 
 class BedWarsCommand(plugin: BedWars) : BaseCommand("bedwars", plugin) {
 
@@ -26,8 +23,7 @@ class BedWarsCommand(plugin: BedWars) : BaseCommand("bedwars", plugin) {
                 CommandParameter("player", CommandParamType.TARGET, true)
         )
         this.commandParameters["sign"] = arrayOf(
-                CommandParameter("action", arrayOf("sign")),
-                CommandParameter("arena", plugin.arenas.keys.toTypedArray())
+                CommandParameter("action", arrayOf("sign"))
         )
         this.commandParameters["stats"] = arrayOf(
                 CommandParameter("action", arrayOf("stats")),
@@ -36,13 +32,13 @@ class BedWarsCommand(plugin: BedWars) : BaseCommand("bedwars", plugin) {
         this.commandParameters["help"] = arrayOf(
                 CommandParameter("action", arrayOf("help"))
         )
-        plugin.arenas.values.forEach { arena ->
-            this.commandParameters["teamsign" + arena.name] = arrayOf(
-                    CommandParameter("action", arrayOf("sign")),
-                    CommandParameter("arena", arena.name),
-                    CommandParameter("team", CommandParamType.INT, false)
-            )
-        }
+//        plugin.arenas.values.forEach { arena ->
+//            this.commandParameters["teamsign" + arena.name] = arrayOf(
+//                    CommandParameter("action", arrayOf("sign")),
+//                    CommandParameter("arena", arena.name),
+//                    CommandParameter("team", CommandParamType.INT, false)
+//            )
+//        }
     }
 
     override fun execute(sender: CommandSender, label: String, args: Array<out String>): Boolean {
@@ -134,7 +130,7 @@ class BedWarsCommand(plugin: BedWars) : BaseCommand("bedwars", plugin) {
             }
             else -> {
                 if (sender !is Player) {
-                    sender.sendMessage(BedWars.prefix + Lang.COMMAND_IN_GAME.translate())
+                    sender.sendMessage(Lang.COMMAND_IN_GAME.translatePrefix())
                     return false
                 }
 
@@ -144,18 +140,12 @@ class BedWarsCommand(plugin: BedWars) : BaseCommand("bedwars", plugin) {
                             return true
                         }
 
-                        if (args.size != 2) {
+                        if (args.size != 1) {
                             sender.sendMessage(Lang.CMD_SIGN_HELP.translatePrefix())
                             return true
                         }
 
-                        val arena = plugin.getArena(args[1])
-                        if(arena == null) {
-                            sender.sendMessage(Lang.ARENA_NOT_FOUND.translatePrefix(args[1]))
-                            return true
-                        }
-
-                        plugin.commandListener.actionPlayers[sender.uniqueId] = ActionData(Action.SET_SIGN, arena)
+                        plugin.commandListener.actionPlayers[sender.uniqueId] = Action.SET_SIGN
                         sender.sendMessage(Lang.CMD_SIGN_ACTION.translatePrefix())
                     }
                     "teamsign" -> {
@@ -169,7 +159,7 @@ class BedWarsCommand(plugin: BedWars) : BaseCommand("bedwars", plugin) {
                         }
 
                         val arena = plugin.getArena(args[1])
-                        if(arena == null) {
+                        if (arena == null) {
                             sender.sendMessage(Lang.ARENA_NOT_FOUND.translatePrefix(args[1]))
                             return true
                         }
@@ -177,12 +167,12 @@ class BedWarsCommand(plugin: BedWars) : BaseCommand("bedwars", plugin) {
                         val team = args[2].toIntOrNull()?.let {
                             arena.getTeam(it)
                         }
-                        if(team == null) {
+                        if (team == null) {
                             sender.sendMessage(Lang.ARENA_NOT_FOUND.translatePrefix(args[1]))
                             return true
                         }
 
-                        plugin.commandListener.actionPlayers[sender.uniqueId] = ActionData(Action.SET_TEAM_SIGN, team)
+                        plugin.commandListener.actionPlayers[sender.uniqueId] = Action.SET_TEAM_SIGN
                         sender.sendMessage(Lang.CMD_SIGN_ACTION.translatePrefix())
                     }
                     else -> {

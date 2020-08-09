@@ -5,7 +5,8 @@ import proguard.gradle.ProGuardTask
 val jacksonVersion = "2.10.1"
 
 plugins {
-    kotlin("jvm") version "1.3.70"
+//    kotlin("jvm") version "1.3.70"
+    kotlin("jvm") version "1.4.0-rc"
 }
 
 buildscript {
@@ -20,6 +21,7 @@ buildscript {
 repositories {
     jcenter()
     mavenCentral()
+    mavenLocal()
     maven("https://dl.bintray.com/kotlin/kotlin-eap")
     maven("https://kotlin.bintray.com/kotlinx")
     maven("http://repo.nukkitx.com/main")
@@ -48,6 +50,7 @@ dependencies {
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:$jacksonVersion")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
     implementation("org.jooq:joor-java-8:0.9.12")
+    implementation("com.creeperface.nukkit.kformapi:KFormAPI:1.0-SNAPSHOT")
 
 
     compileOnly(files("lib/actaeon.jar", "lib/ScoreboardAPI.jar", "lib/EconomyAPI.jar"))
