@@ -33,7 +33,7 @@ import com.creeperface.nukkit.bedwars.entity.TNTShip
 import com.creeperface.nukkit.bedwars.obj.BedWarsData
 import com.creeperface.nukkit.bedwars.utils.Items
 import com.creeperface.nukkit.bedwars.utils.configuration
-import com.creeperface.nukkit.bedwars.utils.openInventory
+import com.creeperface.nukkit.bedwars.utils.openShopInventory
 import com.creeperface.nukkit.bedwars.utils.register
 import com.creeperface.nukkit.placeholderapi.api.scope.context
 import com.creeperface.nukkit.placeholderapi.api.util.translatePlaceholders
@@ -48,6 +48,7 @@ class ArenaListener(private val arena: Arena) : Listener {
         register(plugin, this::onBlockTouch, EventPriority.HIGHEST, true)
         register(plugin, this::onQuit)
         register(plugin, this::onHit, ignoreCancelled = true)
+        register(plugin, this::onEntityInteract)
         register(plugin, this::onBlockBreak, ignoreCancelled = true)
         register(plugin, this::onBlockPlace)
         register(plugin, this::onProjectileHit, EventPriority.LOWEST, true)
@@ -97,6 +98,7 @@ class ArenaListener(private val arena: Arena) : Listener {
             val slot = p.inventory.heldItemIndex
             if (slot == arena.lobbyItem?.slot) {
                 this.arena.leaveArena(p)
+                p.teleport(arena.plugin.server.defaultLevel.spawnLocation)
                 return
             }
 
@@ -105,7 +107,7 @@ class ArenaListener(private val arena: Arena) : Listener {
                 return
             }
 
-            if (arena.voting && slot == arena.voteItem?.slot) {
+            if (arena.voting && slot == arena.voteConfig.item?.slot) {
                 arena.votingManager.showVotingSelection(p)
                 return
             }
@@ -153,21 +155,21 @@ class ArenaListener(private val arena: Arena) : Listener {
     fun onHit(e: EntityDamageEvent) {
         val victim = e.entity
 
-        if (arena.arenaState == ArenaState.LOBBY) {
-            if (victim is Player) {
-                if (this.arena.arenaState == ArenaState.LOBBY && e.cause == EntityDamageEvent.DamageCause.VOID && arena.inArena(victim)) {
-                    victim.teleport(this.arena.arenaLobby)
-                    e.setCancelled()
-                }
-            }
-
-            return
-        }
+//        if (arena.arenaState == ArenaState.LOBBY) {
+//            if (victim is Player) {
+//                if (this.arena.arenaState == ArenaState.LOBBY && e.cause == EntityDamageEvent.DamageCause.VOID && arena.inArena(victim)) {
+//                    victim.teleport(this.arena.arenaLobby)
+//                    e.setCancelled()
+//                }
+//            }
+//
+//            return
+//        }
 
         var kill = false
 
         var data: BedWarsData? = null
-        var kData: BedWarsData
+        val kData: BedWarsData
 
         if (victim is Player) {
             if (arena.isSpectator(victim)) {
@@ -194,7 +196,7 @@ class ArenaListener(private val arena: Arena) : Listener {
 
             if (victim.getHealth() - e.finalDamage < 1) {
                 kill = true
-                data = arena.playerData[victim.getName().toLowerCase()]
+                data = arena.getPlayerData(victim)
             }
         } else if (victim is BWVillager) {
             e.setCancelled()
@@ -203,18 +205,14 @@ class ArenaListener(private val arena: Arena) : Listener {
         if (e is EntityDamageByEntityEvent) {
             if (e.damager is Player) {
                 val killer = e.damager as Player
-
-                if (!arena.inArena(killer)) {
-                    return
-                }
+                kData = arena.getPlayerData(killer) ?: return
 
                 if (victim is Player) {
                     if (data == null) {
-                        data = arena.playerData[victim.getName().toLowerCase()]
+                        data = arena.getPlayerData(victim) ?: return
                     }
-                    kData = arena.playerData[killer.name.toLowerCase()]!!
 
-                    if (this.arena.arenaState == ArenaState.LOBBY || data!!.team.id == kData.team.id) {
+                    if (this.arena.arenaState == ArenaState.LOBBY || data.team === kData.team) {
                         e.setCancelled()
                         return
                     }
@@ -227,10 +225,9 @@ class ArenaListener(private val arena: Arena) : Listener {
                 }
 
                 if (e !is EntityDamageByChildEntityEvent && victim is BWVillager && killer.getGamemode() == 0) {
-                    kData = arena.playerData[killer.name.toLowerCase()]!!
                     val inv = kData.team.shop
 
-                    killer.openInventory(inv)
+                    killer.openShopInventory(inv)
 
                     e.setCancelled()
                 }
@@ -272,6 +269,19 @@ class ArenaListener(private val arena: Arena) : Listener {
             } else {
                 p.teleport(data.team.spawn)
             }
+        }
+    }
+
+    @EventHandler
+    fun onEntityInteract(e: PlayerInteractEntityEvent) {
+        val p = e.player
+
+        val data = arena.getPlayerData(p) ?: return
+
+        if (arena.arenaState == ArenaState.GAME) {
+            val inv = data.team.shop
+
+            p.openShopInventory(inv)
         }
     }
 

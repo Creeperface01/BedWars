@@ -7,14 +7,14 @@ import com.creeperface.nukkit.kformapi.form.util.ImageData
 import java.time.Instant
 
 data class MapConfiguration(
-        val name: String,
-        val icon: ImageData?,
-        val bronze: List<Vector3>,
-        val iron: List<Vector3>,
-        val gold: List<Vector3>,
-        override val lastModification: Instant = Instant.now(),
-        val teams: List<TeamData>
-) : ModifiableConfiguration {
+    val name: String,
+    val icon: ImageData?,
+    val bronze: List<Vector3>,
+    val iron: List<Vector3>,
+    val gold: List<Vector3>,
+    override var lastModification: Instant = Instant.now(),
+    val teams: List<TeamData>
+) : MutableConfiguration {
 
     interface ITeamData {
         val name: String
@@ -27,12 +27,12 @@ data class MapConfiguration(
     }
 
     data class TeamData(
-            override val name: String,
-            override val color: DyeColor,
-            override val chatColor: TextFormat,
-            override val spawn: Vector3,
-            override val villager: Vector3,
-            override val bed1: Vector3,
-            override val bed2: Vector3
+        override val name: String,
+        override val color: DyeColor,
+        override val chatColor: TextFormat,
+        override val spawn: Vector3,
+        override val villager: Vector3,
+        override val bed1: Vector3,
+        override val bed2: Vector3
     ) : ITeamData
 }

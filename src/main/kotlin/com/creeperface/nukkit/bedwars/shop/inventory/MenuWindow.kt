@@ -15,17 +15,10 @@ class MenuWindow(window: ShopMenuWindow) : Window(window), ShopMenuWindow {
     }
 
     fun setWindows(windows: Map<Int, ShopWindow>) {
-//        logInfo("name $windowName")
-//        logInfo("windows: ${windows.size}")
-//        logInfo("size: ${this.size}")
         windows.forEach { (index, win) ->
-//            logInfo("setting item $index ${win.icon.item}")
             setItem(index, win.icon.item)
-//            logInfo("get item: " + getItem(index))
 
             this.windows[index] = win.toInventory()
         }
-
-//        logInfo("contents: $contents")
     }
 }

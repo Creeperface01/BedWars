@@ -11,6 +11,7 @@ import com.creeperface.nukkit.bedwars.api.BedWarsAPI
 import com.creeperface.nukkit.bedwars.api.arena.Arena.ArenaState
 import com.creeperface.nukkit.bedwars.api.arena.configuration.ArenaConfiguration
 import com.creeperface.nukkit.bedwars.api.arena.configuration.MapConfiguration
+import com.creeperface.nukkit.bedwars.api.arena.configuration.MutableConfiguration
 import com.creeperface.nukkit.bedwars.api.data.Stat
 import com.creeperface.nukkit.bedwars.api.data.provider.DataProvider
 import com.creeperface.nukkit.bedwars.api.economy.EconomyProvider
@@ -40,6 +41,7 @@ import com.creeperface.nukkit.bedwars.placeholder.Placeholders
 import com.creeperface.nukkit.bedwars.shop.Shop
 import com.creeperface.nukkit.bedwars.shop.form.FormShopManager
 import com.creeperface.nukkit.bedwars.utils.*
+import com.fasterxml.jackson.databind.InjectableValues
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap
 import kotlinx.coroutines.runBlocking
 import org.apache.commons.io.FileUtils
@@ -47,6 +49,7 @@ import org.joor.Reflect
 import java.io.File
 import java.io.FileFilter
 import java.io.IOException
+import java.time.Instant
 import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.jvm.javaField
@@ -180,7 +183,10 @@ class BedWars : PluginBase(), BedWarsAPI {
 
         files.forEach { file ->
             val data = configuration.arena.toMutableMap()
-            data.putAll(Config(file).rootSection)
+            data.deepMerge(Config(file).rootSection)
+
+            mapper.injectableValues = InjectableValues.Std()
+                .addValue(MutableConfiguration::class.java, MutableConfiguration.get(Instant.now()))
 
             val arenaConf = ConfigurationSerializer.loadClass<ArenaConfiguration>(data)
 

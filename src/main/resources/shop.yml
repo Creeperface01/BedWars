@@ -1,4 +1,8 @@
 #shop configuration file
+
+#configuration file version
+#do not change
+version: 1
 #shop sections
 windows:
   - name: Blocks
@@ -22,23 +26,26 @@ windows:
         cost:
           - item_id: 336
             item_damage: 0
-            item_custom_name: §r§6Bronz
-            item_path: §r§6Bronz
+            item_custom_name: §r§6Bronze
+            item_path: §r§6Bronze
       - name: Chest
         icon:
           item_id: 24
           item_damage: 0
+          item_count: 16
           item_path: Sandstone
         type: offer
         purchase_item:
           item_id: 24
           item_damage: 0
+          item_count: 16
           item_path: Sandstone
         cost:
           - item_id: 336
             item_damage: 0
-            item_custom_name: §r§6Bronz
-            item_path: §r§6Bronz
+            item_count: 16
+            item_custom_name: §r§6Bronze
+            item_path: §r§6Bronze
       - name: Chest
         icon:
           item_id: 121
@@ -52,8 +59,9 @@ windows:
         cost:
           - item_id: 336
             item_damage: 0
-            item_custom_name: §r§6Bronz
-            item_path: §r§6Bronz
+            item_count: 16
+            item_custom_name: §r§6Bronze
+            item_path: §r§6Bronze
       - name: Chest
         icon:
           item_id: 89
@@ -67,8 +75,9 @@ windows:
         cost:
           - item_id: 336
             item_damage: 0
-            item_custom_name: §r§6Bronz
-            item_path: §r§6Bronz
+            item_count: 4
+            item_custom_name: §r§6Bronze
+            item_path: §r§6Bronze
       - name: Chest
         icon:
           item_id: 42
@@ -97,8 +106,9 @@ windows:
         cost:
           - item_id: 336
             item_damage: 0
-            item_custom_name: §r§6Bronz
-            item_path: §r§6Bronz
+            item_count: 8
+            item_custom_name: §r§6Bronze
+            item_path: §r§6Bronze
   - name: Armor
     icon:
       item_id: 303
@@ -114,6 +124,10 @@ windows:
           enchantments:
             - id: 17
               level: 1
+          data:
+            customColor:
+              type: int
+              value: "%bw_team_color_rgb%"
           item_path: Leather Cap
         type: offer
         purchase_item:
@@ -122,12 +136,16 @@ windows:
           enchantments:
             - id: 17
               level: 1
+          data:
+            customColor:
+              type: int
+              value: "%bw_team_color_rgb%"
           item_path: Leather Cap
         cost:
           - item_id: 336
             item_damage: 0
-            item_custom_name: §r§6Bronz
-            item_path: §r§6Bronz
+            item_custom_name: §r§6Bronze
+            item_path: Bronze
       - name: Chest
         icon:
           item_id: 300
@@ -135,6 +153,10 @@ windows:
           enchantments:
             - id: 17
               level: 1
+          data:
+            customColor:
+              type: int
+              value: "%bw_team_color_rgb%"
           item_path: Leather Pants
         type: offer
         purchase_item:
@@ -143,12 +165,16 @@ windows:
           enchantments:
             - id: 17
               level: 1
+          data:
+            customColor:
+              type: int
+              value: "%bw_team_color_rgb%"
           item_path: Leather Pants
         cost:
           - item_id: 336
             item_damage: 0
-            item_custom_name: §r§6Bronz
-            item_path: §r§6Bronz
+            item_custom_name: §r§6Bronze
+            item_path: §r§6Bronze
       - name: Chest
         icon:
           item_id: 301
@@ -156,6 +182,10 @@ windows:
           enchantments:
             - id: 17
               level: 1
+          data:
+            customColor:
+              type: int
+              value: "%bw_team_color_rgb%"
           item_path: Leather Boots
         type: offer
         purchase_item:
@@ -164,12 +194,16 @@ windows:
           enchantments:
             - id: 17
               level: 1
+          data:
+            customColor:
+              type: int
+              value: "%bw_team_color_rgb%"
           item_path: Leather Boots
         cost:
           - item_id: 336
             item_damage: 0
-            item_custom_name: §r§6Bronz
-            item_path: §r§6Bronz
+            item_custom_name: §r§6Bronze
+            item_path: Bronze
       - name: Chest
         icon:
           item_id: 303
@@ -222,6 +256,7 @@ windows:
         cost:
           - item_id: 265
             item_damage: 0
+            item_count: 3
             item_custom_name: §r§7Iron
             item_path: §r§7Iron
       - name: Chest
@@ -249,6 +284,7 @@ windows:
         cost:
           - item_id: 265
             item_damage: 0
+            item_count: 7
             item_custom_name: §r§7Iron
             item_path: §r§7Iron
   - name: Swords
@@ -280,8 +316,9 @@ windows:
         cost:
           - item_id: 336
             item_damage: 0
-            item_custom_name: §r§6Bronz
-            item_path: §r§6Bronz
+            item_count: 7
+            item_custom_name: §r§6Bronze
+            item_path: §r§6Bronze
       - name: Chest
         icon:
           item_id: 283
@@ -334,6 +371,7 @@ windows:
         cost:
           - item_id: 265
             item_damage: 0
+            item_count: 3
             item_custom_name: §r§7Iron
             item_path: §r§7Iron
       - name: Chest
@@ -365,6 +403,7 @@ windows:
         cost:
           - item_id: 266
             item_damage: 0
+            item_count: 5
             item_custom_name: §r§eGold
             item_path: §r§eGold
   - name: Pickaxes
@@ -400,8 +439,9 @@ windows:
         cost:
           - item_id: 336
             item_damage: 0
-            item_custom_name: §r§6Bronz
-            item_path: §r§6Bronz
+            item_count: 4
+            item_custom_name: §r§6Bronze
+            item_path: §r§6Bronze
       - name: Chest
         icon:
           item_id: 274
@@ -427,6 +467,7 @@ windows:
         cost:
           - item_id: 265
             item_damage: 0
+            item_count: 2
             item_custom_name: §r§7Iron
             item_path: §r§7Iron
       - name: Chest
@@ -484,6 +525,7 @@ windows:
         cost:
           - item_id: 266
             item_damage: 0
+            item_count: 5
             item_custom_name: §r§eGold
             item_path: §r§eGold
       - name: Chest
@@ -511,6 +553,7 @@ windows:
         cost:
           - item_id: 266
             item_damage: 0
+            item_count: 7
             item_custom_name: §r§eGold
             item_path: §r§eGold
       - name: Chest
@@ -542,6 +585,7 @@ windows:
         cost:
           - item_id: 266
             item_damage: 0
+            item_count: 13
             item_custom_name: §r§eGold
             item_path: §r§eGold
       - name: Chest
@@ -565,6 +609,7 @@ windows:
         cost:
           - item_id: 266
             item_damage: 0
+            item_count: 23
             item_custom_name: §r§eGold
             item_path: §r§eGold
       - name: Chest
@@ -603,6 +648,7 @@ windows:
         cost:
           - item_id: 265
             item_damage: 0
+            item_count: 4
             item_custom_name: §r§7Iron
             item_path: §r§7Iron
       - name: Chest
@@ -618,6 +664,7 @@ windows:
         cost:
           - item_id: 266
             item_damage: 0
+            item_count: 3
             item_custom_name: §r§eGold
             item_path: §r§eGold
   - name: Food
@@ -641,8 +688,8 @@ windows:
         cost:
           - item_id: 336
             item_damage: 0
-            item_custom_name: §r§6Bronz
-            item_path: §r§6Bronz
+            item_custom_name: §r§6Bronze
+            item_path: §r§6Bronze
       - name: Chest
         icon:
           item_id: 320
@@ -656,8 +703,9 @@ windows:
         cost:
           - item_id: 336
             item_damage: 0
-            item_custom_name: §r§6Bronz
-            item_path: §r§6Bronz
+            item_count: 4
+            item_custom_name: §r§6Bronze
+            item_path: §r§6Bronze
       - name: Chest
         icon:
           item_id: 354
@@ -671,6 +719,7 @@ windows:
         cost:
           - item_id: 265
             item_damage: 0
+            item_count: 2
             item_custom_name: §r§7Iron
             item_path: §r§7Iron
       - name: Chest
@@ -686,6 +735,7 @@ windows:
         cost:
           - item_id: 266
             item_damage: 0
+            item_count: 5
             item_custom_name: §r§eGold
             item_path: §r§eGold
   - name: Potions
@@ -709,6 +759,7 @@ windows:
         cost:
           - item_id: 265
             item_damage: 0
+            item_count: 3
             item_custom_name: §r§7Iron
             item_path: §r§7Iron
       - name: Chest
@@ -724,6 +775,7 @@ windows:
         cost:
           - item_id: 265
             item_damage: 0
+            item_count: 5
             item_custom_name: §r§7Iron
             item_path: §r§7Iron
       - name: Chest
@@ -739,6 +791,7 @@ windows:
         cost:
           - item_id: 265
             item_damage: 0
+            item_count: 7
             item_custom_name: §r§7Iron
             item_path: §r§7Iron
       - name: Chest
@@ -754,6 +807,7 @@ windows:
         cost:
           - item_id: 266
             item_damage: 0
+            item_count: 8
             item_custom_name: §r§eGold
             item_path: §r§eGold
   - name: Special
@@ -779,6 +833,7 @@ windows:
         cost:
           - item_id: 265
             item_damage: 0
+            item_count: 5
             item_custom_name: §r§7Iron
             item_path: §r§7Iron
       - name: Chest
@@ -794,6 +849,7 @@ windows:
         cost:
           - item_id: 266
             item_damage: 0
+            item_count: 13
             item_custom_name: §r§eGold
             item_path: §r§eGold
       - name: Chest
@@ -811,8 +867,9 @@ windows:
         cost:
           - item_id: 336
             item_damage: 0
-            item_custom_name: §r§6Bronz
-            item_path: §r§6Bronz
+            item_count: 64
+            item_custom_name: §r§6Bronze
+            item_path: §r§6Bronze
       - name: Chest
         icon:
           item_id: 70
@@ -828,6 +885,7 @@ windows:
         cost:
           - item_id: 265
             item_damage: 0
+            item_count: 5
             item_custom_name: §r§7Iron
             item_path: §r§7Iron
       - name: Chest
@@ -843,6 +901,7 @@ windows:
         cost:
           - item_id: 265
             item_damage: 0
+            item_count: 5
             item_custom_name: §r§7Iron
             item_path: §r§7Iron
 

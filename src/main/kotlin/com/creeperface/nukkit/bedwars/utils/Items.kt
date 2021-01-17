@@ -11,7 +11,7 @@ import java.util.*
 
 object Items {
 
-    val BRONZE = Item.get(Item.BRICK).setCustomName("§r§6Bronz")
+    val BRONZE = Item.get(Item.BRICK).setCustomName("§r§6Bronze")
     val IRON = Item.get(Item.IRON_INGOT).setCustomName("§r§7Iron")
     val GOLD = Item.get(Item.GOLD_INGOT).setCustomName("§r§eGold")
 

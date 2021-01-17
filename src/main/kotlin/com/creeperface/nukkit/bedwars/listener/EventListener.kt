@@ -48,7 +48,7 @@ class EventListener(private val plugin: BedWars) : Listener {
         register(plugin, this::onTransaction, ignoreCancelled = true)
         register(plugin, this::onSlotClick)
         register(plugin, this::onHungerChange, ignoreCancelled = true)
-        register(plugin, this::launchProjectile)
+        register(plugin, this::onProjectileLaunch)
         register(plugin, this::onDamage, ignoreCancelled = true, priority = EventPriority.LOW)
         register(plugin, this::onDropItem)
     }
@@ -66,13 +66,14 @@ class EventListener(private val plugin: BedWars) : Listener {
 
         val be = b.blockEntity
         if (be is BlockEntityArenaSign) {
+            be.arena?.let { arena ->
+                if (!arena.multiPlatform && p.loginChainData.deviceOS == 7 && !p.hasPermission("bedwars.crossplatform")) {
+                    p.sendMessage(Lang.PE_ONLY.translate())
+                    return
+                }
 
-            if (!be.arena.multiPlatform && p.loginChainData.deviceOS == 7 && !p.hasPermission("bedwars.crossplatform")) {
-                p.sendMessage(Lang.PE_ONLY.translate())
-                return
+                arena.joinToArena(p)
             }
-
-            be.arena.joinToArena(p)
         }
     }
 
@@ -227,7 +228,6 @@ class EventListener(private val plugin: BedWars) : Listener {
     @EventHandler
     fun onSlotClick(e: InventoryClickEvent) {
         val p = e.player
-        logInfo("click inventory")
 
         val inv2 = e.inventory as? Window ?: return
 
@@ -238,24 +238,23 @@ class EventListener(private val plugin: BedWars) : Listener {
             return
         }
 
+        if (slot == inv2.size - 1) {
+            inv2.parent?.let {
+                p.openShopInventory(it)
+            }
+
+            return
+        }
+
         if (inv2 is OfferWindow) {
             if (slot == 0) {
                 plugin.shop.processTransaction(p, inv2.item, inv2.cost)
-            } else if (slot == inv2.size - 1) {
-                inv2.parent?.let {
-                    p.addWindow(it)
-                    it.onOpen(p)
-                }
             }
         } else if (inv2 is MenuWindow) {
             val newWindow = inv2[slot]
 
             if (newWindow != null) {
-                val id = p.addWindow(newWindow)
-
-                if (id >= 0) {
-                    newWindow.onOpen(p)
-                }
+                p.openShopInventory(newWindow)
             }
         }
     }
@@ -271,7 +270,7 @@ class EventListener(private val plugin: BedWars) : Listener {
     }
 
     @EventHandler
-    fun launchProjectile(e: ProjectileLaunchEvent) {
+    fun onProjectileLaunch(e: ProjectileLaunchEvent) {
         val p = e.entity.shootingEntity as? Player ?: return
         plugin.getPlayerArena(p) ?: return
 
@@ -288,6 +287,10 @@ class EventListener(private val plugin: BedWars) : Listener {
             plugin.getPlayerArena(entity)?.let {
                 if (it.arenaState == Arena.ArenaState.LOBBY) {
                     e.setCancelled()
+
+                    if (e.cause == EntityDamageEvent.DamageCause.VOID) {
+                        entity.teleport(it.arenaLobby)
+                    }
                 }
             }
         }

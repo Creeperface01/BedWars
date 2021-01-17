@@ -2,7 +2,7 @@ package com.creeperface.nukkit.bedwars.dataprovider
 
 import com.creeperface.nukkit.bedwars.api.arena.configuration.ArenaConfiguration
 import com.creeperface.nukkit.bedwars.api.arena.configuration.MapConfiguration
-import com.creeperface.nukkit.bedwars.api.arena.configuration.ModifiableConfiguration
+import com.creeperface.nukkit.bedwars.api.arena.configuration.MutableConfiguration
 import com.creeperface.nukkit.bedwars.api.data.Stat
 import com.creeperface.nukkit.bedwars.api.data.Stats
 import com.creeperface.nukkit.bedwars.api.data.provider.DataProvider
@@ -150,7 +150,7 @@ internal class MySQLDataProvider(private val configuration: Configuration) : Dat
         }
     }
 
-    private inline fun <reified T : ModifiableConfiguration> sync(data: MutableMap<String, T>, table: String) {
+    private inline fun <reified T : MutableConfiguration> sync(data: MutableMap<String, T>, table: String) {
         connection.use { con ->
             con.prepareStatement("SELECT * FROM $table").use { statement ->
                 val result = statement.executeQuery()

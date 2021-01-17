@@ -19,18 +19,18 @@ class BedWarsCommand(plugin: BedWars) : BaseCommand("bedwars", plugin) {
 
         this.commandParameters.clear()
         this.commandParameters["quickjoin"] = arrayOf(
-                CommandParameter("action", arrayOf("quickjoin")),
-                CommandParameter("player", CommandParamType.TARGET, true)
+            CommandParameter.newEnum("action", arrayOf("quickjoin")),
+            CommandParameter.newType("player", true, CommandParamType.TARGET)
         )
         this.commandParameters["sign"] = arrayOf(
-                CommandParameter("action", arrayOf("sign"))
+            CommandParameter.newEnum("action", arrayOf("sign")),
         )
         this.commandParameters["stats"] = arrayOf(
-                CommandParameter("action", arrayOf("stats")),
-                CommandParameter("player", CommandParamType.TARGET, true)
+            CommandParameter.newEnum("action", arrayOf("stats")),
+            CommandParameter.newType("player", true, CommandParamType.TARGET)
         )
         this.commandParameters["help"] = arrayOf(
-                CommandParameter("action", arrayOf("help"))
+            CommandParameter.newEnum("action", arrayOf("help")),
         )
 //        plugin.arenas.values.forEach { arena ->
 //            this.commandParameters["teamsign" + arena.name] = arrayOf(
@@ -96,7 +96,15 @@ class BedWarsCommand(plugin: BedWars) : BaseCommand("bedwars", plugin) {
 
                 val stats = data.stats
 
-                sender.sendMessage(Lang.STATS.translate(stats[Stat.KILLS].toString(), stats[Stat.DEATHS].toString(), stats[Stat.WINS].toString(), stats[Stat.LOSSES].toString(), stats[Stat.BEDS].toString()))
+                sender.sendMessage(
+                    Lang.STATS.translate(
+                        stats[Stat.KILLS].toString(),
+                        stats[Stat.DEATHS].toString(),
+                        stats[Stat.WINS].toString(),
+                        stats[Stat.LOSSES].toString(),
+                        stats[Stat.BEDS].toString()
+                    )
+                )
             }
             "help" -> {
                 var msg = BedWars.chatPrefix + Lang.AVAILABLE_COMMANDS.translate() + ":\n"

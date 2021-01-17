@@ -2,36 +2,37 @@ package com.creeperface.nukkit.bedwars.api.arena.configuration
 
 import cn.nukkit.math.Vector3
 import com.creeperface.nukkit.bedwars.api.utils.InventoryItem
-import java.time.Instant
+import com.creeperface.nukkit.bedwars.api.utils.watch
+import com.fasterxml.jackson.annotation.JacksonInject
+import com.fasterxml.jackson.annotation.JsonProperty
 
-data class ArenaConfiguration(
-        override val name: String,
-        override val lobby: Vector3? = null,
-        override val lastModification: Instant = Instant.now(),
+class ArenaConfiguration(
+    @JacksonInject conf: MutableConfiguration,
 
-        override val timeLimit: Int,
-        override val startTime: Int,
-        override val endingTime: Int,
-        override val startPlayers: Int,
-        override val bronzeDropInterval: Int,
-        override val ironDropInterval: Int,
-        override val goldDropInterval: Int,
-        override val fastStart: Boolean,
-        override val fastStartTime: Int,
-        override val fastStartPlayers: Int,
-        override val teamPlayers: Int,
-        override val maxPlayers: Int,
-        override val multiPlatform: Boolean,
-        override val teamSelectCommand: Boolean,
-        override val teamSelectItem: InventoryItem? = null,
-        override val voteItem: InventoryItem? = null,
-        override val lobbyItem: InventoryItem?,
-        override val votePlayers: Int,
-        override val voteCountdown: Int,
-        override val mapFilter: MapFilter
-) : IArenaConfiguration
+    override val name: String,
+    override val lobby: Vector3? = null,
 
-interface IArenaConfiguration : ModifiableConfiguration {
+    override val timeLimit: Int,
+    override val startTime: Int,
+    override val endingTime: Int,
+    override val startPlayers: Int,
+    override val bronzeDropInterval: Int,
+    override val ironDropInterval: Int,
+    override val goldDropInterval: Int,
+    override val fastStart: Boolean,
+    override val fastStartTime: Int,
+    override val fastStartPlayers: Int,
+    override val teamPlayers: Int,
+    override val maxPlayers: Int,
+    override val multiPlatform: Boolean,
+    override val teamSelectCommand: Boolean,
+    override val teamSelectItem: InventoryItem? = null,
+    @JsonProperty("voting") override val voteConfig: VoteConfig,
+    override val lobbyItem: InventoryItem?,
+    override val mapFilter: MapFilter
+) : IArenaConfiguration, MutableConfiguration by conf
+
+interface IArenaConfiguration : MutableConfiguration {
     val name: String
     val timeLimit: Int
     val startTime: Int
@@ -49,16 +50,36 @@ interface IArenaConfiguration : ModifiableConfiguration {
     val lobby: Vector3?
     val teamSelectCommand: Boolean
     val teamSelectItem: InventoryItem?
-    val voteItem: InventoryItem?
+    val voteConfig: VoteConfig
     val lobbyItem: InventoryItem?
-    val votePlayers: Int
-    val voteCountdown: Int
     val mapFilter: MapFilter
 }
 
-data class MapFilter(
-        val enable: Boolean,
-        val teamCount: Set<Int> = emptySet(),
-        val include: List<String> = emptyList(),
-        val exclude: List<String> = emptyList()
-)
+class VoteConfig(
+    @JacksonInject parent: MutableConfiguration,
+    enable: Boolean,
+    maxOptions: Int,
+    players: Int,
+    countdown: Int,
+    item: InventoryItem?
+) {
+
+    val enable: Boolean by watch(parent, enable)
+    val maxOptions: Int by watch(parent, maxOptions)
+    val players: Int by watch(parent, players)
+    val countdown: Int by watch(parent, countdown)
+    val item: InventoryItem? by watch(parent, item)
+}
+
+class MapFilter(
+    @JacksonInject parent: MutableConfiguration,
+    enable: Boolean,
+    teamCount: Set<Int> = emptySet(),
+    include: List<String> = emptyList(),
+    exclude: List<String> = emptyList()
+) {
+    val enable: Boolean by watch(parent, enable)
+    val teamCount: Set<Int> by watch(parent, teamCount)
+    val include: List<String> by watch(parent, include)
+    val exclude: List<String> by watch(parent, exclude)
+}

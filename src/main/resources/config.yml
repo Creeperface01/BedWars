@@ -1,3 +1,7 @@
+#configuration file version
+#do not change
+version: 1
+
 #language
 general:
   language: "english"
@@ -8,14 +12,16 @@ general:
   disable_command: true
   #Commands available even in arena.
   #Note that events like teleport (into different worlds) etc aren't handled by BedWars
-  enabled_commands: ["lobby"] #Assuming lobby commands cause player to leave the BedWars server
+  enabled_commands: [ "lobby"] #Assuming lobby commands cause player to leave the BedWars server
   #Separate chat between players in game and the others playing on server
   separate_chat: true
 
 data:
   #if disabled, no player data will be saved
   enable: false
+  #data providers, default available: [mysql, mongodb], use 'none' to disable
   data_provider: none
+  #whether BedWars should use DbLib plugin (if available)
   use_db_lib: true
   #unique player identifier. Can be whether 'name' or 'uuid'. UUID is recommended unless you're running server in offline mode
   player_identifier: uuid

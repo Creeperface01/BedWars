@@ -1,11 +1,12 @@
 name: BedWars
 version: "1.0"
-api: ["1.0.0"]
+api: [ "1.0.0" ]
 main: com.creeperface.nukkit.bedwars.BedWars
+load: STARTUP
 author: "CreeperFace"
-description: "bedWars minigame"
-depend: ["Actaeon", "DbLib", "PlaceholderAPI", "KotlinLib"]
-softdepend: ["BedWarsHelper", "EconomyAPI"]
+description: "BedWars minigame"
+depend: [ "Actaeon", "PlaceholderAPI", "KotlinLib", "KFormAPI" ]
+softdepend: [ "BedWarsHelper", "EconomyAPI", "DbLib" ]
 
 permissions:
   bedwars:

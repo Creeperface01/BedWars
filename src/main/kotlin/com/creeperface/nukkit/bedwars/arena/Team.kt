@@ -11,7 +11,6 @@ import com.creeperface.nukkit.bedwars.obj.BedWarsData
 import com.creeperface.nukkit.bedwars.shop.inventory.MenuWindow
 import com.creeperface.nukkit.bedwars.utils.EnderChestInventory
 import com.creeperface.nukkit.bedwars.utils.configuration
-import com.creeperface.nukkit.bedwars.utils.logInfo
 import com.creeperface.nukkit.bedwars.utils.plus
 import com.creeperface.nukkit.placeholderapi.api.scope.Message
 import com.creeperface.nukkit.placeholderapi.api.scope.MessageScope
@@ -31,18 +30,16 @@ class Team(override val arena: Arena,
 
     override val enderChest = EnderChestInventory()
 
-    override val shop: MenuWindow = arena.plugin.shop.load(arena, this)
-
     val windowMap = Int2ObjectOpenHashMap<ShopWindow>()
 
     val players = mutableMapOf<String, BedWarsData>()
 
     override val context = TeamScope.getContext(this)
 
+    override val shop: MenuWindow
+
     init {
         recalculateStatus()
-
-        logInfo(shop.contents.toString())
 
         fun foreachWindows(window: ShopMenuWindow) {
             window.windows.values.forEach {
@@ -54,6 +51,7 @@ class Team(override val arena: Arena,
             }
         }
 
+        shop = arena.plugin.shop.load(arena, this)
         foreachWindows(shop)
     }
 

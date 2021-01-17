@@ -1,3 +1,7 @@
+#configuration file version
+#do not change
+version: 1
+
 general:
   #You can choose between form window shop (form) or chest inventory shop (inventory)
   shop: inventory
@@ -8,8 +12,8 @@ general:
 chat:
   all_prefix: '!'
   lobby_format: '&7[&9LOBBY&7] &f%player%&7: &f%message%'
-  team_format: '&7[%team_color%TEAM&7] &f%player%&7:%team_color% %message%'
-  all_format: '&7[%team_color%ALL&7] &f%player%&7:%team_color% %message%'
+  team_format: '&7[%bw_team_chat_color%TEAM&7] &f%player%&7:%bw_team_chat_color% %message%'
+  all_format: '&7[%bw_team_chat_color%ALL&7] &f%player%&7:%bw_team_chat_color% %message%'
   spectator_format: '&7[&9SPECTATOR&7] &f%player%&7: &f%message%'
 
 #Following settings are applied by default if not overridden in arena configuration file
@@ -42,11 +46,6 @@ arena:
   multi_platform: true
   #Enabled team selection command
   team_select_command: true
-  #Player count required for vote countdown to start
-  #Should be lower or equals to start_players property
-  vote_players: 8
-  #Countdown for voting in seconds
-  vote_countdown: 20
   #If specified, an item will be given to every player in lobby for team selection
   #If removed, disables item team selection
   team_select_item:
@@ -61,20 +60,30 @@ arena:
       item_count: 1
       #Item custom name
       item_custom_name: "&eTeam select"
-  #If specified, an item will be given to every player in lobby for voting
-  #If removed, disables item voting
-  vote_item:
-    #Inventory slot
-    slot: 4
+  voting:
+    #If true, players are able to vote for the map. Otherwise random map will be selected
+    enable: true
+    #Number of maps that players can choose between
+    max_options: 4
+    #Player count required for vote countdown to start
+    #Should be lower or equals to start_players property
+    players: 8
+    #Countdown for voting in seconds
+    countdown: 20
+    #If specified, an item will be given to every player in lobby for voting
+    #If removed, disables item voting
     item:
-      #Item id or name
-      item_id: empty_map
-      #Item meta (damage)
-      item_damage: 0
-      #Item count
-      item_count: 1
-      #Item custom name
-      item_custom_name: "&eVoting"
+      #Inventory slot
+      slot: 4
+      item:
+        #Item id or name
+        item_id: empty_map
+        #Item meta (damage)
+        item_damage: 0
+        #Item count
+        item_count: 1
+        #Item custom name
+        item_custom_name: "&eVoting"
   #If specified, an item will be given to every player in lobby to leave an arena
   lobby_item:
     #Inventory slot

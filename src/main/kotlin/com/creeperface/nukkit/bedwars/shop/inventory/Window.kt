@@ -15,14 +15,15 @@ abstract class Window(window: ShopWindow) : ShopInventory(), ShopWindow {
 
     init {
         window.parent.let {
-            parent = if (it != null) {
+            parent = if (it is MenuWindow) {
                 // non-main window
                 val item = ItemBlock(BlockWool(), 14)
                 item.customName = TextFormat.AQUA.toString() + "Back"
 
-                setItem(getSize() - 1, item)
+                this.setItem(getSize() - 1, item)
 
-                MenuWindow(it)
+//                MenuWindow(it)
+                it
             } else null
         }
     }

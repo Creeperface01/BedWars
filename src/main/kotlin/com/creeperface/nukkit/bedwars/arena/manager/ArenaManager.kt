@@ -23,7 +23,7 @@ fun Arena.showTeamSelection(p: Player) {
         teams.forEach { team ->
             val statusColor = if (team.canPlayerJoin(p)) TextFormat.GREEN else TextFormat.RED
             button(team.chatColor + team.name.ucFirst() + TextFormat.GRAY + " - " + statusColor + team.players.size + "/" + teamPlayers) {
-                getPlayerData(p)?.let { data ->
+                getPlayerData(p)?.let { _ ->
                     addToTeam(p, team.id)
                 }
             }
@@ -63,6 +63,12 @@ fun Arena.spawnBeds() {
         val positions = arrayOf(team.bed1, team.bed2)
 
         for (pos in positions) {
+            while (true) {
+                val be = this.level.getBlockEntity(pos) ?: break
+
+                be.close()
+            }
+
             val nbt = BlockEntity.getDefaultCompound(pos, BlockEntity.BED)
             nbt.putByte("color", team.color.woolData)
 

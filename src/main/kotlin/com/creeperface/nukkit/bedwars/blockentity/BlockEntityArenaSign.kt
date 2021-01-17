@@ -9,18 +9,24 @@ import com.creeperface.nukkit.bedwars.arena.Arena
 
 class BlockEntityArenaSign(chunk: FullChunk, nbt: CompoundTag) : BlockEntitySign(chunk, nbt) {
 
-    lateinit var arena: Arena
-        private set
-
-    private var lastSignUpdate = 0L
-
-    init {
+    val arena: Arena? by lazy {
         val arena = BedWars.instance.getArena(nbt.getString("bw-arena"))
+//        logInfo("arena first load")
 
         if (arena != null) {
-            this.arena = arena
             scheduleUpdate()
         }
+
+        return@lazy arena
+    }
+
+    private var lastSignUpdate = -1L
+
+    private val initialized = true
+
+    init {
+//        logInfo("init")
+        scheduleUpdate()
     }
 
     override fun onUpdate(): Boolean {
@@ -28,35 +34,51 @@ class BlockEntityArenaSign(chunk: FullChunk, nbt: CompoundTag) : BlockEntitySign
     }
 
     fun onUpdate(force: Boolean): Boolean {
-        val time = System.currentTimeMillis()
+        val spawn = lastSignUpdate == -1L
 
-        if (force || arena.signManager.lastMainSignUpdate > lastSignUpdate) {
-            updateData()
-            lastSignUpdate = time
+        arena?.let {
+            if (force || it.signManager.lastMainSignUpdate > lastSignUpdate) {
+                updateData()
+            }
         }
+
+        if (spawn) {
+//            logInfo("first update")
+            spawnToAll()
+        }
+
         return true
     }
 
     private fun updateData() {
-        this.setText(*arena.signManager.mainSign)
+        arena?.let {
+//            logInfo("update data")
+            lastSignUpdate = System.currentTimeMillis()
+            this.setText(*it.signManager.mainSign)
+        }
     }
 
     override fun spawnTo(player: Player?) {
-        if (!::arena.isInitialized) {
-            val arena = BedWars.instance.getArena(namedTag.getString("bw-arena"))
+        if (!initialized) { //hack
+//            logInfo("spawn !initialized")
+            return
+        }
 
-            if (arena != null) {
-                this.arena = arena
-                scheduleUpdate()
-            } else {
-                close()
-                return
+        if (lastSignUpdate == -1L) {
+//            logInfo("spawn first update")
+            arena?.let {
+                onUpdate(false)
             }
-
-            onUpdate(true)
         }
 
         super.spawnTo(player)
+    }
+
+    override fun getSpawnCompound(): CompoundTag {
+        if (lastSignUpdate == -1L) {
+            updateData()
+        }
+        return super.getSpawnCompound()
     }
 
     companion object {

@@ -65,7 +65,16 @@ internal class Configuration(plugin: BedWars, global: File, game: File) {
         with(globalConf.getSection("data")) {
             savePlayerData = getBoolean("enable")
             dataProvider = getString("data_provider")
-            useDbLib = getBoolean("use_db_lib")
+
+            getBoolean("use_db_lib").let {
+                useDbLib = if (it && plugin.server.pluginManager.getPlugin("DbLib") == null) {
+                    logWarning("'use_db_lib' option is set to true while DbLib plugin not loaded")
+                    false
+                } else {
+                    it
+                }
+            }
+
             loadArenas = getBoolean("load_arenas")
             playerIdentifier = try {
                 PlayerIdentifier.valueOf(getString("player_identifier").toUpperCase())
@@ -75,22 +84,22 @@ internal class Configuration(plugin: BedWars, global: File, game: File) {
 
             with(getSection("mysql")) {
                 mysql = DB(
-                        getString("host"),
-                        getInt("port"),
-                        getString("user"),
-                        getString("password"),
-                        getString("database")
+                    getString("host"),
+                    getInt("port"),
+                    getString("user"),
+                    getString("password"),
+                    getString("database")
                 )
             }
 
             with(getSection("mongo")) {
                 mongo = Mongo(
-                        getString("host"),
-                        getInt("port"),
-                        getString("user"),
-                        getString("password"),
-                        getString("database"),
-                        getSection("options")
+                    getString("host"),
+                    getInt("port"),
+                    getString("user"),
+                    getString("password"),
+                    getString("database"),
+                    getSection("options")
                 )
             }
         }
@@ -137,15 +146,22 @@ internal class Configuration(plugin: BedWars, global: File, game: File) {
         arena = gameConf.readSection("arena")
     }
 
-    internal class Mongo(host: String, port: Int, user: String, password: String, database: String, val options: Map<String, Any>) : DB(
-            host, port, user, password, database
+    internal class Mongo(
+        host: String,
+        port: Int,
+        user: String,
+        password: String,
+        database: String,
+        val options: Map<String, Any>
+    ) : DB(
+        host, port, user, password, database
     )
 
     internal open class DB(
-            val host: String,
-            val port: Int,
-            val user: String,
-            val password: String,
-            val database: String
+        val host: String,
+        val port: Int,
+        val user: String,
+        val password: String,
+        val database: String
     )
 }

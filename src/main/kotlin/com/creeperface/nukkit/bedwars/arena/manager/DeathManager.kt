@@ -49,23 +49,12 @@ class DeathManager(var plugin: Arena) {
                 dColor = data.killerColor
                 killer = data.killer
 
-                killerName = dColor ?: "" + killer ?: ""
+                killerName = (dColor ?: "") + (killer ?: "")
 
                 val kData = plugin.playerData[killer!!.toLowerCase()]
 
                 kData?.addStat(Stat.KILLS)
             }
-
-
-            /*if($lastDmg instanceof EntityDamageByBlockEvent){
-                if($escape === true){
-                    $this->plugin->messageAllPlayers($pColor."{$p->getName()}".TextFormat::GRAY." walked into a cactus while trying to escape ".$this->plugi->getTeamColor($this->plugin->getPlayerTeam($killer)).$killer->getName());
-                    $this->plugin->mysql->addKill($killer->getName());
-                    return;
-                }
-                $this->plugin->messageAllPlayers($pColor."{$p->getName()}".TextFormat::GRAY." was pricked to death");
-                return;
-            }*/
 
             val playerName = pColor + p.name
 

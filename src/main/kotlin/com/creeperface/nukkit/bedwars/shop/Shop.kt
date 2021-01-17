@@ -6,7 +6,6 @@ import cn.nukkit.item.ItemBlock
 import cn.nukkit.utils.Config
 import cn.nukkit.utils.ConfigSection
 import com.creeperface.nukkit.bedwars.BedWars
-import com.creeperface.nukkit.bedwars.api.placeholder.TeamScope
 import com.creeperface.nukkit.bedwars.api.shop.Shop
 import com.creeperface.nukkit.bedwars.api.shop.ShopType
 import com.creeperface.nukkit.bedwars.api.shop.ShopWindow
@@ -18,6 +17,7 @@ import com.creeperface.nukkit.bedwars.shop.generic.GenericOfferWindow
 import com.creeperface.nukkit.bedwars.shop.inventory.MenuWindow
 import com.creeperface.nukkit.bedwars.shop.inventory.Window
 import com.creeperface.nukkit.bedwars.utils.*
+import com.fasterxml.jackson.module.kotlin.convertValue
 import java.io.File
 
 class Shop(private val plugin: BedWars) : Shop {
@@ -30,9 +30,9 @@ class Shop(private val plugin: BedWars) : Shop {
         plugin.saveResource("shop.yml")
 
         config = Config(File(plugin.dataFolder, "shop.yml"), Config.YAML)
-                .rootSection
-                .getList("windows")
-                .filterIsInstance<ConfigSection>()
+            .rootSection
+            .getList("windows")
+            .filterIsInstance<ConfigSection>()
 
         if (config.size > 255) {
             throw RuntimeException("The maximal window count per menu is 255")
@@ -52,13 +52,13 @@ class Shop(private val plugin: BedWars) : Shop {
             return GenericMenuWindow.create(0, "Shop").inventory
         }
 
-        val teamContext = TeamScope.getContext(team)
-
         fun loadWindow(parent: MenuWindow, section: ConfigSection, level: Int, id: Int): Window {
             val name = section.getString("name")
+
+            setConfigScopes(team.context)
             val icon = ShopWindow.WindowIcon(
-                    section.readItem("icon", teamContext),
-                    section.getString("item_path")
+                mapper.convertValue(section.getSection("icon")),
+                section.getString("item_path")
             )
 
             val textureType = if (icon.item is ItemBlock) {
@@ -68,19 +68,23 @@ class Shop(private val plugin: BedWars) : Shop {
             }
 
             //TODO: state name
-            section.getSection("icon").set("item_path", "textures/$textureType/" + /*GlobalBlockPalette.getName(icon.item.id).substring(10) +*/ ".png")
+            section.getSection("icon").set(
+                "item_path",
+                "textures/$textureType/" + /*GlobalBlockPalette.getName(icon.item.id).substring(10) +*/ ".png"
+            )
 
             val type = section.readEnum(ShopWindow.WindowType::class, "type")
 
             if (type == ShopWindow.WindowType.OFFER) {
-                val item = section.readItem("purchase_item", teamContext)
+                val item = mapper.convertValue<Item>(section.getSection("purchase_item"))
 
                 val cost = section.getList("cost").filterIsInstance<ConfigSection>().map {
-                    it.readItem(context = teamContext)
+                    mapper.convertValue<Item>(it)
                 }
 
                 return GenericOfferWindow(id, item, cost, name, icon, parent).inventory
             }
+            resetConfigScopes()
 
             val windows = mutableMapOf<Int, ShopWindow>()
 
@@ -100,7 +104,6 @@ class Shop(private val plugin: BedWars) : Shop {
             window.setWindows(children.mapIndexed { index, it ->
                 index to loadWindow(window, it, nextLevel, id or (index shl (level * 5)))
             }.toMap())
-
             return window
         }
 

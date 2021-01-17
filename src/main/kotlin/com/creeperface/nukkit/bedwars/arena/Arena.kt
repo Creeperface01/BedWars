@@ -169,7 +169,7 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : IArenaConfigurati
         inv.clearAll()
 
         teamSelectItem?.set(inv)
-        voteItem?.set(inv)
+        voteConfig.item?.set(inv)
         lobbyItem?.set(inv)
 
         inv.sendContents(p)
@@ -197,6 +197,10 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : IArenaConfigurati
                 data.addStat(Stat.LOSSES)
             }
 
+            if (data.hasTeam()) {
+                scoreboardManager.updateTeam(data.team.id)
+            }
+
             if (p.isOnline) {
                 p.sendMessage(Lang.LEAVE.translatePrefix())
             }
@@ -205,10 +209,7 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : IArenaConfigurati
         }
 
         this.unsetPlayer(p)
-
-        if (this.arenaState == ArenaState.GAME) {
-            this.checkAlive()
-        }
+        this.checkAlive()
 
         data?.globalData?.arena = null
 
@@ -288,25 +289,51 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : IArenaConfigurati
     }
 
     internal fun checkAlive() {
-        if (!this.ending) {
-            val aliveTeams = this.aliveTeams
+        if (this.arenaState == ArenaState.GAME) {
+            if (!this.ending) {
+                val aliveTeams = this.aliveTeams
 
-            if (aliveTeams.size == 1) {
-                val team = aliveTeams[0]
-                winnerTeam = team
+                if (aliveTeams.size == 1) {
+                    val team = aliveTeams[0]
+                    winnerTeam = team
 
-                for (pl in team.players.values) {
-                    pl.addStat(Stat.WINS)
+                    for (pl in team.players.values) {
+                        pl.addStat(Stat.WINS)
+                    }
+
+                    messageAllPlayers(Lang.END_GAME, false, "" + team.chatColor, team.name)
+                    this.ending = true
                 }
 
-                messageAllPlayers(Lang.END_GAME, false, "" + team.chatColor, team.name)
-                this.ending = true
             }
 
-        }
+            if (this.playerData.isEmpty()) {
+                Server.getInstance().scheduler.scheduleDelayedTask(
+                    plugin,
+                    { stopGame(ArenaStopEvent.Cause.NO_PLAYERS) },
+                    1
+                )
+            }
+        } else {
+            val count = players.size
 
-        if (this.playerData.isEmpty()) {
-            Server.getInstance().scheduler.scheduleDelayedTask(plugin, { stopGame(ArenaStopEvent.Cause.NO_PLAYERS) }, 1)
+            if (count <= 0) {
+                if (task.startTime <= 5) {
+                    stopGame(ArenaStopEvent.Cause.NO_PLAYERS)
+                } else {
+                    this.task.reset()
+                    this.starting = false
+                }
+            }
+
+            if (starting) {
+                if (count < startPlayers && task.startTime > 5) {
+                    this.task.reset()
+                    this.starting = false
+                }
+            } else if (count < voteConfig.players) {
+                this.task.reset()
+            }
         }
     }
 
@@ -423,7 +450,14 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : IArenaConfigurati
         val color = "" + team.chatColor
         val name = team.name
 
-        messageAllPlayers(Lang.BED_BREAK, false, "" + bedteam.chatColor, color + p.name, color + name, bedteam.chatColor.toString() + bedteam.name)
+        messageAllPlayers(
+            Lang.BED_BREAK,
+            false,
+            "" + bedteam.chatColor,
+            color + p.name,
+            color + name,
+            bedteam.chatColor.toString() + bedteam.name
+        )
         bedteam.onBedBreak()
 
         checkAlive()
@@ -448,7 +482,7 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : IArenaConfigurati
 
     fun isTeamFree(team: Team): Boolean {
         val minPlayers = this.teams.filter { it !== team }.minByOrNull { it.players.size }?.players?.size
-                ?: team.players.size
+            ?: team.players.size
 
         return team.players.size - minPlayers < 2
     }
@@ -461,12 +495,13 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : IArenaConfigurati
         }
 
         val pTeam = teams[team]
-        val data = playerData[p.name.toLowerCase()]!!
+        val data = playerData[p.name.toLowerCase()] ?: return
 
         if ((isTeamFull(pTeam) || !isTeamFree(pTeam)) && !p.hasPermission("bedwars.joinfullteam")) {
             p.sendMessage(Lang.FULL_TEAM.translatePrefix())
             return
         }
+
         if (data.hasTeam()) {
             val currentTeam = data.team
 
@@ -475,9 +510,7 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : IArenaConfigurati
                 return
             }
 
-            if (currentTeam.id != 0) {
-                currentTeam.removePlayer(data)
-            }
+            currentTeam.removePlayer(data)
 
             scoreboardManager.updateTeamPlayerCount(currentTeam)
         }
@@ -504,7 +537,9 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : IArenaConfigurati
         if (data != null) {
             data.globalData.arena = null
 
-            data.team.removePlayer(data)
+            if (data.hasTeam()) {
+                data.team.removePlayer(data)
+            }
         }
 
         p.inventory.clearAll()
@@ -533,19 +568,35 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : IArenaConfigurati
         val itemTag = NBTIO.putItemHelper(item)
         itemTag.name = "Item"
 
-        val entities = this.level.getNearbyEntities(SimpleAxisAlignedBB(v.x - 1, v.y - 1, v.z - 1, v.x + 1, v.y + 1, v.z + 1))
+        val entities =
+            this.level.getNearbyEntities(SimpleAxisAlignedBB(v.x - 1, v.y - 1, v.z - 1, v.x + 1, v.y + 1, v.z + 1))
 
         for (entity in entities) {
             if (entity is EntityItem) {
 
-                if (!entity.closed && entity.isAlive && entity.item.count < 64 && entity.item.equals(item, true, false)) {
+                if (!entity.closed && entity.isAlive && entity.item.count < 64 && entity.item.equals(
+                        item,
+                        true,
+                        false
+                    )
+                ) {
                     entity.item.count++
                     return
                 }
             }
         }
 
-        val itemEntity = SpecialItem(this.level.getChunk(v.getX().toInt() shr 4, v.getZ().toInt() shr 4, true), CompoundTag().putList(ListTag<Tag>("Pos").add(DoubleTag("", v.getX() + 0.5)).add(DoubleTag("", v.getY())).add(DoubleTag("", v.getZ() + 0.5))).putList(ListTag<Tag>("Motion").add(DoubleTag("", motion.x)).add(DoubleTag("", motion.y)).add(DoubleTag("", motion.z))).putList(ListTag<Tag>("Rotation").add(FloatTag("", Random().nextFloat() * 360.0f)).add(FloatTag("", 0.0f))).putShort("Health", 5).putCompound("Item", itemTag).putShort("PickupDelay", 0))
+        val itemEntity = SpecialItem(
+            this.level.getChunk(v.getX().toInt() shr 4, v.getZ().toInt() shr 4, true),
+            CompoundTag().putList(
+                ListTag<Tag>("Pos").add(DoubleTag("", v.getX() + 0.5)).add(DoubleTag("", v.getY()))
+                    .add(DoubleTag("", v.getZ() + 0.5))
+            ).putList(
+                ListTag<Tag>("Motion").add(DoubleTag("", motion.x)).add(DoubleTag("", motion.y))
+                    .add(DoubleTag("", motion.z))
+            ).putList(ListTag<Tag>("Rotation").add(FloatTag("", Random().nextFloat() * 360.0f)).add(FloatTag("", 0.0f)))
+                .putShort("Health", 5).putCompound("Item", itemTag).putShort("PickupDelay", 0)
+        )
 
         if (item.id > 0 && item.getCount() > 0) {
             itemEntity.spawnToAll()
@@ -577,9 +628,18 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : IArenaConfigurati
         val pData = data ?: getPlayerData(player) ?: return
 
         val msg = if (pData.hasTeam()) {
-            configuration.allFormat.translatePlaceholders(player, context, pData.team.context, MessageScope.getContext(player, message))
+            configuration.allFormat.translatePlaceholders(
+                player,
+                context,
+                pData.team.context,
+                MessageScope.getContext(player, message)
+            )
         } else {
-            configuration.lobbyFormat.translatePlaceholders(player, context, MessageScope.getContext(Message(player, message)))
+            configuration.lobbyFormat.translatePlaceholders(
+                player,
+                context,
+                MessageScope.getContext(Message(player, message))
+            )
         }
 
         for (p in playerData.values) {
@@ -635,8 +695,8 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : IArenaConfigurati
                 this.task.startTime = this.fastStartTime
             }
         } else if (voting) {
-            if (this.playerData.size >= this.votePlayers) {
-                task.voteTime = voteCountdown
+            if (this.playerData.size >= this.voteConfig.players) {
+                task.voteTime = voteConfig.countdown
             }
         }
     }
@@ -742,6 +802,22 @@ class Arena(var plugin: BedWars, config: ArenaConfiguration) : IArenaConfigurati
 
     companion object {
 
-        internal val allowedBlocks = HashSet<Int>(listOf(Item.SANDSTONE, Block.STONE_PRESSURE_PLATE, 92, 30, 42, 54, 89, 121, 19, 92, Item.OBSIDIAN, Item.BRICKS, Item.ENDER_CHEST))
+        internal val allowedBlocks = HashSet<Int>(
+            listOf(
+                Item.SANDSTONE,
+                Block.STONE_PRESSURE_PLATE,
+                92,
+                30,
+                42,
+                54,
+                89,
+                121,
+                19,
+                92,
+                Item.OBSIDIAN,
+                Item.BRICKS,
+                Item.ENDER_CHEST
+            )
+        )
     }
 }

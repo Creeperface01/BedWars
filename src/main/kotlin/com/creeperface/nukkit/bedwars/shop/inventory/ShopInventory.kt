@@ -3,6 +3,7 @@ package com.creeperface.nukkit.bedwars.shop.inventory
 import cn.nukkit.Player
 import cn.nukkit.block.Block
 import cn.nukkit.block.BlockAir
+import cn.nukkit.blockentity.BlockEntity
 import cn.nukkit.inventory.BaseInventory
 import cn.nukkit.inventory.InventoryType
 import cn.nukkit.item.ItemBlock
@@ -21,14 +22,12 @@ open class ShopInventory : BaseInventory(FakeHolder(), InventoryType.CHEST) {
 
     private val spawnedBlocks = HashMap<Long, BlockVector3>()
 
-    private var pos = BlockVector3()
-
     override fun getHolder() = this.holder as FakeHolder
 
     override fun onOpen(who: Player) { //method called when player opens an inventory
         super.onOpen(who)
 
-        pos = BlockVector3(who.floorX, who.floorY + 3, who.floorZ)
+        val pos = BlockVector3(who.floorX, who.floorY + 3, who.floorZ)
 
         val updateBlockPacket = UpdateBlockPacket()
         updateBlockPacket.x = pos.x
@@ -54,10 +53,8 @@ open class ShopInventory : BaseInventory(FakeHolder(), InventoryType.CHEST) {
         who.dataPacket(bep)
 
         val pk = ContainerOpenPacket()
-        pk.windowId = who.getWindowId(this).toByte().toInt()
-        pk.type = this.getType().networkType.toByte().toInt()
-        //pk.entityId = who.getId();
-        //MainLogger.getLogger().info("opening ID: "+pk.windowId);
+        pk.windowId = who.getWindowId(this)
+        pk.type = this.getType().networkType
 
         pk.x = pos.x
         pk.y = pos.y
@@ -69,14 +66,19 @@ open class ShopInventory : BaseInventory(FakeHolder(), InventoryType.CHEST) {
     }
 
     override fun onClose(who: Player) { //method called when player closes an inventory
-        val pk2 = ContainerClosePacket()
-        pk2.windowId = who.getWindowId(this).toByte().toInt()
-        who.dataPacket(pk2)
+        val pk = ContainerClosePacket()
+        pk.windowId = who.getWindowId(this)
+        pk.wasServerInitiated = who.closingWindowId != pk.windowId
+        who.dataPacket(pk)
 
         val v = spawnedBlocks[who.id]
 
         if (v != null && who.getLevel().isChunkLoaded(v.x shr 4, v.z shr 4)) {
-            who.getLevel().sendBlocks(arrayOf(who), arrayOf(Vector3(v.x.toDouble(), v.y.toDouble(), v.z.toDouble())), UpdateBlockPacket.FLAG_ALL_PRIORITY)
+            who.getLevel().sendBlocks(
+                arrayOf(who),
+                arrayOf(Vector3(v.x.toDouble(), v.y.toDouble(), v.z.toDouble())),
+                UpdateBlockPacket.FLAG_ALL_PRIORITY
+            )
         }
 
         spawnedBlocks.remove(who.id)
@@ -85,7 +87,7 @@ open class ShopInventory : BaseInventory(FakeHolder(), InventoryType.CHEST) {
     }
 
     private fun getSpawnCompound(v: BlockVector3): CompoundTag {
-        val c = CompoundTag().putString("id", "Chest").putInt("x", v.x).putInt("y", v.y).putInt("z", v.z)
+        val c = CompoundTag().putString("id", BlockEntity.CHEST).putInt("x", v.x).putInt("y", v.y).putInt("z", v.z)
         c.putString("CustomName", "Shop") //name of the inventory
 
         return c

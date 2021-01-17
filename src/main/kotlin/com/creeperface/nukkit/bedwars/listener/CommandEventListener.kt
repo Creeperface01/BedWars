@@ -60,7 +60,7 @@ class CommandEventListener(private val plugin: BedWars) : Listener {
 
                                 input("Team ID", "0")
 
-                                onSubmit { player, response ->
+                                onSubmit { _, response ->
                                     if (b.level?.provider == null || b.level.getBlock(b) !is BlockSignPost) {
                                         p.sendMessage(Lang.ERROR.translatePrefix())
                                         return@onSubmit

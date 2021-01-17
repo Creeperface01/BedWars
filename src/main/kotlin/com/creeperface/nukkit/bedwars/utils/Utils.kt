@@ -22,15 +22,15 @@ import com.creeperface.nukkit.bedwars.BedWars
 import com.creeperface.nukkit.bedwars.api.shop.ShopMenuWindow
 import com.creeperface.nukkit.bedwars.api.shop.ShopOfferWindow
 import com.creeperface.nukkit.bedwars.api.shop.ShopWindow
-import com.creeperface.nukkit.bedwars.shop.inventory.MenuWindow
-import com.creeperface.nukkit.bedwars.shop.inventory.OfferWindow
-import com.creeperface.nukkit.bedwars.shop.inventory.Window
+import com.creeperface.nukkit.bedwars.shop.inventory.*
 import com.fasterxml.jackson.databind.json.JsonMapper
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.google.common.base.CaseFormat
 import org.joor.Reflect
 import java.sql.ResultSet
+import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
 import kotlin.reflect.KClass
@@ -166,7 +166,7 @@ fun <T : Any> KClass<T>.initClass(vararg params: Any): T {
 val Player.identifier: String
     get() = BedWars.instance.configuration.playerIdentifier.get(this).toString()
 
-fun <T> MutableList<T>.merge(list: List<T>): List<T> {
+fun <T> MutableCollection<T>.merge(list: Collection<T>): Collection<T> {
     this.addAll(list)
     return this
 }
@@ -181,8 +181,8 @@ fun <K, V> MutableMap<K, V>.deepMerge(map: Map<K, V>): Map<K, V> {
             return@forEach
         }
 
-        if (v is List<*> && v1 is MutableList<*>) {
-            (v1 as MutableList<Any>).merge(v as List<Any>)
+        if (v is Collection<*> && v1 is MutableCollection<*>) {
+            (v1 as MutableCollection<Any>).merge(v as Collection<Any>)
             return@forEach
         }
 
@@ -207,8 +207,16 @@ fun ShopWindow.toInventory(): Window {
     }
 }
 
+fun <T> Optional<T>.unwrap(): T? = orElse(null)
+
 fun Player.openInventory(inv: Inventory) {
     val id = this.getWindowId(inv)
+
+//    if (id != -1) {
+//        Reflect.on(this).get<MutableMap<Inventory, Int>>("windows").remove(inv)
+//    }
+//
+//    this.addWindow(inv)
 
     if (id >= 0) {
         inv.onOpen(this)
@@ -217,14 +225,41 @@ fun Player.openInventory(inv: Inventory) {
     }
 }
 
-@Suppress("NOTHING_TO_INLINE")
-inline fun logAlert(message: String) = Reflect.on(BedWars.instance).call("getLogger").call("alert", TextFormat.YELLOW + message)
+fun Player.openShopInventory(inv: Window) {
+    openInventory(inv)
+//    val windows = Reflect.on(this).get<MutableMap<Inventory, Int>>("windows")
+//    val top = this.topWindow.unwrap()
+//
+//    val id = if(top is ShopInventory) {
+//        this.getWindowId(top)
+//    } else {
+//        null
+//    }
+//
+//    if(top != null) {
+//        windows.remove(top)
+//    }
+//
+//    if(id != null) {
+//        windows[inv] = id
+//    } else {
+//        this.addWindow(inv)
+//    }
+//
+//    inv.sendContents(this)
+}
 
 @Suppress("NOTHING_TO_INLINE")
-inline fun logInfo(message: String) = Reflect.on(BedWars.instance).call("getLogger").call("info", TextFormat.GRAY + message)
+inline fun logAlert(message: String) =
+    Reflect.on(BedWars.instance).call("getLogger").call("alert", TextFormat.YELLOW + message)
 
 @Suppress("NOTHING_TO_INLINE")
-inline fun logWarning(message: String) = Reflect.on(BedWars.instance).call("getLogger").call("warning", TextFormat.YELLOW + message)
+inline fun logInfo(message: String) =
+    Reflect.on(BedWars.instance).call("getLogger").call("info", TextFormat.GRAY + message)
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun logWarning(message: String) =
+    Reflect.on(BedWars.instance).call("getLogger").call("warning", TextFormat.YELLOW + message)
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun logError(message: String) = Reflect.on(BedWars.instance).call("getLogger").call("error", TextFormat.RED + message)

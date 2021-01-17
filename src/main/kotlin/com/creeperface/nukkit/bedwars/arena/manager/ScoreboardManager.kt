@@ -31,7 +31,11 @@ class ScoreboardManager(private val arena: Arena) {
             scoreboard.setScore(i.toLong(), "${TF.AQUA}[${i + 1}] ${TF.DARK_GRAY}${votes[i]} ${TF.RED}» ${TF.GREEN}${vm.stats[i]} votes", i)
         }
 
-        scoreboard.setScore(votes.size.toLong(), "${TF.DARK_GRAY}Time: ${TF.GOLD} ${arena.voteCountdown} s", votes.size)
+        scoreboard.setScore(
+            votes.size.toLong(),
+            "${TF.DARK_GRAY}Time: ${TF.GOLD} ${arena.voteConfig.countdown} s",
+            votes.size
+        )
 
         scoreboard.update()
     }
@@ -78,8 +82,12 @@ class ScoreboardManager(private val arena: Arena) {
     fun updateStartTime() {
         val teams = arena.teams
 
-//        scoreboard.setScore(teams.size.toLong(), "${TF.DARK_GRAY}Time: ${TF.GOLD} ${arena.task.startTime} s", teams.size)
-//        scoreboard.update()
+        scoreboard.setScore(
+            teams.size.toLong(),
+            "${TF.DARK_GRAY}Time: ${TF.GOLD} ${arena.task.startTime} s",
+            teams.size
+        )
+        scoreboard.update()
     }
 
     fun initGame() {
