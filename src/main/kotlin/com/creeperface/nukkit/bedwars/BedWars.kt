@@ -88,6 +88,8 @@ class BedWars : PluginBase(), BedWarsAPI {
         instance = this
         Reflect.on(logger).set("pluginName", consolePrefix)
 
+        initApi()
+
         demo {
             logAlert("---------------------------------------")
             logAlert("|   Running demo version of BedWars   |")
@@ -164,6 +166,12 @@ class BedWars : PluginBase(), BedWarsAPI {
             instance.isAccessible = true
             instance.set(BedWarsAPI.Companion, this)
         }
+    }
+
+    private fun initApi() {
+        Reflect.on(BedWarsAPI.Companion).set("chatPrefix", chatPrefix)
+        Reflect.on(BedWarsAPI.Companion).set("logInfo", { s: String -> logInfo(s) })
+        Reflect.on(BedWarsAPI.Companion).set("logError", { s: String -> logError(s) })
     }
 
     private fun registerArenas() {
@@ -300,7 +308,7 @@ class BedWars : PluginBase(), BedWarsAPI {
 
     private fun loadEconomy() {
         this.economyProvider = this.economyProviders[this.configuration.economyProvider]?.initClass(configuration, this)
-                ?: throw RuntimeException("Undefined economy provider '${this.configuration.economyProvider}'")
+            ?: throw RuntimeException("Undefined economy provider '${this.configuration.economyProvider}'")
 
         val rewards = mutableMapOf<Stat, Collection<EconomyReward>>()
         configuration.rewards.forEach { (stat, data) ->
@@ -341,7 +349,7 @@ class BedWars : PluginBase(), BedWarsAPI {
 
     private fun loadData() {
         this.dataProvider = this.dataProviders[this.configuration.dataProvider]?.initClass(configuration, this)
-                ?: throw RuntimeException("Undefined data provider '${this.configuration.dataProvider}'")
+            ?: throw RuntimeException("Undefined data provider '${this.configuration.dataProvider}'")
     }
 
     private fun initDataProviders() {

@@ -4,6 +4,7 @@ import proguard.gradle.ProGuardTask
 val jacksonVersion = "2.10.1"
 val kotlinVersion = "1.4.21"
 val kotlinCoroutinesVersion = "1.4.2"
+val placeholderApiVersion = "1.4-SNAPSHOT"
 
 plugins {
     kotlin("jvm") version "1.4.21"
@@ -37,7 +38,9 @@ dependencies {
     compileOnly("ru.nukkit.dblib:DbLib:1.0-SNAPSHOT")
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion")
     compileOnly("com.creeperface.nukkit.kformapi:KFormAPI:1.0-SNAPSHOT")
+    compileOnly("com.creeperface.nukkit.placeholderapi:PlaceholderAPI:$placeholderApiVersion")
 
+    implementation("com.creeperface.nukkit.bedwars:BedWars-api:1.0-SNAPSHOT")
     implementation("commons-io:commons-io:2.6")
     implementation("org.apache.httpcomponents:httpclient:4.5.12")
     implementation("org.apache.commons:commons-lang3:3.9")
@@ -59,6 +62,12 @@ dependencies {
 //kotlin {
 //    experimental.coroutines = Coroutines.ENABLE
 //}
+
+kotlin {
+    sourceSets["main"].apply {
+        kotlin.srcDir("src/main/kotlin")
+    }
+}
 
 val compileKotlin: KotlinCompile by tasks
 compileKotlin.kotlinOptions.apply {
@@ -92,17 +101,17 @@ tasks {
         )
     }
 
-    val apiJar by creating(Jar::class) {
-        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-        archiveClassifier.set("api")
-
-        from(sourceSets["main"].output) {
-            include("com/creeperface/nukkit/bedwars/api/**")
-            exclude(
-                "org/**"
-            )
-        }
-    }
+//    val apiJar by creating(Jar::class) {
+//        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+//        archiveClassifier.set("api")
+//
+//        from(sourceSets["main"].output) {
+//            include("com/creeperface/nukkit/bedwars/api/**")
+//            exclude(
+//                "org/**"
+//            )
+//        }
+//    }
 
     val libJar by creating(Jar::class) {
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
@@ -122,7 +131,7 @@ tasks {
     }
 
     artifacts {
-        archives(apiJar)
+//        archives(apiJar)
         archives(libJar)
 //        archives(proguardTask.outputs.files.singleFile) {
 //            builtBy(proguardTask)
