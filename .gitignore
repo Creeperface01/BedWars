@@ -212,3 +212,5 @@ local.properties
 build
 *.iml
 src/main/resources/rebel.xml
+
+.idea

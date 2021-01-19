@@ -1,0 +1,3 @@
+[submodule "api"]
+	path = api
+	url = https://github.com/Creeperface01/BedWars-API.git
