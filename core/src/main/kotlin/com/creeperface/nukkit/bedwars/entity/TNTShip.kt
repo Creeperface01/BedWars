@@ -8,12 +8,12 @@ import cn.nukkit.event.entity.EntityDamageEvent
 import cn.nukkit.level.format.FullChunk
 import cn.nukkit.nbt.tag.CompoundTag
 import com.creeperface.nukkit.bedwars.api.utils.BedWarsExplosion
-import com.creeperface.nukkit.bedwars.arena.Arena
 import com.creeperface.nukkit.bedwars.arena.Team
+import com.creeperface.nukkit.bedwars.arena.handler.ArenaGame
 import me.onebone.actaeon.entity.MovingEntity
 import me.onebone.actaeon.target.EntityTarget
 
-class TNTShip(chunk: FullChunk, nbt: CompoundTag, private val arena: Arena, private val team: Team) :
+class TNTShip(chunk: FullChunk, nbt: CompoundTag, private val arena: ArenaGame, private val team: Team) :
     MovingEntity(chunk, nbt) {
 
     init {

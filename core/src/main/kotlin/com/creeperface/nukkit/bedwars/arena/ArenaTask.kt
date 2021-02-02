@@ -1,9 +1,10 @@
 package com.creeperface.nukkit.bedwars.arena
 
 import cn.nukkit.scheduler.Task
-import com.creeperface.nukkit.bedwars.api.arena.Arena.ArenaState
 import com.creeperface.nukkit.bedwars.api.event.ArenaStopEvent
-
+import com.creeperface.nukkit.bedwars.api.utils.handle
+import com.creeperface.nukkit.bedwars.arena.handler.ArenaGame
+import com.creeperface.nukkit.bedwars.arena.handler.ArenaTeamSelect
 
 class ArenaTask(var plugin: Arena) : Task() {
 
@@ -11,6 +12,9 @@ class ArenaTask(var plugin: Arena) : Task() {
     var startTime = plugin.startTime
     var drop = 0
     var voteTime = 0
+
+    var onVoteEnd: (() -> Unit)? = null
+    var onStart: (() -> Unit)? = null
 
     fun reset() {
         gameTime = 0
@@ -20,53 +24,68 @@ class ArenaTask(var plugin: Arena) : Task() {
     }
 
     override fun onRun(tick: Int) {
-        if (voteTime > 0) {
-            if (--voteTime == 0) {
-                plugin.voting = false
-                plugin.teamSelect = true
-                plugin.selectMap()
-            } else {
-                plugin.scoreboardManager.updateVoteTime()
+        plugin.handle(ArenaState.GAME) {
+            if (!ending) {
+                game(this)
             }
-        } else if (this.plugin.starting) {
-            this.starting()
-        } else if (this.plugin.arenaState == ArenaState.GAME && !plugin.ending) {
-            this.game()
-        }
-    }
 
-    private fun starting() {
-        if (this.startTime == 5 && plugin.map == null) {
-            this.plugin.selectMap()
-        }
-
-        if (this.startTime <= 0) {
-            this.plugin.startGame()
             return
         }
 
-        plugin.scoreboardManager.updateStartTime()
+        if (voteTime > 0) {
+            plugin.handle(ArenaState.VOTING) {
+                if (--voteTime == 0) {
+                    reset()
+                    handler = ArenaTeamSelect(this@ArenaTask.plugin, selectMap())
+                } else {
+                    this@ArenaTask.plugin.scoreboardManager.updateVoteTime(this)
+                }
+            }
+        } else {
+            plugin.handle(ArenaState.TEAM_SELECT) {
+                if (starting) {
+                    starting(this)
+                }
+            }
+        }
+    }
+
+    private fun starting(arena: ArenaTeamSelect) {
+//        if (this.startTime == 5 && plugin.map == null) {
+//            this.plugin.selectMap()
+//        }
+//        if (arena.fastStart && this.startTime > arena.fastStartTime && arena.arenaPlayers.size >= arena.fastStartPlayers) {
+//            this.startTime = arena.fastStartTime
+//        }
+
+        if (this.startTime <= 0) {
+            reset()
+            arena.prepareGame()
+            return
+        }
+
+        plugin.scoreboardManager.updateStartTime(arena)
 
         this.startTime--
     }
 
-    private fun game() {
+    private fun game(arena: ArenaGame) {
         gameTime++
 
         if (this.drop % plugin.bronzeDropInterval == 0) {
-            this.plugin.dropBronze()
+            arena.dropBronze()
         }
 
         if (this.drop % plugin.ironDropInterval == 0) {
-            this.plugin.dropIron()
+            arena.dropIron()
         }
 
         if (this.drop % plugin.goldDropInterval == 0) {
-            this.plugin.dropGold()
+            arena.dropGold()
         }
 
         if (gameTime > plugin.timeLimit) {
-            plugin.stopGame(ArenaStopEvent.Cause.TIME_LIMIT)
+            arena.stop(ArenaStopEvent.Cause.TIME_LIMIT)
         }
 
         this.drop++

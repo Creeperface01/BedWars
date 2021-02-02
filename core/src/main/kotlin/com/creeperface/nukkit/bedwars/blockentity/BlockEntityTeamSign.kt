@@ -4,11 +4,14 @@ import cn.nukkit.blockentity.BlockEntitySign
 import cn.nukkit.level.format.FullChunk
 import cn.nukkit.nbt.tag.CompoundTag
 import com.creeperface.nukkit.bedwars.BedWars
+import com.creeperface.nukkit.bedwars.api.utils.handle
 import com.creeperface.nukkit.bedwars.arena.Arena
+import com.creeperface.nukkit.bedwars.arena.ArenaState
+import com.creeperface.nukkit.bedwars.arena.Team
 
 class BlockEntityTeamSign(chunk: FullChunk, nbt: CompoundTag) : BlockEntitySign(chunk, nbt) {
 
-    val team: Int
+    val teamId: Int
     private lateinit var arena: Arena
 
     private var lastSignUpdate = 0L
@@ -16,9 +19,9 @@ class BlockEntityTeamSign(chunk: FullChunk, nbt: CompoundTag) : BlockEntitySign(
     init {
         if (!nbt.contains("bw-team")) {
             close()
-            team = 0
+            teamId = 0
         } else {
-            team = nbt.getInt("bw-team")
+            teamId = nbt.getInt("bw-team")
             val arena = BedWars.instance.getArena(nbt.getString("bw-arena"))
 
             if (arena == null) {
@@ -29,6 +32,12 @@ class BlockEntityTeamSign(chunk: FullChunk, nbt: CompoundTag) : BlockEntitySign(
 
             scheduleUpdate()
         }
+    }
+
+    val team: Team by lazy {
+        arena.handle(ArenaState.TEAM_SELECT) {
+            this.teams[teamId]
+        } ?: error("Cannot access arena team")
     }
 
     override fun onUpdate(): Boolean {
@@ -42,7 +51,7 @@ class BlockEntityTeamSign(chunk: FullChunk, nbt: CompoundTag) : BlockEntitySign(
     }
 
     private fun updateData() {
-        this.setText(*arena.signManager.getData(this.team))
+//        this.setText(*arena.signManager.getData(this.teamId)) //TODO: sign support
     }
 
     companion object {

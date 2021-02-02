@@ -15,7 +15,7 @@ import cn.nukkit.event.server.DataPacketReceiveEvent
 import cn.nukkit.inventory.transaction.action.SlotChangeAction
 import cn.nukkit.network.protocol.ProtocolInfo
 import com.creeperface.nukkit.bedwars.BedWars
-import com.creeperface.nukkit.bedwars.api.arena.Arena
+import com.creeperface.nukkit.bedwars.api.arena.GAME
 import com.creeperface.nukkit.bedwars.api.data.Stats
 import com.creeperface.nukkit.bedwars.api.utils.Lang
 import com.creeperface.nukkit.bedwars.blockentity.BlockEntityArenaSign
@@ -72,7 +72,9 @@ class EventListener(private val plugin: BedWars) : Listener {
                     return
                 }
 
-                arena.joinToArena(p)
+                if (arena.tryJoinPlayer(p)) {
+                    arena.joinToArena(p)
+                }
             }
         }
     }
@@ -264,7 +266,7 @@ class EventListener(private val plugin: BedWars) : Listener {
         val p = e.player
         val arena = plugin.getPlayerArena(p) ?: return
 
-        if (arena.arenaState == Arena.ArenaState.LOBBY) {
+        if (arena.state != GAME) {
             e.setCancelled()
         }
     }
@@ -285,7 +287,7 @@ class EventListener(private val plugin: BedWars) : Listener {
 
         if (entity is Player) {
             plugin.getPlayerArena(entity)?.let {
-                if (it.arenaState == Arena.ArenaState.LOBBY) {
+                if (it.state != GAME) {
                     e.setCancelled()
 
                     if (e.cause == EntityDamageEvent.DamageCause.VOID) {

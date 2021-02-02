@@ -33,16 +33,31 @@ import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
+import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
+import kotlin.reflect.KProperty
 import kotlin.reflect.full.declaredFunctions
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.jvm.javaMethod
 
 const val DEMO = true
 
+val powerNukkit = try {
+    Class.forName("cn.nukkit.api.PowerNukkitOnly")
+    true
+} catch (e: ClassNotFoundException) {
+    false
+}
+
 inline fun demo(action: () -> Unit) {
     if (DEMO) {
+        action()
+    }
+}
+
+inline fun notDemo(action: () -> Unit) {
+    if (!DEMO) {
         action()
     }
 }
@@ -77,7 +92,7 @@ private val RGB_CONVERTER = arrayOf(
 val DyeColor.rgb: Int
     get() = RGB_CONVERTER[this.ordinal]
 
-operator fun TextFormat.plus(any: Any) = this.toString() + any
+operator fun TF.plus(any: Any) = this.toString() + any
 
 val Block.blockEntity: BlockEntity?
     get() = this.level.getBlockEntity(this)
@@ -196,7 +211,7 @@ operator fun Appendable.plusAssign(str: String) {
     this.append(str)
 }
 
-operator fun TextFormat.plus(str: String) = this.toString() + str
+operator fun TF.plus(str: String) = this.toString() + str
 
 fun ShopWindow.toInventory(): Window {
     return when (this) {
@@ -250,24 +265,30 @@ fun Player.openShopInventory(inv: Window) {
 }
 
 @Suppress("NOTHING_TO_INLINE")
-inline fun logAlert(message: String) =
-    Reflect.on(BedWars.instance).call("getLogger").call("alert", TextFormat.YELLOW + message)
+inline fun logAlert(message: String) {
+    BedWars.instance.callAny("getLogger").callAny("alert", TF.YELLOW + message)
+}
 
 @Suppress("NOTHING_TO_INLINE")
-inline fun logInfo(message: String) =
-    Reflect.on(BedWars.instance).call("getLogger").call("info", TextFormat.GRAY + message)
+inline fun logInfo(message: String) {
+    BedWars.instance.callAny("getLogger").callAny("info", TF.GRAY + message)
+}
 
 @Suppress("NOTHING_TO_INLINE")
-inline fun logWarning(message: String) =
-    Reflect.on(BedWars.instance).call("getLogger").call("warning", TextFormat.YELLOW + message)
+inline fun logWarning(message: String) {
+    BedWars.instance.callAny("getLogger").callAny("warning", TF.YELLOW + message)
+}
 
 @Suppress("NOTHING_TO_INLINE")
-inline fun logError(message: String) =
-    Reflect.on(BedWars.instance).call("getLogger").call("error", TextFormat.RED + message)
+inline fun logError(message: String) {
+    BedWars.instance.callAny("getLogger").callAny("error", TF.RED + message)
+}
 
 @Suppress("NOTHING_TO_INLINE")
-inline fun logError(message: String, t: Throwable) =
-    Reflect.on(BedWars.instance).call("getLogger").call("error", TextFormat.RED + message, t)
+inline fun logError(message: String, t: Throwable) {
+    BedWars.instance.callAny("getLogger").callAny("error", TF.RED + message, t)
+}
+//    Reflect.on(BedWars.instance).call("getLogger").call("error", TF.RED + message, t)
 
 private val jacksonMapper = JsonMapper.builder()
     .addModule(Jdk8Module())
@@ -289,7 +310,7 @@ fun String.camelToSnakeCase() = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDER
 
 fun Player.sendPermissionMessage() {
     val msg = this.server.language.translate(TranslationContainer("commands.generic.permission"))
-    this.sendMessage(TextFormat.RED + msg)
+    this.sendMessage(TF.RED + msg)
 }
 
 fun Listener.register(plugin: Plugin) {
@@ -325,6 +346,11 @@ fun Listener.register(
     }
 }
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun Listener.unregisterAll() {
+    Reflect.onClass("cn.nukkit.event.HandlerList").call("unregisterAll", this)
+}
+
 fun String.replaceColors() = this.replace('&', '§')
 
 fun printBWLogo() {
@@ -337,4 +363,20 @@ fun printBWLogo() {
     logInfo("${TF.RED}╚═════╝ ╚══════╝╚═════╝ ${TF.WHITE} ╚══╝╚══╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝")
     logInfo("")
     logInfo("                     ${TF.RED}Bed${TF.WHITE}Wars enabled                      ")
+}
+
+fun <K, T> lazyNotNull(action: () -> T?) = object : ReadOnlyProperty<K, T?> {
+
+    var value: T? = null
+
+    override fun getValue(thisRef: K, property: KProperty<*>): T? {
+        value?.let {
+            return it
+        }
+
+        value = action()
+
+        return value
+    }
+
 }

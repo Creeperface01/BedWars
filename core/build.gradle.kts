@@ -9,7 +9,11 @@ plugins {
 val compileKotlin: KotlinCompile by tasks
 compileKotlin.kotlinOptions.apply {
     jvmTarget = "1.8"
-    freeCompilerArgs = listOf("-Xjvm-default=enable", "-Xopt-in=kotlin.RequiresOptIn")
+    freeCompilerArgs = listOf(
+        "-Xjvm-default=enable",
+        "-Xopt-in=kotlin.RequiresOptIn",
+        "-Xopt-in=kotlin.contracts.ExperimentalContracts"
+    )
 }
 
 dependencies {
@@ -22,7 +26,6 @@ dependencies {
     compileOnly("com.creeperface.nukkit.placeholderapi:PlaceholderAPI:${PlaceholderAPI.version}")
 
     implementation(project(":api"))
-    implementation("commons-io:commons-io:2.6")
     implementation("org.apache.httpcomponents:httpclient:4.5.12")
     implementation("org.apache.commons:commons-lang3:3.9")
     implementation("org.mongodb:mongo-java-driver:3.12.2")

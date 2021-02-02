@@ -1,7 +1,6 @@
 package com.creeperface.nukkit.bedwars.arena.manager
 
 import cn.nukkit.Server
-import org.apache.commons.io.FileUtils
 
 import java.io.File
 import java.io.IOException
@@ -13,7 +12,7 @@ object WorldManager {
         val to = File(Server.getInstance().dataPath + "/worlds/" + name + "_" + id)
 
         try {
-            FileUtils.copyDirectory(from, to)
+            from.copyRecursively(to)
         } catch (e: IOException) {
             e.printStackTrace()
         }
@@ -23,7 +22,7 @@ object WorldManager {
     private fun deleteWorld(name: String, id: String) {
         try {
             val directory = File(Server.getInstance().dataPath + "/worlds/" + name + "_" + id)
-            FileUtils.deleteDirectory(directory)
+            directory.deleteRecursively()
         } catch (e: IOException) {
             e.printStackTrace()
         }

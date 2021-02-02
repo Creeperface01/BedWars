@@ -8,7 +8,6 @@ import cn.nukkit.utils.Config
 import cn.nukkit.utils.ConfigSection
 import cn.nukkit.utils.MainLogger
 import com.creeperface.nukkit.bedwars.api.BedWarsAPI
-import com.creeperface.nukkit.bedwars.api.arena.Arena.ArenaState
 import com.creeperface.nukkit.bedwars.api.arena.configuration.ArenaConfiguration
 import com.creeperface.nukkit.bedwars.api.arena.configuration.MapConfiguration
 import com.creeperface.nukkit.bedwars.api.arena.configuration.MutableConfiguration
@@ -17,7 +16,10 @@ import com.creeperface.nukkit.bedwars.api.data.provider.DataProvider
 import com.creeperface.nukkit.bedwars.api.economy.EconomyProvider
 import com.creeperface.nukkit.bedwars.api.event.ArenaStopEvent
 import com.creeperface.nukkit.bedwars.api.utils.Lang
+import com.creeperface.nukkit.bedwars.api.utils.handle
+import com.creeperface.nukkit.bedwars.api.utils.invoke
 import com.creeperface.nukkit.bedwars.arena.Arena
+import com.creeperface.nukkit.bedwars.arena.ArenaState
 import com.creeperface.nukkit.bedwars.arena.config.ConfigurationSerializer
 import com.creeperface.nukkit.bedwars.blockentity.BlockEntityArenaSign
 import com.creeperface.nukkit.bedwars.blockentity.BlockEntityMine
@@ -43,9 +45,10 @@ import com.creeperface.nukkit.bedwars.shop.form.FormShopManager
 import com.creeperface.nukkit.bedwars.utils.*
 import com.fasterxml.jackson.databind.InjectableValues
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.apache.commons.io.FileUtils
-import org.joor.Reflect
 import java.io.File
 import java.io.FileFilter
 import java.io.IOException
@@ -80,15 +83,9 @@ class BedWars : PluginBase(), BedWarsAPI {
     val shopFormManager = FormShopManager(this)
     val formManager = FormManager(this)
 
-//    init {
-//        initInstance()
-//    }
-
     override fun onLoad() {
         instance = this
-        Reflect.on(logger).set("pluginName", consolePrefix)
-
-        initApi()
+        logger.setProperty("pluginName", consolePrefix)
 
         demo {
             logAlert("---------------------------------------")
@@ -109,6 +106,8 @@ class BedWars : PluginBase(), BedWarsAPI {
 
         logInfo("Loading configuration")
         loadConfiguration()
+        initApi()
+
         initDataProviders()
         initEconomyProviders()
     }
@@ -140,12 +139,19 @@ class BedWars : PluginBase(), BedWarsAPI {
         listener.register()
 
         printBWLogo()
+
+        powerNukkit {
+            GlobalScope.launch {
+                delay(1000)
+                logWarning("Unsupported fork (PowerNukkit) detected. Before reporting any issues please make sure they can be reproduced with official nukkit snapshot")
+            }
+        }
     }
 
     override fun onDisable() {
-        for (arena in this.ins.values) {
-            if (arena.arenaState == ArenaState.GAME) {
-                arena.stopGame(ArenaStopEvent.Cause.SHUTDOWN)
+        this.ins.values.forEach { arena ->
+            arena.handle(ArenaState.GAME) {
+                stop(ArenaStopEvent.Cause.SHUTDOWN)
             }
         }
 
@@ -169,9 +175,12 @@ class BedWars : PluginBase(), BedWarsAPI {
     }
 
     private fun initApi() {
-        Reflect.on(BedWarsAPI.Companion).set("chatPrefix", chatPrefix)
-        Reflect.on(BedWarsAPI.Companion).set("logInfo", { s: String -> logInfo(s) })
-        Reflect.on(BedWarsAPI.Companion).set("logError", { s: String -> logError(s) })
+        BedWarsAPI.Companion.setProperty("chatPrefix", chatPrefix)
+        BedWarsAPI.Companion.setProperty("logInfo", { s: String -> logInfo(s) })
+        BedWarsAPI.Companion.setProperty("logError", { s: String -> logError(s) })
+//        Reflect.on(BedWarsAPI.Companion).set("chatPrefix", chatPrefix)
+//        Reflect.on(BedWarsAPI.Companion).set("logInfo", { s: String -> logInfo(s) })
+//        Reflect.on(BedWarsAPI.Companion).set("logError", { s: String -> logError(s) })
     }
 
     private fun registerArenas() {
@@ -253,7 +262,7 @@ class BedWars : PluginBase(), BedWarsAPI {
         if (worlds != null && worlds.isNotEmpty()) {
             for (f in worlds) {
                 try {
-                    FileUtils.deleteDirectory(f)
+                    f.deleteRecursively()
                 } catch (e: IOException) {
                     e.printStackTrace()
                 }
@@ -281,10 +290,10 @@ class BedWars : PluginBase(), BedWarsAPI {
         var players = -1
 
         for (a in ins.values) {
-            if (a.arenaState == ArenaState.GAME)
+            if (a.state == ArenaState.GAME)
                 continue
 
-            val count = a.playerData.size
+            val count = a.arenaPlayers.size
 
             if (!a.multiPlatform && pc || a.multiPlatform && !pc && players > 0) {
                 continue

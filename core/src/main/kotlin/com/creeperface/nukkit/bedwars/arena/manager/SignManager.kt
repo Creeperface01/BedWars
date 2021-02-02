@@ -1,13 +1,16 @@
 package com.creeperface.nukkit.bedwars.arena.manager
 
-import cn.nukkit.utils.TextFormat
-import com.creeperface.nukkit.bedwars.api.arena.Arena.ArenaState
+import com.creeperface.nukkit.bedwars.api.arena.GAME
+import com.creeperface.nukkit.bedwars.api.utils.handle
 import com.creeperface.nukkit.bedwars.arena.Arena
+import com.creeperface.nukkit.bedwars.arena.ArenaState
+import com.creeperface.nukkit.bedwars.arena.handler.ArenaLobby
+import com.creeperface.nukkit.bedwars.utils.TF
 import com.creeperface.nukkit.bedwars.utils.plus
 
 class SignManager(private val arena: Arena) {
 
-    private val teamSigns = ArrayList<Array<String>>(arena.teams.size)
+//    private val teamSigns = ArrayList<Array<String>>(arena.teams.size)
 
     var lastTeamSignsUpdate = 0L
         private set
@@ -17,50 +20,49 @@ class SignManager(private val arena: Arena) {
         private set
 
     internal fun init() {
-        for (i in arena.teams.indices) {
-            teamSigns[i] = Array(4) { "" }
-        }
+//        for (i in arena.teams.indices) {
+//            teamSigns[i] = Array(4) { "" }
+//        }
 
         updateMainSign()
-        updateTeamSigns()
+//        updateTeamSigns()
     }
 
-    fun getData(team: Int) = teamSigns[team]
+//    fun getData(team: Int) = teamSigns[team]
 
     internal fun updateMainSign() {
-        val mapname = arena.map ?: "Voting"
-        val map: String
+        val mapName = arena.handle(ArenaState.GAME) { mapConfig.name } ?: "Voting"
 
-        map = when (arena.arenaState) {
-            ArenaState.LOBBY -> if (arena.multiPlatform) "---" else "" + TextFormat.BOLD + TextFormat.LIGHT_PURPLE + "PE ONLY"
-            else -> mapname
+        val map = arena.handle<ArenaLobby, String> {
+            if (arena.multiPlatform) {
+                "---"
+            } else {
+                "" + TF.BOLD + TF.LIGHT_PURPLE + "PE ONLY"
+            }
+        } ?: mapName
+
+        val game = when (arena.state) {
+            GAME -> if (arena.canJoin) TF.RED + "In-game" else TF.RED + TF.BOLD + "RESTART"
+            else -> TF.GREEN + "Lobby"
         }
 
-        var game = TextFormat.GREEN + "Lobby"
-        if (arena.arenaState == ArenaState.GAME) {
-            game = TextFormat.RED + "Ingame"
-        }
-        if (arena.arenaState != ArenaState.LOBBY && !arena.canJoin) {
-            game = "§c§lRESTART"
-        }
-
-        this.mainSign[0] = TextFormat.DARK_RED + "■" + arena.name + "■"
-        this.mainSign[1] = TextFormat.BLACK + arena.playerData.size + "/" + arena.maxPlayers
+        this.mainSign[0] = TF.DARK_RED + "■" + arena.name + "■"
+        this.mainSign[1] = TF.BLACK + arena.arenaPlayers.size + "/" + arena.maxPlayers
         this.mainSign[2] = game
-        this.mainSign[3] = TextFormat.BOLD + TextFormat.BLACK + map
+        this.mainSign[3] = TF.BOLD + TF.BLACK + map
 
         lastMainSignUpdate = System.currentTimeMillis()
     }
 
-    internal fun updateTeamSigns() {
-        teamSigns.forEachIndexed { index, data ->
-            val team = arena.teams[index]
-
-            data[1] = TextFormat.BOLD + team.chatColor + team.name.toUpperCase()
-            data[2] = TextFormat.GRAY + team.players.size + " players"
-        }
-
-        lastTeamSignsUpdate = System.currentTimeMillis()
-    }
+//    internal fun updateTeamSigns() {
+//        teamSigns.forEachIndexed { index, data ->
+//            val team = arena.teams[index]
+//
+//            data[1] = TextFormat.BOLD + team.chatColor + team.name.toUpperCase()
+//            data[2] = TextFormat.GRAY + team.players.size + " players"
+//        }
+//
+//        lastTeamSignsUpdate = System.currentTimeMillis()
+//    }
 
 }

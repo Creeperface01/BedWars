@@ -9,10 +9,9 @@ import com.creeperface.nukkit.bedwars.arena.Team
 class BedWarsData(
     override val arena: Arena,
     override val player: Player,
+    override var team: Team,
     val globalData: GlobalData
 ) : PlayerData {
-
-    override lateinit var team: Team
 
     var lastHit: Long = 0
 
@@ -22,7 +21,7 @@ class BedWarsData(
 
     var points = 0
 
-    override fun hasTeam() = ::team.isInitialized
+//    override fun hasTeam() = ::team.isInitialized
 
     fun canRespawn(): Boolean {
         return this.team.hasBed()

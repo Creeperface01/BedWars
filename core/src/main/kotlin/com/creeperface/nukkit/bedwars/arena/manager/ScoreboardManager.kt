@@ -1,14 +1,16 @@
 package com.creeperface.nukkit.bedwars.arena.manager
 
 import cn.nukkit.Player
-import com.creeperface.nukkit.bedwars.arena.Arena
 import com.creeperface.nukkit.bedwars.arena.Team
+import com.creeperface.nukkit.bedwars.arena.handler.ArenaGame
+import com.creeperface.nukkit.bedwars.arena.handler.ArenaTeamSelect
+import com.creeperface.nukkit.bedwars.arena.handler.ArenaVoting
 import com.creeperface.nukkit.bedwars.utils.plus
 import com.creeperface.nukkit.bedwars.utils.ucFirst
 import gt.creeperface.nukkit.scoreboardapi.ScoreboardAPI
 import cn.nukkit.utils.TextFormat as TF
 
-class ScoreboardManager(private val arena: Arena) {
+class ScoreboardManager {
 
     private val scoreboard = ScoreboardAPI.builder().build()
 
@@ -20,17 +22,17 @@ class ScoreboardManager(private val arena: Arena) {
         scoreboard.removePlayer(p)
     }
 
-    fun initVotes() {
+    fun initVotes(arena: ArenaVoting) {
         scoreboard.resetAllScores()
 
         scoreboard.setDisplayName("${TF.DARK_GRAY}Voting ${TF.WHITE}| ${TF.GOLD}/vote <map>")
         val vm = arena.votingManager
         val votes = vm.currentTable
 
-        for (i in votes.indices) {
+        votes.forEachIndexed { i, map ->
             scoreboard.setScore(
                 i.toLong(),
-                "${TF.AQUA}[${i + 1}] ${TF.DARK_GRAY}${votes[i]} ${TF.RED}» ${TF.GREEN}${vm.stats[i]} votes",
+                "${TF.AQUA}[${i + 1}] ${TF.DARK_GRAY}${map.name} ${TF.RED}» ${TF.GREEN}${vm.stats[i]} votes",
                 i
             )
         }
@@ -44,32 +46,33 @@ class ScoreboardManager(private val arena: Arena) {
         scoreboard.update()
     }
 
-    fun updateVoteTime() {
+    fun updateVoteTime(arena: ArenaVoting) {
         val votes = arena.votingManager.currentTable
         scoreboard.setScore(votes.size.toLong(), "${TF.DARK_GRAY}Time: ${TF.GOLD} ${arena.task.voteTime} s", votes.size)
 
         scoreboard.update()
     }
 
-    fun updateVote(index: Int) {
+    fun updateVote(arena: ArenaVoting, index: Int) {
         val vm = arena.votingManager
         val votes = vm.currentTable
 
         scoreboard.setScore(
             index.toLong(),
-            "${TF.AQUA}[${index + 1}] ${TF.DARK_GRAY}${votes[index]} ${TF.RED}» ${TF.GREEN}${vm.stats[index]} votes",
+            "${TF.AQUA}[${index + 1}] ${TF.DARK_GRAY}${votes[index].name} ${TF.RED}» ${TF.GREEN}${vm.stats[index]} votes",
             index
         )
 
         scoreboard.update()
     }
 
-    fun initTeamSelect() {
+    fun initTeamSelect(arena: ArenaTeamSelect) {
         scoreboard.resetAllScores()
 
-        scoreboard.setDisplayName("${TF.DARK_GRAY}Map: ${TF.GOLD}${arena.map}")
+        scoreboard.setDisplayName("${TF.DARK_GRAY}Map: ${TF.GOLD}${arena.mapConfig.name}")
 
         val teams = arena.teams
+
         teams.forEach {
             scoreboard.setScore(
                 it.id.toLong(),
@@ -91,7 +94,7 @@ class ScoreboardManager(private val arena: Arena) {
         )
     }
 
-    fun updateStartTime() {
+    fun updateStartTime(arena: ArenaTeamSelect) {
         val teams = arena.teams
 
         scoreboard.setScore(
@@ -102,11 +105,10 @@ class ScoreboardManager(private val arena: Arena) {
         scoreboard.update()
     }
 
-    fun initGame() {
+    fun initGame(arena: ArenaGame) {
         scoreboard.resetAllScores()
 
-        val map = arena.map ?: "Voting"
-        scoreboard.setDisplayName("${TF.DARK_GRAY}Map: ${TF.GOLD}$map")
+        scoreboard.setDisplayName("${TF.DARK_GRAY}Map: ${TF.GOLD}${arena.mapConfig.name}")
 
         arena.teams.forEachIndexed { index, team ->
             scoreboard.setScore(index.toLong(), team.status, index)
@@ -115,7 +117,7 @@ class ScoreboardManager(private val arena: Arena) {
         scoreboard.update()
     }
 
-    fun updateTeam(index: Int) {
+    fun updateTeam(arena: ArenaGame, index: Int) {
         scoreboard.setScore(index.toLong(), arena.teams[index].status, index)
         scoreboard.update()
     }

@@ -1,8 +1,8 @@
 package com.creeperface.nukkit.bedwars.command
 
 import cn.nukkit.command.CommandSender
-import cn.nukkit.utils.TextFormat
 import com.creeperface.nukkit.bedwars.BedWars
+import com.creeperface.nukkit.bedwars.utils.TF
 import com.creeperface.nukkit.bedwars.utils.plus
 
 class ReloadCommand(plugin: BedWars) : BaseCommand("reload", plugin) {
@@ -19,7 +19,7 @@ class ReloadCommand(plugin: BedWars) : BaseCommand("reload", plugin) {
             return true
         }
 
-        sender.sendMessage(TextFormat.RED + "You can't use this command while BedWars is enabled")
+        sender.sendMessage(TF.RED + "You can't use this command while BedWars is enabled")
         return true
     }
 }

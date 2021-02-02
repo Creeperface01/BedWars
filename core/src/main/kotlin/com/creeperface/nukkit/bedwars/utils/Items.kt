@@ -69,17 +69,17 @@ object Items {
     val LEGEND_SWORD =
         ItemSwordDiamond().addEnchantment(Enchantment.ID_DAMAGE_ALL, 3).addEnchantment(Enchantment.ID_KNOCKBACK, 2)
             .addEnchantment(Enchantment.ID_FIRE_ASPECT, 2).addEnchantment(Enchantment.ID_DURABILITY, 3)
-            .setCustomName(TextFormat.AQUA.toString() + "Legendary Sword")
+            .setCustomName(TF.AQUA.toString() + "Legendary Sword")
     val LEGEND_BOW =
         ItemBow().addEnchantment(Enchantment.ID_BOW_POWER, 4).addEnchantment(Enchantment.ID_BOW_KNOCKBACK, 1)
             .addEnchantment(Enchantment.ID_BOW_FLAME, 1).addEnchantment(Enchantment.ID_DURABILITY, 3)
-            .addEnchantment(Enchantment.ID_BOW_INFINITY, 1).setCustomName(TextFormat.AQUA.toString() + "Legendary Bow")
+            .addEnchantment(Enchantment.ID_BOW_INFINITY, 1).setCustomName(TF.AQUA.toString() + "Legendary Bow")
     val LEGEND_PICKAXE =
         ItemPickaxeDiamond().addEnchantment(Enchantment.ID_EFFICIENCY, 5).addEnchantment(Enchantment.ID_DURABILITY, 3)
-            .setCustomName(TextFormat.AQUA.toString() + "Legendary Pickaxe")
+            .setCustomName(TF.AQUA.toString() + "Legendary Pickaxe")
 
     val SHEEP = Item.get(Item.SPAWN_EGG, TNTShip.NETWORK_ID)
-        .setCustomName("${TextFormat.RED}Sheepy ${TextFormat.GOLD}Sheep ${TextFormat.YELLOW}Sheep")
+        .setCustomName("${TF.RED}Sheepy ${TF.GOLD}Sheep ${TF.YELLOW}Sheep")
 
     private val luckItems = mutableListOf<Item>()
 

@@ -4,6 +4,8 @@ import cn.nukkit.Server
 import cn.nukkit.scheduler.AsyncTask
 import cn.nukkit.utils.LevelException
 import com.creeperface.nukkit.bedwars.BedWars
+import com.creeperface.nukkit.bedwars.api.utils.handle
+import com.creeperface.nukkit.bedwars.arena.ArenaState
 import com.creeperface.nukkit.bedwars.arena.manager.WorldManager
 import com.creeperface.nukkit.bedwars.utils.logError
 
@@ -33,10 +35,10 @@ class WorldCopyTask constructor(
         val arena = plugin.getArena(id)
 
         if (arena != null) {
-            arena.isLevelLoaded = true
-
             if (force) {
-                arena.startGame()
+                arena.handle(ArenaState.TEAM_SELECT) {
+                    forceStart()
+                }
             }
         }
     }

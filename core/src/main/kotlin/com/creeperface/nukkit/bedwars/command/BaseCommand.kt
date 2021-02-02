@@ -3,8 +3,8 @@ package com.creeperface.nukkit.bedwars.command
 import cn.nukkit.command.Command
 import cn.nukkit.command.CommandSender
 import cn.nukkit.lang.TranslationContainer
-import cn.nukkit.utils.TextFormat
 import com.creeperface.nukkit.bedwars.BedWars
+import com.creeperface.nukkit.bedwars.utils.TF
 
 abstract class BaseCommand(name: String, protected val plugin: BedWars) : Command(name) {
 
@@ -22,7 +22,7 @@ abstract class BaseCommand(name: String, protected val plugin: BedWars) : Comman
             if (this.permissionMessage == null) {
                 target.sendMessage(
                     TranslationContainer(
-                        TextFormat.RED.toString() + "%commands.generic.unknown",
+                        TF.RED.toString() + "%commands.generic.unknown",
                         this.name
                     )
                 )

@@ -6,11 +6,11 @@ import cn.nukkit.event.EventHandler
 import cn.nukkit.event.EventPriority
 import cn.nukkit.event.Listener
 import cn.nukkit.event.player.PlayerInteractEvent
-import cn.nukkit.utils.TextFormat
 import com.creeperface.nukkit.bedwars.BedWars
 import com.creeperface.nukkit.bedwars.api.utils.Lang
 import com.creeperface.nukkit.bedwars.blockentity.BlockEntityArenaSign
 import com.creeperface.nukkit.bedwars.blockentity.BlockEntityTeamSign
+import com.creeperface.nukkit.bedwars.utils.TF
 import com.creeperface.nukkit.bedwars.utils.fullChunk
 import com.creeperface.nukkit.bedwars.utils.register
 import com.creeperface.nukkit.kformapi.KFormAPI
@@ -48,7 +48,7 @@ class CommandEventListener(private val plugin: BedWars) : Listener {
                                     .putString("bw-arena", arena.name)
                             )
                             actionPlayers.remove(p.uniqueId)
-                            p.sendMessage(BedWars.chatPrefix + TextFormat.GREEN + "Sign successfully set")
+                            p.sendMessage(BedWars.chatPrefix + TF.GREEN + "Sign successfully set")
                         }
                     }
                     Action.SET_TEAM_SIGN -> {
@@ -69,7 +69,7 @@ class CommandEventListener(private val plugin: BedWars) : Listener {
                                     val teamId = response.getInput(0).toIntOrNull()
 
                                     if (teamId == null) {
-                                        p.sendMessage(BedWars.chatPrefix + TextFormat.RED + "Team ID must be an integer")
+                                        p.sendMessage(BedWars.chatPrefix + TF.RED + "Team ID must be an integer")
                                         return@onSubmit
                                     }
 
@@ -80,7 +80,7 @@ class CommandEventListener(private val plugin: BedWars) : Listener {
                                             .putInt("bw-team", teamId)
                                     )
                                     actionPlayers.remove(p.uniqueId)
-                                    p.sendMessage(BedWars.chatPrefix + TextFormat.GREEN + "Sign successfully set")
+                                    p.sendMessage(BedWars.chatPrefix + TF.GREEN + "Sign successfully set")
                                 }
                             }
 

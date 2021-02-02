@@ -9,9 +9,11 @@ import cn.nukkit.nbt.tag.DoubleTag
 import cn.nukkit.nbt.tag.FloatTag
 import cn.nukkit.nbt.tag.ListTag
 import cn.nukkit.scheduler.Task
-import com.creeperface.nukkit.bedwars.api.arena.Arena.ArenaState
 import com.creeperface.nukkit.bedwars.api.event.ArenaStopEvent
 import com.creeperface.nukkit.bedwars.api.utils.Lang
+import com.creeperface.nukkit.bedwars.api.utils.handle
+import com.creeperface.nukkit.bedwars.arena.handler.ArenaGame
+import com.creeperface.nukkit.bedwars.arena.handler.ArenaLobby
 import com.creeperface.nukkit.bedwars.utils.FireworkUtils
 import java.util.*
 
@@ -24,35 +26,41 @@ class PopupTask(var plugin: Arena) : Task() {
         /*if (this.plugin.game == 1 && !this.plugin.ending) {
             this.sendStatus();
         }*/
-        if (this.plugin.ending && this.plugin.arenaState == ArenaState.GAME) {
-            if (this.ending <= 0) {
-                this.plugin.ending = false
-                this.plugin.stopGame(ArenaStopEvent.Cause.ELIMINATION)
-                this.ending = 20
-                return
+
+        this.plugin.handle(ArenaState.GAME) {
+            if (ending) {
+                if (this@PopupTask.ending <= 0) {
+                    this.ending = false
+                    this.stop(ArenaStopEvent.Cause.ELIMINATION)
+                    this@PopupTask.ending = 20
+                    return
+                }
+
+                spawnFireworks(this)
+                this@PopupTask.ending--
             }
 
-            spawnFireworks()
-            this.ending--
+            return
         }
-        if (this.plugin.arenaState == ArenaState.LOBBY) {
+
+        this.plugin.handle<ArenaLobby, Unit> {
             sendPlayerCount()
         }
     }
 
     private fun sendPlayerCount() {
-        this.plugin.playerData.values.forEach {
-            it.player.sendPopup(Lang.PLAYER_COUNT.translate(plugin.playerData.size.toString(), plugin.maxPlayers))
+        this.plugin.arenaPlayers.values.forEach {
+            it.player.sendPopup(Lang.PLAYER_COUNT.translate(plugin.arenaPlayers.size.toString(), plugin.maxPlayers))
         }
     }
 
-    private fun spawnFireworks() {
-        val winnerTeam = plugin.winnerTeam ?: return
+    private fun spawnFireworks(arena: ArenaGame) {
+        val winnerTeam = arena.winner ?: return
 
         val positions = ArrayList<Vector3>()
 
-        for (team in plugin.teams) {
-            positions.add(team.spawn)
+        arena.teams.forEach {
+            positions.add(it.spawn)
         }
 
         if (fireworkIndex > 3) {
@@ -83,9 +91,9 @@ class PopupTask(var plugin: Arena) : Task() {
                 )
                 .putCompound("FireworkItem", itemTag)
 
-            val entity = EntityFirework(plugin.level.getChunk(pos.floorX shr 4, pos.floorZ shr 4), nbt)
-            entity.motionX = NukkitRandom().nextRange(-5, 5).toDouble() / 10
-            entity.motionZ = NukkitRandom().nextRange(-5, 5).toDouble() / 10
+            val entity = EntityFirework(arena.level.getChunk(pos.floorX shr 4, pos.floorZ shr 4), nbt)
+            entity.motionX = NukkitRandom().nextRange(-5, 5).toDouble() / 100f
+            entity.motionZ = NukkitRandom().nextRange(-5, 5).toDouble() / 100f
 
             entity.spawnToAll()
         }

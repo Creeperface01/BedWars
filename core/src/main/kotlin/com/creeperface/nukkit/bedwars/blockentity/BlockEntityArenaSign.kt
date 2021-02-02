@@ -6,16 +6,17 @@ import cn.nukkit.level.format.FullChunk
 import cn.nukkit.nbt.tag.CompoundTag
 import com.creeperface.nukkit.bedwars.BedWars
 import com.creeperface.nukkit.bedwars.arena.Arena
+import com.creeperface.nukkit.bedwars.utils.lazyNotNull
+import com.creeperface.nukkit.bedwars.utils.logInfo
 
 class BlockEntityArenaSign(chunk: FullChunk, nbt: CompoundTag) : BlockEntitySign(chunk, nbt) {
 
-    val arena: Arena? by lazy {
+    val arena: Arena? by lazyNotNull lazy@{
         val arena = BedWars.instance.getArena(nbt.getString("bw-arena"))
-//        logInfo("arena first load")
 
-        if (arena != null) {
-            scheduleUpdate()
-        }
+//        if (arena != null) {
+//            scheduleUpdate()
+//        }
 
         return@lazy arena
     }
@@ -25,7 +26,6 @@ class BlockEntityArenaSign(chunk: FullChunk, nbt: CompoundTag) : BlockEntitySign
     private val initialized = true
 
     init {
-//        logInfo("init")
         scheduleUpdate()
     }
 
@@ -34,25 +34,29 @@ class BlockEntityArenaSign(chunk: FullChunk, nbt: CompoundTag) : BlockEntitySign
     }
 
     fun onUpdate(force: Boolean): Boolean {
-        val spawn = lastSignUpdate == -1L
+//        val spawn = lastSignUpdate == -1L
 
         arena?.let {
             if (force || it.signManager.lastMainSignUpdate > lastSignUpdate) {
                 updateData()
             }
+
+            if (server.tick % 20 == 0) { //TODO: fix hack
+                spawnToAll()
+            }
         }
 
-        if (spawn) {
-//            logInfo("first update")
-            spawnToAll()
-        }
+//        if (spawn) {
+////            logInfo("first update")
+//            spawnToAll()
+//        }
 
         return true
     }
 
     private fun updateData() {
         arena?.let {
-//            logInfo("update data")
+            logInfo("update data")
             lastSignUpdate = System.currentTimeMillis()
             this.setText(*it.signManager.mainSign)
         }
@@ -78,6 +82,7 @@ class BlockEntityArenaSign(chunk: FullChunk, nbt: CompoundTag) : BlockEntitySign
         if (lastSignUpdate == -1L) {
             updateData()
         }
+
         return super.getSpawnCompound()
     }
 
