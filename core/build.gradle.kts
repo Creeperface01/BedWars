@@ -40,7 +40,7 @@ dependencies {
     implementation("org.jooq:joor-java-8:0.9.13")
 
 
-    compileOnly(files("lib/actaeon.jar", "lib/ScoreboardAPI.jar", "lib/EconomyAPI.jar"))
+    compileOnly(files("lib/actaeon.jar", "lib/ScoreboardAPI.jar", "lib/EconomyAPI.jar", "lib/GAC-1.0.jar"))
 }
 
 tasks {

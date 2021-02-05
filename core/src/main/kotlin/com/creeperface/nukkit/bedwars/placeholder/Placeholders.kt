@@ -1,13 +1,11 @@
 package com.creeperface.nukkit.bedwars.placeholder
 
-import cn.nukkit.utils.DyeColor
 import com.creeperface.nukkit.bedwars.BedWars
 import com.creeperface.nukkit.bedwars.api.arena.State
 import com.creeperface.nukkit.bedwars.api.placeholder.ArenaScope
 import com.creeperface.nukkit.bedwars.api.placeholder.TeamScope
 import com.creeperface.nukkit.bedwars.api.utils.handle
 import com.creeperface.nukkit.bedwars.arena.ArenaState
-import com.creeperface.nukkit.bedwars.utils.TF
 import com.creeperface.nukkit.bedwars.utils.rgb
 import com.creeperface.nukkit.placeholderapi.api.PlaceholderAPI
 
@@ -74,23 +72,29 @@ object Placeholders {
         }
 
         //team placeholders
-        api.build<DyeColor>("${PREFIX}team_color") {
+        api.build<Any>("${PREFIX}team_color") {
+            processParameters(true)
+
             scopedLoader(TeamScope) {
-                contextVal.color
+                when (parameters.single()?.value) {
+                    "chat" -> contextVal.chatColor
+                    "rgb" -> contextVal.color.rgb
+                    else -> contextVal.color
+                }
             }
         }
 
-        api.build<Int>("${PREFIX}team_color_rgb") {
-            scopedLoader(TeamScope) {
-                contextVal.color.rgb
-            }
-        }
-
-        api.build<TF>("${PREFIX}team_chat_color") {
-            scopedLoader(TeamScope) {
-                contextVal.chatColor
-            }
-        }
+//        api.build<Int>("${PREFIX}team_color_rgb") {
+//            scopedLoader(TeamScope) {
+//                contextVal.color.rgb
+//            }
+//        }
+//
+//        api.build<TF>("${PREFIX}team_chat_color") {
+//            scopedLoader(TeamScope) {
+//                contextVal.chatColor
+//            }
+//        }
 
         api.build<String>("${PREFIX}team_name") {
             scopedLoader(TeamScope) {

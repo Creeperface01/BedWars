@@ -8,12 +8,15 @@ general:
   #How many maps should be added into a vote table
   vote_table_size: 4
   allow_spectators: true
+  #Enables nuker GAC check (in case GAC plugin is enabled)
+  #This check is performed only when breaking beds for better performance
+  nuker_check: true
 
 chat:
   all_prefix: '!'
   lobby_format: '&7[&9LOBBY&7] &f%player%&7: &f%message%'
-  team_format: '&7[%bw_team_chat_color%TEAM&7] &f%player%&7:%bw_team_chat_color% %message%'
-  all_format: '&7[%bw_team_chat_color%ALL&7] &f%player%&7:%bw_team_chat_color% %message%'
+  team_format: '&7[%bw_team_color<chat>%TEAM&7] &f%player%&7:%bw_team_color<chat>% %message%'
+  all_format: '&7[%bw_team_color<chat>%ALL&7] &f%player%&7:%bw_team_color<chat>% %message%'
   spectator_format: '&7[&9SPECTATOR&7] &f%player%&7: &f%message%'
 
 #Following settings are applied by default if not overridden in arena configuration file

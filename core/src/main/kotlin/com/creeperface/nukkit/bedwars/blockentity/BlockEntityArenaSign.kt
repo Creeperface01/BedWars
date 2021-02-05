@@ -7,7 +7,6 @@ import cn.nukkit.nbt.tag.CompoundTag
 import com.creeperface.nukkit.bedwars.BedWars
 import com.creeperface.nukkit.bedwars.arena.Arena
 import com.creeperface.nukkit.bedwars.utils.lazyNotNull
-import com.creeperface.nukkit.bedwars.utils.logInfo
 
 class BlockEntityArenaSign(chunk: FullChunk, nbt: CompoundTag) : BlockEntitySign(chunk, nbt) {
 
@@ -56,7 +55,7 @@ class BlockEntityArenaSign(chunk: FullChunk, nbt: CompoundTag) : BlockEntitySign
 
     private fun updateData() {
         arena?.let {
-            logInfo("update data")
+//            logInfo("update data")
             lastSignUpdate = System.currentTimeMillis()
             this.setText(*it.signManager.mainSign)
         }

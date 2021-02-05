@@ -127,7 +127,7 @@ windows:
           data:
             customColor:
               type: int
-              value: "%bw_team_color_rgb%"
+              value: "%bw_team_color<rgb>%"
           item_path: Leather Cap
         type: offer
         purchase_item:
@@ -139,7 +139,7 @@ windows:
           data:
             customColor:
               type: int
-              value: "%bw_team_color_rgb%"
+              value: "%bw_team_color<rgb>%"
           item_path: Leather Cap
         cost:
           - item_id: 336
@@ -156,7 +156,7 @@ windows:
           data:
             customColor:
               type: int
-              value: "%bw_team_color_rgb%"
+              value: "%bw_team_color<rgb>%"
           item_path: Leather Pants
         type: offer
         purchase_item:
@@ -168,7 +168,7 @@ windows:
           data:
             customColor:
               type: int
-              value: "%bw_team_color_rgb%"
+              value: "%bw_team_color<rgb>%"
           item_path: Leather Pants
         cost:
           - item_id: 336
@@ -185,7 +185,7 @@ windows:
           data:
             customColor:
               type: int
-              value: "%bw_team_color_rgb%"
+              value: "%bw_team_color<rgb>%"
           item_path: Leather Boots
         type: offer
         purchase_item:
@@ -197,7 +197,7 @@ windows:
           data:
             customColor:
               type: int
-              value: "%bw_team_color_rgb%"
+              value: "%bw_team_color<rgb>%"
           item_path: Leather Boots
         cost:
           - item_id: 336

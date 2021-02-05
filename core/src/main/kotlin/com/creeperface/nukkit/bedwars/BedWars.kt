@@ -102,6 +102,7 @@ class BedWars : PluginBase(), BedWarsAPI {
         BlockEntity.registerBlockEntity("BedWarsArenaSign", BlockEntityArenaSign::class.java)
         BlockEntity.registerBlockEntity("BedWarsTeamSign", BlockEntityTeamSign::class.java)
 
+        GAC.init()
         FireworkUtils.init()
 
         logInfo("Loading configuration")

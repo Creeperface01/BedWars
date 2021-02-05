@@ -41,6 +41,7 @@ internal class Configuration(plugin: BedWars, global: File, game: File) {
     val shopType: ShopType
     val votesSize: Int
     val allowSpectators: Boolean
+    val gacNuker: Boolean
 
     //random
     val synapseTransfer: Boolean
@@ -133,6 +134,7 @@ internal class Configuration(plugin: BedWars, global: File, game: File) {
 
             votesSize = readInt("vote_table_size", 4)
             allowSpectators = readBoolean("allow_spectators")
+            gacNuker = readBoolean("nuker_check")
         }
 
         with(gameConf.readSection("chat")) {

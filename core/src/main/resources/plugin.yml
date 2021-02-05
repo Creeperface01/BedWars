@@ -6,7 +6,7 @@ load: STARTUP
 author: "CreeperFace"
 description: "BedWars minigame"
 depend: [ "Actaeon", "PlaceholderAPI", "KotlinLib", "KFormAPI" ]
-softdepend: [ "BedWarsHelper", "EconomyAPI", "DbLib" ]
+softdepend: [ "BedWarsHelper", "EconomyAPI", "DbLib", "GAC" ]
 
 permissions:
   bedwars:

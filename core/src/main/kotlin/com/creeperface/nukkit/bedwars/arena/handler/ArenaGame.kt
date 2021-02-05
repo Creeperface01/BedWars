@@ -382,7 +382,7 @@ open class ArenaGame(
             it.sendMessage(msg)
         }
 
-        plugin.logger.info(msg)
+        plugin.server.logger.info(msg)
     }
 
     override fun isSpectator(p: Player): Boolean {
