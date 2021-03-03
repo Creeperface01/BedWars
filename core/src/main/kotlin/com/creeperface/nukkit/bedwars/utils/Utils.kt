@@ -41,7 +41,7 @@ import kotlin.reflect.full.declaredFunctions
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.jvm.javaMethod
 
-const val DEMO = true
+const val DEMO = false
 
 val powerNukkit = try {
     Class.forName("cn.nukkit.api.PowerNukkitOnly")
