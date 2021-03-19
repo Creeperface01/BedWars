@@ -117,8 +117,12 @@ class ScoreboardManager {
         scoreboard.update()
     }
 
-    fun updateTeam(arena: ArenaGame, index: Int) {
-        scoreboard.setScore(index.toLong(), arena.teams[index].status, index)
+    fun updateTeam(team: Team) {
+        if (team.hasBed()) {
+            scoreboard.setScore(team.id.toLong(), team.status, team.id)
+        } else {
+            scoreboard.resetScore(team.id.toLong())
+        }
         scoreboard.update()
     }
 

@@ -1,0 +1,8 @@
+item_id: 278
+item_damage: 0
+item_custom_name: §bLegendary Pickaxe
+enchantments:
+  - id: 15
+    level: 5
+  - id: 17
+    level: 3

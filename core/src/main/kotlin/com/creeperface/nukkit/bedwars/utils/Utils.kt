@@ -16,6 +16,7 @@ import cn.nukkit.lang.TranslationContainer
 import cn.nukkit.level.format.FullChunk
 import cn.nukkit.plugin.MethodEventExecutor
 import cn.nukkit.plugin.Plugin
+import cn.nukkit.utils.Config
 import cn.nukkit.utils.DyeColor
 import cn.nukkit.utils.TextFormat
 import com.creeperface.nukkit.bedwars.BedWars
@@ -28,6 +29,7 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.google.common.base.CaseFormat
 import org.joor.Reflect
+import java.io.File
 import java.sql.ResultSet
 import java.util.*
 import kotlin.collections.ArrayList
@@ -379,4 +381,86 @@ fun <K, T> lazyNotNull(action: () -> T?) = object : ReadOnlyProperty<K, T?> {
         return value
     }
 
+}
+
+@Suppress("UNCHECKED_CAST")
+fun Plugin.refactorShop(cfg: Map<String, *>) {
+    val items = mutableMapOf<Map<String, Any>, String>()
+    val data = cfg["windows"] as List<MutableMap<String, Any>>
+
+    fun getItemName(itemData: Map<String, Any>): String {
+        var itemName = itemData["item_custom_name"] as? String ?: Item.get(itemData["item_id"] as Int).name
+        itemName = itemName.replace('&', '§')
+        itemName = TF.clean(itemName)
+
+        items[itemData]?.let { return it }
+
+        var i = 0
+        var name = itemName
+
+        while (items.containsValue(name)) {
+            name = itemName + i++
+        }
+
+        items[itemData] = name
+        return name
+    }
+
+    fun replaceItem(itemSection: MutableMap<String, Any>) {
+        val amount = itemSection["item_count"]
+        val path = TF.clean(itemSection["item_path"].toString().replace('&', '§'))
+
+        itemSection.remove("item_count")
+        itemSection.remove("item_path")
+        val itemName = getItemName(itemSection.toMap())
+
+        itemSection.clear()
+        itemSection["item"] = itemName
+
+        amount?.let {
+            itemSection["item_count"] = it
+        }
+
+        path?.let {
+            itemSection["item_path"] = it
+        }
+    }
+
+    fun parseWindow(windowData: MutableMap<String, Any>) {
+        val type = windowData["type"].toString()
+
+        replaceItem(windowData["icon"] as MutableMap<String, Any>)
+
+        if (type == "menu") {
+            val children = windowData["children"] as List<MutableMap<String, Any>>
+            children.forEach {
+                parseWindow(it)
+            }
+            return
+        }
+
+        replaceItem(windowData["purchase_item"] as MutableMap<String, Any>)
+
+        (windowData["cost"] as List<MutableMap<String, Any>>).forEach { cost ->
+            replaceItem(cost)
+        }
+    }
+
+    data.forEach { window ->
+        parseWindow(window)
+    }
+
+    val itemDir = File(dataFolder, "items")
+    itemDir.mkdirs()
+
+    items.forEach { (itemData, name) ->
+        val itemCfg = Config(File(itemDir, "$name.yml"), Config.YAML)
+        itemCfg.rootSection.putAll(itemData)
+
+        itemCfg.save()
+    }
+
+    val newShop = Config(File(dataFolder, "shop_new.yml"), Config.YAML)
+    newShop.rootSection.putAll(cfg)
+    newShop.save()
 }

@@ -1,0 +1,10 @@
+item_id: 267
+item_damage: 0
+item_custom_name: Sword lvl III
+enchantments:
+  - id: 12
+    level: 1
+  - id: 9
+    level: 2
+  - id: 17
+    level: 2

@@ -30,7 +30,6 @@ import com.creeperface.nukkit.bedwars.blockentity.BlockEntityMine
 import com.creeperface.nukkit.bedwars.entity.BWVillager
 import com.creeperface.nukkit.bedwars.entity.TNTShip
 import com.creeperface.nukkit.bedwars.obj.BedWarsData
-import com.creeperface.nukkit.bedwars.utils.Items
 import com.creeperface.nukkit.bedwars.utils.TF
 import com.creeperface.nukkit.bedwars.utils.configuration
 import com.creeperface.nukkit.bedwars.utils.openShopInventory
@@ -314,9 +313,9 @@ class ArenaGameListener(private val arena: ArenaGame) : Listener {
         }
 
         if (b.id == Item.SPONGE) {
-            val randomItem = Items.luckyBlock
+            val randomItem = this.arena.luckyBlockItems.random()
 
-            if (TF.clean(randomItem.customName).startsWith("Legendary")) {
+            if (TF.clean(randomItem.customName).startsWith("Legendary")) { //TODO: do not hardcode
                 arena.messageAllPlayers(
                     Lang.LEGEND_FOUND,
                     data.team.chatColor.toString() + p.name,

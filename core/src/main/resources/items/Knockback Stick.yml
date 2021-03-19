@@ -1,0 +1,6 @@
+item_id: 280
+item_damage: 0
+item_custom_name: Knockback Stick
+enchantments:
+  - id: 12
+    level: 1

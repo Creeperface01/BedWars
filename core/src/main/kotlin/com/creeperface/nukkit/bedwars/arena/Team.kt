@@ -90,7 +90,7 @@ class Team(
         refreshStatus()
 
         arena.handle(ArenaState.GAME) {
-            arena.scoreboardManager.updateTeam(this, this@Team.id)
+            arena.scoreboardManager.updateTeam(this@Team)
         }
     }
 
@@ -101,7 +101,7 @@ class Team(
         refreshStatus()
 
         arena.handle(ArenaState.GAME) {
-            arena.scoreboardManager.updateTeam(this, this@Team.id)
+            arena.scoreboardManager.updateTeam(this@Team)
         }
     }
 

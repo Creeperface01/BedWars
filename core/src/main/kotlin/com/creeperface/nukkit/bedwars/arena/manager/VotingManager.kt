@@ -6,7 +6,6 @@ import com.creeperface.nukkit.bedwars.api.arena.configuration.MapConfiguration
 import com.creeperface.nukkit.bedwars.api.utils.Lang
 import com.creeperface.nukkit.bedwars.api.utils.applyFilter
 import com.creeperface.nukkit.bedwars.arena.handler.ArenaVoting
-import com.creeperface.nukkit.bedwars.utils.configuration
 import com.creeperface.nukkit.bedwars.utils.logError
 import com.creeperface.nukkit.kformapi.KFormAPI
 import com.creeperface.nukkit.kformapi.form.util.showForm
@@ -25,7 +24,7 @@ class VotingManager(val arena: ArenaVoting) {
             logError("Arena '${arena.name}' has empty map selection")
         }
 
-        this.currentTable = maps.dropLast(max(0, maps.size - configuration.votesSize)).toTypedArray()
+        this.currentTable = maps.dropLast(max(0, maps.size - arena.voteConfig.maxOptions)).toTypedArray()
         this.stats = Array(this.currentTable.size) { 0 }
 
         this.players.clear()

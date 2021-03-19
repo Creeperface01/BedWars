@@ -1,908 +1,398 @@
-#shop configuration file
-
-#configuration file version
-#do not change
 version: 1
-#shop sections
 windows:
   - name: Blocks
     icon:
-      item_id: 24
-      item_damage: 0
-      item_custom_name: §eBlocks
-      item_path: §eBlocks
+      item: Blocks
+      item_path: Blocks
     type: menu
     children:
       - name: Chest
-        icon:
-          item_id: 24
-          item_damage: 0
-          item_path: Sandstone
         type: offer
         purchase_item:
-          item_id: 24
-          item_damage: 0
+          item: Sandstone
           item_path: Sandstone
         cost:
-          - item_id: 336
-            item_damage: 0
-            item_custom_name: §r§6Bronze
-            item_path: §r§6Bronze
+          - item: Bronze
+            item_path: Bronze
       - name: Chest
-        icon:
-          item_id: 24
-          item_damage: 0
-          item_count: 16
-          item_path: Sandstone
         type: offer
         purchase_item:
-          item_id: 24
-          item_damage: 0
+          item: Sandstone
           item_count: 16
           item_path: Sandstone
         cost:
-          - item_id: 336
-            item_damage: 0
+          - item: Bronze
             item_count: 16
-            item_custom_name: §r§6Bronze
-            item_path: §r§6Bronze
+            item_path: Bronze
       - name: Chest
-        icon:
-          item_id: 121
-          item_damage: 0
-          item_path: End Stone
         type: offer
         purchase_item:
-          item_id: 121
-          item_damage: 0
+          item: End Stone
           item_path: End Stone
         cost:
-          - item_id: 336
-            item_damage: 0
+          - item: Bronze
             item_count: 16
-            item_custom_name: §r§6Bronze
-            item_path: §r§6Bronze
+            item_path: Bronze
       - name: Chest
-        icon:
-          item_id: 89
-          item_damage: 0
-          item_path: Glowstone
         type: offer
         purchase_item:
-          item_id: 89
-          item_damage: 0
+          item: Glowstone
           item_path: Glowstone
         cost:
-          - item_id: 336
-            item_damage: 0
+          - item: Bronze
             item_count: 4
-            item_custom_name: §r§6Bronze
-            item_path: §r§6Bronze
+            item_path: Bronze
       - name: Chest
-        icon:
-          item_id: 42
-          item_damage: 0
-          item_path: Iron Block
         type: offer
         purchase_item:
-          item_id: 42
-          item_damage: 0
+          item: Iron Block
           item_path: Iron Block
         cost:
-          - item_id: 265
-            item_damage: 0
-            item_custom_name: §r§7Iron
-            item_path: §r§7Iron
+          - item: Iron
+            item_path: Iron
       - name: Chest
-        icon:
-          item_id: 20
-          item_damage: 0
-          item_path: Glass
         type: offer
         purchase_item:
-          item_id: 20
-          item_damage: 0
+          item: Glass
           item_path: Glass
         cost:
-          - item_id: 336
-            item_damage: 0
+          - item: Bronze
             item_count: 8
-            item_custom_name: §r§6Bronze
-            item_path: §r§6Bronze
+            item_path: Bronze
   - name: Armor
     icon:
-      item_id: 303
-      item_damage: 0
-      item_custom_name: §eArmor
-      item_path: §eArmor
+      item: Armor
+      item_path: Armor
     type: menu
     children:
       - name: Chest
-        icon:
-          item_id: 298
-          item_damage: 0
-          enchantments:
-            - id: 17
-              level: 1
-          data:
-            customColor:
-              type: int
-              value: "%bw_team_color<rgb>%"
-          item_path: Leather Cap
         type: offer
         purchase_item:
-          item_id: 298
-          item_damage: 0
-          enchantments:
-            - id: 17
-              level: 1
-          data:
-            customColor:
-              type: int
-              value: "%bw_team_color<rgb>%"
+          item: Leather Cap
           item_path: Leather Cap
         cost:
-          - item_id: 336
-            item_damage: 0
-            item_custom_name: §r§6Bronze
+          - item: Bronze
             item_path: Bronze
       - name: Chest
-        icon:
-          item_id: 300
-          item_damage: 0
-          enchantments:
-            - id: 17
-              level: 1
-          data:
-            customColor:
-              type: int
-              value: "%bw_team_color<rgb>%"
-          item_path: Leather Pants
         type: offer
         purchase_item:
-          item_id: 300
-          item_damage: 0
-          enchantments:
-            - id: 17
-              level: 1
-          data:
-            customColor:
-              type: int
-              value: "%bw_team_color<rgb>%"
+          item: Leather Pants
           item_path: Leather Pants
         cost:
-          - item_id: 336
-            item_damage: 0
-            item_custom_name: §r§6Bronze
-            item_path: §r§6Bronze
-      - name: Chest
-        icon:
-          item_id: 301
-          item_damage: 0
-          enchantments:
-            - id: 17
-              level: 1
-          data:
-            customColor:
-              type: int
-              value: "%bw_team_color<rgb>%"
-          item_path: Leather Boots
-        type: offer
-        purchase_item:
-          item_id: 301
-          item_damage: 0
-          enchantments:
-            - id: 17
-              level: 1
-          data:
-            customColor:
-              type: int
-              value: "%bw_team_color<rgb>%"
-          item_path: Leather Boots
-        cost:
-          - item_id: 336
-            item_damage: 0
-            item_custom_name: §r§6Bronze
+          - item: Bronze
             item_path: Bronze
       - name: Chest
-        icon:
-          item_id: 303
-          item_damage: 0
-          item_custom_name: Chestplate lvl I
-          enchantments:
-            - id: 17
-              level: 1
-            - id: 0
-              level: 1
-          item_path: Chestplate lvl I
         type: offer
         purchase_item:
-          item_id: 303
-          item_damage: 0
-          item_custom_name: Chestplate lvl I
-          enchantments:
-            - id: 17
-              level: 1
-            - id: 0
-              level: 1
-          item_path: Chestplate lvl I
+          item: Leather Boots
+          item_path: Leather Boots
         cost:
-          - item_id: 265
-            item_damage: 0
-            item_custom_name: §r§7Iron
-            item_path: §r§7Iron
+          - item: Bronze
+            item_path: Bronze
       - name: Chest
-        icon:
-          item_id: 303
-          item_damage: 0
-          item_custom_name: Chestplate lvl II
-          enchantments:
-            - id: 17
-              level: 1
-            - id: 0
-              level: 2
-          item_path: Chestplate lvl II
         type: offer
         purchase_item:
-          item_id: 303
-          item_damage: 0
-          item_custom_name: Chestplate lvl II
-          enchantments:
-            - id: 17
-              level: 1
-            - id: 0
-              level: 2
+          item: Chestplate lvl I
+          item_path: Chestplate lvl I
+        cost:
+          - item: Iron
+            item_path: Iron
+      - name: Chest
+        type: offer
+        purchase_item:
+          item: Chestplate lvl II
           item_path: Chestplate lvl II
         cost:
-          - item_id: 265
-            item_damage: 0
+          - item: Iron
             item_count: 3
-            item_custom_name: §r§7Iron
-            item_path: §r§7Iron
+            item_path: Iron
       - name: Chest
-        icon:
-          item_id: 303
-          item_damage: 0
-          item_custom_name: Chestplate lvl III
-          enchantments:
-            - id: 17
-              level: 1
-            - id: 0
-              level: 3
-          item_path: Chestplate lvl III
         type: offer
         purchase_item:
-          item_id: 303
-          item_damage: 0
-          item_custom_name: Chestplate lvl III
-          enchantments:
-            - id: 17
-              level: 1
-            - id: 0
-              level: 3
+          item: Chestplate lvl III
           item_path: Chestplate lvl III
         cost:
-          - item_id: 265
-            item_damage: 0
+          - item: Iron
             item_count: 7
-            item_custom_name: §r§7Iron
-            item_path: §r§7Iron
+            item_path: Iron
   - name: Swords
     icon:
-      item_id: 283
-      item_damage: 0
-      item_custom_name: §eSwords
-      item_path: §eSwords
+      item: Swords
+      item_path: Swords
     type: menu
     children:
       - name: Chest
-        icon:
-          item_id: 280
-          item_damage: 0
-          item_custom_name: Knockback Stick
-          enchantments:
-            - id: 12
-              level: 1
-          item_path: Knockback Stick
         type: offer
         purchase_item:
-          item_id: 280
-          item_damage: 0
-          item_custom_name: Knockback Stick
-          enchantments:
-            - id: 12
-              level: 1
+          item: Knockback Stick
           item_path: Knockback Stick
         cost:
-          - item_id: 336
-            item_damage: 0
+          - item: Bronze
             item_count: 7
-            item_custom_name: §r§6Bronze
-            item_path: §r§6Bronze
+            item_path: Bronze
       - name: Chest
-        icon:
-          item_id: 283
-          item_damage: 0
-          item_custom_name: Sword lvl I
-          enchantments:
-            - id: 17
-              level: 1
-            - id: 9
-              level: 1
-          item_path: Sword lvl I
         type: offer
         purchase_item:
-          item_id: 283
-          item_damage: 0
-          item_custom_name: Sword lvl I
-          enchantments:
-            - id: 17
-              level: 1
-            - id: 9
-              level: 1
+          item: Sword lvl I
           item_path: Sword lvl I
         cost:
-          - item_id: 265
-            item_damage: 0
-            item_custom_name: §r§7Iron
-            item_path: §r§7Iron
+          - item: Iron
+            item_path: Iron
       - name: Chest
-        icon:
-          item_id: 283
-          item_damage: 0
-          item_custom_name: Sword lvl II
-          enchantments:
-            - id: 17
-              level: 1
-            - id: 9
-              level: 2
-          item_path: Sword lvl II
         type: offer
         purchase_item:
-          item_id: 283
-          item_damage: 0
-          item_custom_name: Sword lvl II
-          enchantments:
-            - id: 17
-              level: 1
-            - id: 9
-              level: 2
+          item: Sword lvl II
           item_path: Sword lvl II
         cost:
-          - item_id: 265
-            item_damage: 0
+          - item: Iron
             item_count: 3
-            item_custom_name: §r§7Iron
-            item_path: §r§7Iron
+            item_path: Iron
       - name: Chest
-        icon:
-          item_id: 267
-          item_damage: 0
-          item_custom_name: Sword lvl III
-          enchantments:
-            - id: 12
-              level: 1
-            - id: 9
-              level: 2
-            - id: 17
-              level: 2
-          item_path: Sword lvl III
         type: offer
         purchase_item:
-          item_id: 267
-          item_damage: 0
-          item_custom_name: Sword lvl III
-          enchantments:
-            - id: 12
-              level: 1
-            - id: 9
-              level: 2
-            - id: 17
-              level: 2
+          item: Sword lvl III
           item_path: Sword lvl III
         cost:
-          - item_id: 266
-            item_damage: 0
+          - item: Gold
             item_count: 5
-            item_custom_name: §r§eGold
-            item_path: §r§eGold
+            item_path: Gold
   - name: Pickaxes
     icon:
-      item_id: 274
-      item_damage: 0
-      item_custom_name: §ePickaxes
-      item_path: §ePickaxes
+      item: Pickaxes
+      item_path: Pickaxes
     type: menu
     children:
       - name: Chest
-        icon:
-          item_id: 270
-          item_damage: 0
-          item_custom_name: Pickaxe lvl I
-          enchantments:
-            - id: 15
-              level: 1
-            - id: 17
-              level: 1
-          item_path: Pickaxe lvl I
         type: offer
         purchase_item:
-          item_id: 270
-          item_damage: 0
-          item_custom_name: Pickaxe lvl I
-          enchantments:
-            - id: 15
-              level: 1
-            - id: 17
-              level: 1
+          item: Pickaxe lvl I
           item_path: Pickaxe lvl I
         cost:
-          - item_id: 336
-            item_damage: 0
+          - item: Bronze
             item_count: 4
-            item_custom_name: §r§6Bronze
-            item_path: §r§6Bronze
+            item_path: Bronze
       - name: Chest
-        icon:
-          item_id: 274
-          item_damage: 0
-          item_custom_name: Pickaxe lvl II
-          enchantments:
-            - id: 15
-              level: 1
-            - id: 17
-              level: 1
-          item_path: Pickaxe lvl II
         type: offer
         purchase_item:
-          item_id: 274
-          item_damage: 0
-          item_custom_name: Pickaxe lvl II
-          enchantments:
-            - id: 15
-              level: 1
-            - id: 17
-              level: 1
+          item: Pickaxe lvl II
           item_path: Pickaxe lvl II
         cost:
-          - item_id: 265
-            item_damage: 0
+          - item: Iron
             item_count: 2
-            item_custom_name: §r§7Iron
-            item_path: §r§7Iron
+            item_path: Iron
       - name: Chest
-        icon:
-          item_id: 257
-          item_damage: 0
-          item_custom_name: Pickaxe lvl III
-          enchantments:
-            - id: 15
-              level: 3
-            - id: 17
-              level: 1
-          item_path: Pickaxe lvl III
         type: offer
         purchase_item:
-          item_id: 257
-          item_damage: 0
-          item_custom_name: Pickaxe lvl III
-          enchantments:
-            - id: 15
-              level: 3
-            - id: 17
-              level: 1
+          item: Pickaxe lvl III
           item_path: Pickaxe lvl III
         cost:
-          - item_id: 266
-            item_damage: 0
-            item_custom_name: §r§eGold
-            item_path: §r§eGold
+          - item: Gold
+            item_path: Gold
   - name: Bows
     icon:
-      item_id: 261
-      item_damage: 0
-      item_custom_name: §eBows
-      item_path: §eBows
+      item: Bows
+      item_path: Bows
     type: menu
     children:
       - name: Chest
-        icon:
-          item_id: 261
-          item_damage: 0
-          item_custom_name: Bow lvl I
-          enchantments:
-            - id: 22
-              level: 1
-          item_path: Bow lvl I
         type: offer
         purchase_item:
-          item_id: 261
-          item_damage: 0
-          enchantments:
-            - id: 22
-              level: 1
+          item: Bow
           item_path: Bow
         cost:
-          - item_id: 266
-            item_damage: 0
+          - item: Gold
             item_count: 5
-            item_custom_name: §r§eGold
-            item_path: §r§eGold
+            item_path: Gold
       - name: Chest
-        icon:
-          item_id: 261
-          item_damage: 0
-          item_custom_name: Bow lvl II
-          enchantments:
-            - id: 22
-              level: 1
-            - id: 19
-              level: 1
-          item_path: Bow lvl II
         type: offer
         purchase_item:
-          item_id: 261
-          item_damage: 0
-          item_custom_name: Bow lvl II
-          enchantments:
-            - id: 22
-              level: 1
-            - id: 19
-              level: 1
+          item: Bow lvl II
           item_path: Bow lvl II
         cost:
-          - item_id: 266
-            item_damage: 0
+          - item: Gold
             item_count: 7
-            item_custom_name: §r§eGold
-            item_path: §r§eGold
+            item_path: Gold
       - name: Chest
-        icon:
-          item_id: 261
-          item_damage: 0
-          item_custom_name: Bow lvl III
-          enchantments:
-            - id: 22
-              level: 1
-            - id: 19
-              level: 1
-            - id: 20
-              level: 1
-          item_path: Bow lvl III
         type: offer
         purchase_item:
-          item_id: 261
-          item_damage: 0
-          item_custom_name: Bow lvl III
-          enchantments:
-            - id: 22
-              level: 1
-            - id: 19
-              level: 1
-            - id: 20
-              level: 1
+          item: Bow lvl III
           item_path: Bow lvl III
         cost:
-          - item_id: 266
-            item_damage: 0
+          - item: Gold
             item_count: 13
-            item_custom_name: §r§eGold
-            item_path: §r§eGold
+            item_path: Gold
       - name: Chest
-        icon:
-          item_id: 261
-          item_damage: 0
-          item_custom_name: Explosive Bow
-          enchantments:
-            - id: 22
-              level: 1
-          item_path: Explosive Bow
         type: offer
         purchase_item:
-          item_id: 261
-          item_damage: 0
-          item_custom_name: Explosive Bow
-          enchantments:
-            - id: 22
-              level: 1
+          item: Explosive Bow
           item_path: Explosive Bow
         cost:
-          - item_id: 266
-            item_damage: 0
+          - item: Gold
             item_count: 23
-            item_custom_name: §r§eGold
-            item_path: §r§eGold
+            item_path: Gold
       - name: Chest
-        icon:
-          item_id: 262
-          item_damage: 0
-          item_path: Arrow
         type: offer
         purchase_item:
-          item_id: 262
-          item_damage: 0
+          item: Arrow
           item_path: Arrow
         cost:
-          - item_id: 266
-            item_damage: 0
-            item_custom_name: §r§eGold
-            item_path: §r§eGold
+          - item: Gold
+            item_path: Gold
   - name: Chests
     icon:
-      item_id: 54
-      item_damage: 0
-      item_custom_name: §eChests
-      item_path: §eChests
+      item: Chests
+      item_path: Chests
     type: menu
     children:
       - name: Chest
-        icon:
-          item_id: 54
-          item_damage: 0
-          item_path: Chest
         type: offer
         purchase_item:
-          item_id: 54
-          item_damage: 0
+          item: Chest
           item_path: Chest
         cost:
-          - item_id: 265
-            item_damage: 0
+          - item: Iron
             item_count: 4
-            item_custom_name: §r§7Iron
-            item_path: §r§7Iron
+            item_path: Iron
       - name: Chest
-        icon:
-          item_id: 130
-          item_damage: 0
-          item_path: Chest
         type: offer
         purchase_item:
-          item_id: 130
-          item_damage: 0
+          item: Ender Chest
           item_path: Chest
         cost:
-          - item_id: 266
-            item_damage: 0
+          - item: Gold
             item_count: 3
-            item_custom_name: §r§eGold
-            item_path: §r§eGold
+            item_path: Gold
   - name: Food
     icon:
-      item_id: 260
-      item_damage: 0
-      item_custom_name: §eFood
-      item_path: §eFood
+      item: Porkchop
+      item_path: Porkchop
     type: menu
     children:
       - name: Chest
-        icon:
-          item_id: 260
-          item_damage: 0
-          item_path: Apple
         type: offer
         purchase_item:
-          item_id: 260
-          item_damage: 0
+          item: Apple
           item_path: Apple
         cost:
-          - item_id: 336
-            item_damage: 0
-            item_custom_name: §r§6Bronze
-            item_path: §r§6Bronze
+          - item: Bronze
+            item_path: Bronze
       - name: Chest
-        icon:
-          item_id: 320
-          item_damage: 0
-          item_path: Cooked Porkchop
         type: offer
         purchase_item:
-          item_id: 320
-          item_damage: 0
+          item: Cooked Porkchop
           item_path: Cooked Porkchop
         cost:
-          - item_id: 336
-            item_damage: 0
+          - item: Bronze
             item_count: 4
-            item_custom_name: §r§6Bronze
-            item_path: §r§6Bronze
+            item_path: Bronze
       - name: Chest
-        icon:
-          item_id: 354
-          item_damage: 0
-          item_path: Cake
         type: offer
         purchase_item:
-          item_id: 354
-          item_damage: 0
+          item: Cake
           item_path: Cake
         cost:
-          - item_id: 265
-            item_damage: 0
+          - item: Iron
             item_count: 2
-            item_custom_name: §r§7Iron
-            item_path: §r§7Iron
+            item_path: Iron
       - name: Chest
-        icon:
-          item_id: 322
-          item_damage: 0
-          item_path: Golden Apple
         type: offer
         purchase_item:
-          item_id: 322
-          item_damage: 0
+          item: Golden Apple
           item_path: Golden Apple
         cost:
-          - item_id: 266
-            item_damage: 0
+          - item: Gold
             item_count: 5
-            item_custom_name: §r§eGold
-            item_path: §r§eGold
+            item_path: Gold
   - name: Potions
     icon:
-      item_id: 373
-      item_damage: 0
-      item_custom_name: §ePotions
-      item_path: §ePotions
+      item: Potions
+      item_path: Potions
     type: menu
     children:
       - name: Chest
-        icon:
-          item_id: 373
-          item_damage: 21
-          item_path: Potion
         type: offer
         purchase_item:
-          item_id: 373
-          item_damage: 21
-          item_path: Potion
+          item: Potion Heal
+          item_path: Potion Heal
         cost:
-          - item_id: 265
-            item_damage: 0
+          - item: Iron
             item_count: 3
-            item_custom_name: §r§7Iron
-            item_path: §r§7Iron
+            item_path: Iron
       - name: Chest
-        icon:
-          item_id: 373
-          item_damage: 22
-          item_path: Potion
         type: offer
         purchase_item:
-          item_id: 373
-          item_damage: 22
-          item_path: Potion
+          item: Potion Heal II
+          item_path: Potion Heal II
         cost:
-          - item_id: 265
-            item_damage: 0
+          - item: Iron
             item_count: 5
-            item_custom_name: §r§7Iron
-            item_path: §r§7Iron
+            item_path: Iron
       - name: Chest
-        icon:
-          item_id: 373
-          item_damage: 15
-          item_path: Potion
         type: offer
         purchase_item:
-          item_id: 373
-          item_damage: 15
+          item: Potion Speed
           item_path: Potion
         cost:
-          - item_id: 265
-            item_damage: 0
+          - item: Iron
             item_count: 7
-            item_custom_name: §r§7Iron
-            item_path: §r§7Iron
+            item_path: Iron
       - name: Chest
-        icon:
-          item_id: 373
-          item_damage: 32
-          item_path: Potion
         type: offer
         purchase_item:
-          item_id: 373
-          item_damage: 32
+          item: Potion Strength
           item_path: Potion
         cost:
-          - item_id: 266
-            item_damage: 0
+          - item: Gold
             item_count: 8
-            item_custom_name: §r§eGold
-            item_path: §r§eGold
+            item_path: Gold
   - name: Special
     icon:
-      item_id: 46
-      item_damage: 0
-      item_custom_name: §eSpecial
-      item_path: §eSpecial
+      item: Special
+      item_path: Special
     type: menu
     children:
       - name: Chest
-        icon:
-          item_id: 19
-          item_damage: 0
-          item_custom_name: §6Lucky Block
-          item_path: §6Lucky Block
         type: offer
         purchase_item:
-          item_id: 19
-          item_damage: 0
-          item_custom_name: §6Lucky Block
-          item_path: §6Lucky Block
+          item: Lucky Block
+          item_path: Lucky Block
         cost:
-          - item_id: 265
-            item_damage: 0
+          - item: Iron
             item_count: 5
-            item_custom_name: §r§7Iron
-            item_path: §r§7Iron
+            item_path: Iron
       - name: Chest
-        icon:
-          item_id: 368
-          item_damage: 0
-          item_path: Ender Pearl
         type: offer
         purchase_item:
-          item_id: 368
-          item_damage: 0
+          item: Ender Pearl
           item_path: Ender Pearl
         cost:
-          - item_id: 266
-            item_damage: 0
+          - item: Gold
             item_count: 13
-            item_custom_name: §r§eGold
-            item_path: §r§eGold
+            item_path: Gold
       - name: Chest
-        icon:
-          item_id: 383
-          item_damage: 13
-          item_custom_name: §cSheepy §6Sheep §eSheep
-          item_path: §cSheepy §6Sheep §eSheep
         type: offer
         purchase_item:
-          item_id: 383
-          item_damage: 13
-          item_custom_name: §cSheepy §6Sheep §eSheep
-          item_path: §cSheepy §6Sheep §eSheep
+          item: Sheepy Sheep Sheep
+          item_path: Sheepy Sheep Sheep
         cost:
-          - item_id: 336
-            item_damage: 0
+          - item: Bronze
             item_count: 64
-            item_custom_name: §r§6Bronze
-            item_path: §r§6Bronze
+            item_path: Bronze
       - name: Chest
-        icon:
-          item_id: 70
-          item_damage: 0
-          item_custom_name: §6Mine
-          item_path: §6Mine
         type: offer
         purchase_item:
-          item_id: 70
-          item_damage: 0
-          item_custom_name: §6Mine
-          item_path: §6Mine
+          item: Mine
+          item_path: Mine
         cost:
-          - item_id: 265
-            item_damage: 0
+          - item: Iron
             item_count: 5
-            item_custom_name: §r§7Iron
-            item_path: §r§7Iron
+            item_path: Iron
       - name: Chest
-        icon:
-          item_id: 346
-          item_damage: 0
-          item_path: Fishing Rod
         type: offer
         purchase_item:
-          item_id: 346
-          item_damage: 0
+          item: Fishing Rod
           item_path: Fishing Rod
         cost:
-          - item_id: 265
-            item_damage: 0
+          - item: Iron
             item_count: 5
-            item_custom_name: §r§7Iron
-            item_path: §r§7Iron
-
-
+            item_path: Iron

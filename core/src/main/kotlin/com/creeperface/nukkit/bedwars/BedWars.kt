@@ -105,6 +105,9 @@ class BedWars : PluginBase(), BedWarsAPI {
         GAC.init()
         FireworkUtils.init()
 
+        logInfo("Loading items")
+        Items.init(this)
+
         logInfo("Loading configuration")
         loadConfiguration()
         initApi()

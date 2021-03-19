@@ -1,0 +1,8 @@
+item_id: 283
+item_damage: 0
+item_custom_name: Sword lvl I
+enchantments:
+  - id: 17
+    level: 1
+  - id: 9
+    level: 1

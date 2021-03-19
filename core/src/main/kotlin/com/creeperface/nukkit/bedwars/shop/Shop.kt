@@ -2,7 +2,6 @@ package com.creeperface.nukkit.bedwars.shop
 
 import cn.nukkit.Player
 import cn.nukkit.item.Item
-import cn.nukkit.item.ItemBlock
 import cn.nukkit.utils.Config
 import cn.nukkit.utils.ConfigSection
 import com.creeperface.nukkit.bedwars.BedWars
@@ -54,26 +53,37 @@ class Shop(private val plugin: BedWars) : Shop {
 
         fun loadWindow(parent: MenuWindow, section: ConfigSection, level: Int, id: Int): Window {
             val name = section.getString("name")
+            val type = section.readEnum(ShopWindow.WindowType::class, "type")
 
             setConfigScopes(team.context)
-            val icon = ShopWindow.WindowIcon(
-                mapper.convertValue(section.getSection("icon")),
-                section.getString("item_path")
-            )
-
-            val textureType = if (icon.item is ItemBlock) {
-                "blocks"
-            } else {
-                "items"
+            val iconItem: Item = when {
+                section.containsKey("icon") -> {
+                    mapper.convertValue(section.getSection("icon"))
+                }
+                type == ShopWindow.WindowType.OFFER -> {
+                    mapper.convertValue(section.getSection("purchase_item"))
+                }
+                else -> {
+                    throw RuntimeException("Menu window must contain icon entry")
+                }
             }
 
-            //TODO: state name
-            section.getSection("icon").set(
-                "item_path",
-                "textures/$textureType/" + /*GlobalBlockPalette.getName(icon.item.id).substring(10) +*/ ".png"
-            )
+//            val textureType = if (iconItem is ItemBlock) {
+//                "blocks"
+//            } else {
+//                "items"
+//            }
 
-            val type = section.readEnum(ShopWindow.WindowType::class, "type")
+            //TODO: state name
+//            section.getSection("icon").set(
+//                "item_path",
+//                "textures/$textureType/" + /*GlobalBlockPalette.getName(icon.item.id).substring(10) +*/ ".png"
+//            )
+
+            val icon = ShopWindow.WindowIcon(
+                iconItem,
+                section.getString("item_path")
+            )
 
             if (type == ShopWindow.WindowType.OFFER) {
                 val item = mapper.convertValue<Item>(section.getSection("purchase_item"))

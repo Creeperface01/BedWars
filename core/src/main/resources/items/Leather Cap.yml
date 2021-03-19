@@ -1,0 +1,9 @@
+item_id: 298
+item_damage: 0
+enchantments:
+  - id: 17
+    level: 1
+data:
+  customColor:
+    type: int
+    value: '%bw_team_color<rgb>%'

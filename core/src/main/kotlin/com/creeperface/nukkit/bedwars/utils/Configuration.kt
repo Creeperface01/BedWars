@@ -39,7 +39,6 @@ internal class Configuration(plugin: BedWars, global: File, game: File) {
 
     //game
     val shopType: ShopType
-    val votesSize: Int
     val allowSpectators: Boolean
     val gacNuker: Boolean
 
@@ -132,7 +131,6 @@ internal class Configuration(plugin: BedWars, global: File, game: File) {
                 ShopType.INVENTORY
             }
 
-            votesSize = readInt("vote_table_size", 4)
             allowSpectators = readBoolean("allow_spectators")
             gacNuker = readBoolean("nuker_check")
         }

@@ -128,12 +128,16 @@ val mapper: ObjectMapper = jacksonObjectMapper()
                 override fun deserialize(p: JsonParser, ctxt: DeserializationContext): Item {
                     val node = ctxt.readTree(p)
 
-                    val itemId = node.get("item_id")
+                    val item = if (node.get("item") != null) {
+                        Items[node.get("item").asText()]
+                    } else {
+                        val itemId = node.get("item_id")
 
-                    val item = when {
-                        itemId.isTextual -> Item.fromString(itemId.asText())
-                        itemId.isInt -> Item.get(itemId.asInt())
-                        else -> error("Invalid item id ${itemId.asText()}")
+                        when {
+                            itemId.isTextual -> Item.fromString(itemId.asText())
+                            itemId.isInt -> Item.get(itemId.asInt())
+                            else -> error("Invalid item id ${itemId.asText()}")
+                        }
                     }
 
                     item.damage = node.get("item_damage")?.asInt() ?: 0
@@ -172,7 +176,7 @@ val mapper: ObjectMapper = jacksonObjectMapper()
                 }
             })
     )
-    .setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE)
+    .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
     .enable(SerializationFeature.WRITE_ENUMS_USING_INDEX)
     .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 

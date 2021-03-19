@@ -5,8 +5,6 @@ version: 1
 general:
   #You can choose between form window shop (form) or chest inventory shop (inventory)
   shop: inventory
-  #How many maps should be added into a vote table
-  vote_table_size: 4
   allow_spectators: true
   #Enables nuker GAC check (in case GAC plugin is enabled)
   #This check is performed only when breaking beds for better performance
@@ -100,3 +98,73 @@ arena:
       item_count: 1
       #custom name
       item_custom_name: "&o&bLobby"
+  drops:
+    #Items for drops
+    bronze: Bronze
+    iron: Iron
+    gold: Gold
+  lucky_block:
+    - item: Chestplate lvl I
+      rarity: 1
+    - item: Chestplate lvl II
+      rarity: 1
+    - item: Chestplate lvl III
+      rarity: 1
+    - item: Sword lvl I
+      rarity: 1
+    - item: Sword lvl II
+      rarity: 1
+    - item: Sword lvl III
+      rarity: 1
+    - item: Pickaxe lvl I
+      rarity: 1
+    - item: Pickaxe lvl II
+      rarity: 1
+    - item: Pickaxe lvl III
+      rarity: 1
+    - item: Bow lvl I
+      rarity: 1
+    - item: Bow lvl II
+      rarity: 1
+    - item: Bow lvl III
+      rarity: 1
+    - item: Explosive Bow
+      rarity: 1
+    - item: Arrow
+      rarity: 1
+    - item: Chest
+      rarity: 1
+    - item: Ender Chest
+      rarity: 1
+    - item: Lucky Block
+      rarity: 1
+    - item: Mine
+      rarity: 1
+    - item: Ender Pearl
+      rarity: 1
+    - item: Sandstone
+      rarity: 1
+    - item: End Stone
+      rarity: 1
+    - item: Potion Heal
+      rarity: 1
+    - item: Potion Heal II
+      rarity: 1
+    - item: Potion Speed
+      rarity: 1
+    - item: Potion Strength
+      rarity: 1
+    - item: Iron Block
+      rarity: 1
+    - item: Porkchop
+      rarity: 1
+    - item: Golden Apple
+      rarity: 1
+    - item: Legendary Bow
+      rarity: 1
+    - item: Legendary Pickaxe
+      rarity: 1
+    - item: Legendary Sword
+      rarity: 1
+    - item: Sheepy Sheep Sheep
+      rarity: 1

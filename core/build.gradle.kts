@@ -45,7 +45,15 @@ dependencies {
 
 tasks {
 
+    val zip = register<Zip>("itemsZip") {
+        archiveFileName.set("items.zip")
+        destinationDirectory.set(file("$buildDir/resources/main"))
+
+        from("$buildDir/resources/main/items")
+    }
+
     withType<Jar> {
+        dependsOn(zip)
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
         archiveBaseName.set("BedWars")
 

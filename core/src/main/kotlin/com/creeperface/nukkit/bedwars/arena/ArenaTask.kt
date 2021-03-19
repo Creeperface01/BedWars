@@ -60,7 +60,7 @@ class ArenaTask(var plugin: Arena) : Task() {
 
         if (this.startTime <= 0) {
             reset()
-            arena.prepareGame()
+            arena.forceStart()
             return
         }
 

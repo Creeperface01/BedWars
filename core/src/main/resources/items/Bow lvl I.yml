@@ -1,0 +1,6 @@
+item_id: 261
+item_damage: 0
+item_custom_name: Bow lvl I
+enchantments:
+  - id: 22
+    level: 1

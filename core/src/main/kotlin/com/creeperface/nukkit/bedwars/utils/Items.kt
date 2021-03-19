@@ -3,127 +3,97 @@ package com.creeperface.nukkit.bedwars.utils
 
 import cn.nukkit.block.BlockAir
 import cn.nukkit.inventory.Inventory
-import cn.nukkit.item.*
-import cn.nukkit.item.enchantment.Enchantment
-import cn.nukkit.utils.TextFormat
-import com.creeperface.nukkit.bedwars.entity.TNTShip
-import java.util.*
+import cn.nukkit.item.Item
+import cn.nukkit.item.ItemBlock
+import com.creeperface.nukkit.bedwars.BedWars
+import com.fasterxml.jackson.databind.json.JsonMapper
+import com.fasterxml.jackson.module.kotlin.convertValue
+import com.fasterxml.jackson.module.kotlin.readValue
+import org.yaml.snakeyaml.Yaml
+import java.io.File
+import java.nio.file.Files
+import java.nio.file.LinkOption
+import java.util.zip.ZipInputStream
 
 object Items {
 
-    val BRONZE = Item.get(Item.BRICK).setCustomName("§r§6Bronze")
-    val IRON = Item.get(Item.IRON_INGOT).setCustomName("§r§7Iron")
-    val GOLD = Item.get(Item.GOLD_INGOT).setCustomName("§r§eGold")
+    val items = mutableMapOf<String, () -> Item>()
 
-    val CHESTPLATE_I = ItemChestplateChain().addEnchantment(Enchantment.ID_PROTECTION_ALL, 1)
-        .addEnchantment(Enchantment.ID_DURABILITY, 1).setCustomName("Chestplate lvl I")
-    val CHESTPLATE_II = ItemChestplateChain().addEnchantment(Enchantment.ID_DURABILITY, 1)
-        .addEnchantment(Enchantment.ID_PROTECTION_ALL, 2).setCustomName("Chestplate lvl I")
-    val CHESTPLATE_III = ItemChestplateChain().addEnchantment(Enchantment.ID_DURABILITY, 1)
-        .addEnchantment(Enchantment.ID_PROTECTION_ALL, 3).setCustomName("Chestplate lvl I")
+    val BRONZE by lazy {
+        this["Bronze"]
+    }
 
-    val SWORD_I =
-        ItemSwordGold().addEnchantment(Enchantment.ID_DURABILITY, 1).addEnchantment(Enchantment.ID_DAMAGE_ALL, 1)
-            .setCustomName("Sword lvl I")
-    val SWORD_II =
-        ItemSwordGold().addEnchantment(Enchantment.ID_DURABILITY, 1).addEnchantment(Enchantment.ID_DAMAGE_ALL, 2)
-            .setCustomName("Sword lvl I")
-    val SWORD_III =
-        ItemSwordIron().addEnchantment(Enchantment.ID_KNOCKBACK, 1).addEnchantment(Enchantment.ID_DAMAGE_ALL, 2)
-            .setCustomName("Sword lvl III").addEnchantment(Enchantment.ID_DURABILITY, 2)
+    val IRON by lazy {
+        this["Iron"]
+    }
 
-    val PICK_I =
-        ItemPickaxeWood().addEnchantment(Enchantment.ID_EFFICIENCY, 1).addEnchantment(Enchantment.ID_DURABILITY, 1)
-            .setCustomName("Pickaxe lvl I")
-    val PICK_II =
-        ItemPickaxeStone().addEnchantment(Enchantment.ID_EFFICIENCY, 1).addEnchantment(Enchantment.ID_DURABILITY, 1)
-            .setCustomName("Pickaxe lvl II")
-    val PICK_III =
-        ItemPickaxeIron().addEnchantment(Enchantment.ID_EFFICIENCY, 3).addEnchantment(Enchantment.ID_DURABILITY, 1)
-            .setCustomName("Pickaxe lvl III")
+    val GOLD by lazy {
+        this["Gold"]
+    }
 
-    val BOW_I = ItemBow().addEnchantment(Enchantment.ID_BOW_INFINITY, 1).setCustomName("Bow lvl I")
-    val BOW_II = ItemBow().addEnchantment(Enchantment.ID_BOW_INFINITY, 1).addEnchantment(Enchantment.ID_BOW_POWER, 1)
-        .setCustomName("Bow lvl II")
-    val BOW_III = ItemBow().addEnchantment(Enchantment.ID_BOW_INFINITY, 1).addEnchantment(Enchantment.ID_BOW_POWER, 1)
-        .addEnchantment(Enchantment.ID_BOW_KNOCKBACK, 1).setCustomName("Bow lvl III")
-    val EXP_BOW = ItemBow().addEnchantment(Enchantment.ID_BOW_INFINITY, 1).setCustomName("Explosive Bow")
-    val ARROW: Item = ItemArrow()
+    operator fun get(name: String) = items[name]?.invoke() ?: error("Item '$name' not found")
 
-    val CHEST = Item.get(Item.CHEST)
-    val ENDER_CHEST = Item.get(Item.ENDER_CHEST)
-    val LUCKY_BLOCK = Item.get(Item.SPONGE).setCustomName(TextFormat.GOLD.toString() + "Lucky Block")
-    val MINE = Item.get(Item.STONE_PRESSURE_PLATE).setCustomName(TextFormat.GOLD.toString() + "Mine")
-    val ENDER_PEARL = Item.get(Item.ENDER_PEARL)
-    val SANDSTONE = Item.get(Item.SANDSTONE, 0, 25)
-    val END_STONE = Item.get(Item.END_STONE, 0, 15)
-    val HEAL: Item = ItemPotion(ItemPotion.INSTANT_HEALTH)
-    val HEAL_II: Item = ItemPotion(ItemPotion.INSTANT_HEALTH_II)
-    val SPEED: Item = ItemPotion(ItemPotion.SPEED_LONG)
-    val STRENGTH: Item = ItemPotion(ItemPotion.STRENGTH_LONG)
-    val IRON_BLOCK = Item.get(Item.IRON_BLOCK, 0, 14)
-    val PORKCHOP: Item = ItemPorkchopCooked(0, 16)
-    val G_APPLE: Item = ItemAppleGold()
+    fun init(plugin: BedWars) {
+        val itemsDir = File(plugin.dataFolder, "items")
+        itemsDir.mkdirs()
 
-    //legendary
-    val LEGEND_SWORD =
-        ItemSwordDiamond().addEnchantment(Enchantment.ID_DAMAGE_ALL, 3).addEnchantment(Enchantment.ID_KNOCKBACK, 2)
-            .addEnchantment(Enchantment.ID_FIRE_ASPECT, 2).addEnchantment(Enchantment.ID_DURABILITY, 3)
-            .setCustomName(TF.AQUA.toString() + "Legendary Sword")
-    val LEGEND_BOW =
-        ItemBow().addEnchantment(Enchantment.ID_BOW_POWER, 4).addEnchantment(Enchantment.ID_BOW_KNOCKBACK, 1)
-            .addEnchantment(Enchantment.ID_BOW_FLAME, 1).addEnchantment(Enchantment.ID_DURABILITY, 3)
-            .addEnchantment(Enchantment.ID_BOW_INFINITY, 1).setCustomName(TF.AQUA.toString() + "Legendary Bow")
-    val LEGEND_PICKAXE =
-        ItemPickaxeDiamond().addEnchantment(Enchantment.ID_EFFICIENCY, 5).addEnchantment(Enchantment.ID_DURABILITY, 3)
-            .setCustomName(TF.AQUA.toString() + "Legendary Pickaxe")
+        val cacheFile = File(itemsDir, ".bw_cache")
 
-    val SHEEP = Item.get(Item.SPAWN_EGG, TNTShip.NETWORK_ID)
-        .setCustomName("${TF.RED}Sheepy ${TF.GOLD}Sheep ${TF.YELLOW}Sheep")
+        if (!cacheFile.exists()) {
+            cacheFile.createNewFile()
+            Files.setAttribute(cacheFile.toPath(), "dos:hidden", true, LinkOption.NOFOLLOW_LINKS)
+        }
 
-    private val luckItems = mutableListOf<Item>()
+        val cache = try {
+            JsonMapper().readValue<MutableSet<String>>(cacheFile)
+        } catch (e: Exception) {
+            logError("Error loading items cache", e)
+            mutableSetOf()
+        }
 
-    val luckyBlock: Item
-        get() = luckItems[Random().nextInt(luckItems.size)]
+        val zip = ZipInputStream(plugin.getResource("items.zip"))
 
-    init {
-        luckItems.add(CHESTPLATE_I)
-        luckItems.add(CHESTPLATE_II)
-        luckItems.add(CHESTPLATE_III)
-        luckItems.add(SWORD_I)
-        luckItems.add(SWORD_II)
-        luckItems.add(SWORD_III)
-        luckItems.add(PICK_I)
-        luckItems.add(PICK_II)
-        luckItems.add(PICK_III)
-        luckItems.add(BOW_I)
-        luckItems.add(BOW_II)
-        luckItems.add(BOW_III)
-        luckItems.add(EXP_BOW)
-        luckItems.add(ARROW)
-        luckItems.add(CHEST)
-        luckItems.add(ENDER_CHEST)
-        luckItems.add(LUCKY_BLOCK)
-        luckItems.add(MINE)
-        luckItems.add(ENDER_PEARL)
-        luckItems.add(SANDSTONE)
-        luckItems.add(END_STONE)
-        luckItems.add(HEAL)
-        luckItems.add(HEAL_II)
-        luckItems.add(SPEED)
-        luckItems.add(STRENGTH)
-        luckItems.add(IRON_BLOCK)
-        luckItems.add(PORKCHOP)
-        luckItems.add(G_APPLE)
+        while (true) {
+            val entry = zip.nextEntry ?: break
+            val itemName = entry.name.dropLast(4)
 
-        luckItems.add(LEGEND_BOW)
-        luckItems.add(LEGEND_PICKAXE)
-        luckItems.add(LEGEND_SWORD)
-        luckItems.add(SHEEP)
+            if (cache.contains(itemName) || itemsDir.list()?.contains(entry.name) == true) {
+                continue
+            }
+
+            val itemFile = File(itemsDir, entry.name)
+            itemFile.createNewFile()
+            itemFile.writer().use { writer ->
+                val buffer = ByteArray(1024)
+                while (true) {
+                    val read = zip.read(buffer, 0, 1024)
+
+                    if (read < 0) {
+                        break
+                    }
+
+                    writer.write(String(buffer, 0, read))
+                }
+            }
+        }
+
+        itemsDir.listFiles { file -> file.name.endsWith(".yml") }?.forEach { file ->
+            val itemName = file.nameWithoutExtension
+            try {
+                val itemData = Yaml().loadAs(file.inputStream(), Map::class.java)
+
+                items[itemName] = { mapper.convertValue(itemData) }
+            } catch (e: Exception) {
+                logError("Error loading item '$itemName'", e)
+            }
+        }
+
+        cache.addAll(items.keys)
+        JsonMapper().writeValue(cacheFile, cache)
     }
 
     fun containsItem(inventory: Inventory, item: Item): Boolean {
-        var count = Math.max(1, item.getCount())
+        var count = 1.coerceAtLeast(item.getCount())
 
         for (i in 0 until inventory.size) {
             val item2 = inventory.getItem(i)

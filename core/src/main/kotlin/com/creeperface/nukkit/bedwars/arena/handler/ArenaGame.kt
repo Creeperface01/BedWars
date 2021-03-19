@@ -39,7 +39,6 @@ import com.creeperface.nukkit.bedwars.arena.Team
 import com.creeperface.nukkit.bedwars.arena.handler.listener.ArenaGameListener
 import com.creeperface.nukkit.bedwars.blockentity.BlockEntityMine
 import com.creeperface.nukkit.bedwars.entity.BWVillager
-import com.creeperface.nukkit.bedwars.entity.SpecialItem
 import com.creeperface.nukkit.bedwars.obj.BedWarsData
 import com.creeperface.nukkit.bedwars.utils.*
 import com.creeperface.nukkit.placeholderapi.api.scope.MessageScope
@@ -317,7 +316,6 @@ open class ArenaGame(
 
         for (entity in entities) {
             if (entity is EntityItem) {
-
                 if (!entity.closed && entity.isAlive && entity.item.count < 64 && entity.item.equals(
                         item,
                         true,
@@ -330,16 +328,29 @@ open class ArenaGame(
             }
         }
 
-        val itemEntity = SpecialItem(
+        val itemEntity = EntityItem(
             this.level.getChunk(v.getX().toInt() shr 4, v.getZ().toInt() shr 4, true),
-            CompoundTag().putList(
-                ListTag<Tag>("Pos").add(DoubleTag("", v.getX() + 0.5)).add(DoubleTag("", v.getY()))
-                    .add(DoubleTag("", v.getZ() + 0.5))
-            ).putList(
-                ListTag<Tag>("Motion").add(DoubleTag("", motion.x)).add(DoubleTag("", motion.y))
-                    .add(DoubleTag("", motion.z))
-            ).putList(ListTag<Tag>("Rotation").add(FloatTag("", Random().nextFloat() * 360.0f)).add(FloatTag("", 0.0f)))
-                .putShort("Health", 5).putCompound("Item", itemTag).putShort("PickupDelay", 0)
+            CompoundTag()
+                .putList(
+                    ListTag<Tag>("Pos")
+                        .add(DoubleTag("", v.getX() + 0.5))
+                        .add(DoubleTag("", v.getY()))
+                        .add(DoubleTag("", v.getZ() + 0.5))
+                )
+                .putList(
+                    ListTag<Tag>("Motion")
+                        .add(DoubleTag("", motion.x))
+                        .add(DoubleTag("", motion.y))
+                        .add(DoubleTag("", motion.z))
+                )
+                .putList(
+                    ListTag<Tag>("Rotation")
+                        .add(FloatTag("", Random().nextFloat() * 360.0f))
+                        .add(FloatTag("", 0.0f))
+                )
+                .putShort("Health", 5)
+                .putCompound("Item", itemTag)
+                .putShort("PickupDelay", 0)
         )
 
         if (item.id > 0 && item.getCount() > 0) {
@@ -450,7 +461,7 @@ open class ArenaGame(
         data.team.messagePlayers(Lang.PLAYER_LEAVE.translate(data.team.chatColor + p.name))
         data.addStat(Stat.LOSSES)
 
-        scoreboardManager.updateTeam(this, data.team.id)
+        scoreboardManager.updateTeam(data.team)
 
         arena.leaveArena(p)
 

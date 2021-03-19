@@ -117,7 +117,7 @@ class Arena(override var plugin: BedWars, config: ArenaConfiguration) : IArenaCo
         this.scoreboardManager.removePlayer(p)
         this.arenaPlayers.remove(p.name.toLowerCase())
 
-        plugin.players[p.id].arena = null
+        plugin.players[p.id]?.arena = null
 
         p.inventory.clearAll()
     }

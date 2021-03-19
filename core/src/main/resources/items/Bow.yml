@@ -1,0 +1,5 @@
+item_id: 261
+item_damage: 0
+enchantments:
+  - id: 22
+    level: 1

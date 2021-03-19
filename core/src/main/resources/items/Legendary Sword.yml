@@ -1,0 +1,10 @@
+item_id: 276
+item_damage: 0
+item_custom_name: §bLegendary Sword
+enchantments:
+  - id: 9
+    level: 3
+  - id: 12
+    level: 2
+  - id: 17
+    level: 3
